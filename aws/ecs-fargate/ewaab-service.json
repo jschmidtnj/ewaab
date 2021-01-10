@@ -1,0 +1,49 @@
+{
+  "cluster": "ewaab",
+  "serviceName": "ewaab",
+  "taskDefinition": "ewaab-task:2",
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:125853090487:targetgroup/ewaab-api-target-group/0fd307edf7610459",
+      "containerName": "api",
+      "containerPort": 8080
+    },
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:125853090487:targetgroup/ewaab-web-target-group/c40c6da24d4a4b94",
+      "containerName": "web",
+      "containerPort": 8000
+    }
+  ],
+  "serviceRegistries": [],
+  "desiredCount": 1,
+  "clientToken": "",
+  "launchType": "FARGATE",
+  "capacityProviderStrategy": [],
+  "role": "",
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "placementConstraints": [],
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-554ea45a",
+        "subnet-e5d389ae",
+        "subnet-f61d4d92",
+        "subnet-6c4fd343",
+        "subnet-d4930389",
+        "subnet-ca7916f5"
+      ],
+      "securityGroups": [
+        "sg-0ef97f1b18453320f"
+      ],
+      "assignPublicIp": "ENABLED"
+    }
+  },
+  "healthCheckGracePeriodSeconds": 60,
+  "schedulingStrategy": "REPLICA",
+  "deploymentController": {
+    "type": "ECS"
+  }
+}

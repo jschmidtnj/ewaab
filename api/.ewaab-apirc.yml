@@ -1,0 +1,4 @@
+JWT_ISSUER: EWAAB
+PORT: 8080
+WEBSITE_URL: https://ewaabweb.org
+DEBUG: false

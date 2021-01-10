@@ -1,0 +1,69 @@
+import { verifyLoggedIn } from '../auth/checkAuth';
+import { Resolver, Ctx, Query, ResolverInterface, FieldResolver, Root } from 'type-graphql';
+import { GraphQLContext } from '../utils/context';
+import User from '../schema/users/user.entity';
+import { getRepository } from 'typeorm';
+import { sign } from 'jsonwebtoken';
+import { SignOptions } from 'jsonwebtoken';
+import { loginType } from '../auth/shared';
+import { getSecret, getJWTIssuer, mediaJWTExpiration, MediaAccessType } from '../utils/jwt';
+
+export interface MediaAccessTokenData {
+  id: number;
+  type: MediaAccessType.media;
+}
+
+const generateJWTMediaAccess = (id: number): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    let secret: string;
+    let jwtIssuer: string;
+    try {
+      secret = getSecret(loginType.LOCAL);
+      jwtIssuer = getJWTIssuer();
+    } catch (err) {
+      reject(err as Error);
+      return;
+    }
+    const authData: MediaAccessTokenData = {
+      id,
+      type: MediaAccessType.media
+    };
+    const signOptions: SignOptions = {
+      issuer: jwtIssuer,
+      expiresIn: mediaJWTExpiration
+    };
+    sign(authData, secret, signOptions, (err, token) => {
+      if (err) {
+        reject(err as Error);
+      } else {
+        resolve(token as string);
+      }
+    });
+  });
+};
+
+@Resolver(_of => User)
+class UserResolvers implements ResolverInterface<User> {
+  @Query(_type => User, { description: 'user data' })
+  async user(@Ctx() ctx: GraphQLContext): Promise<User> {
+    if (!verifyLoggedIn(ctx)) {
+      throw new Error('user not logged in');
+    }
+    if (!ctx.auth) {
+      throw new Error('cannot find auth');
+    }
+    const UserModel = getRepository(User);
+    const user = await UserModel.findOne(ctx.auth.id);
+    if (!user) {
+      throw new Error(`cannot find user with id ${ctx.auth.id}`);
+    }
+    return user;
+  }
+
+  @FieldResolver()
+  async mediaAuth(@Root() user: User): Promise<string> {
+    return await generateJWTMediaAccess(user.id);
+  }
+}
+
+export default UserResolvers;

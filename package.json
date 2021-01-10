@@ -1,0 +1,38 @@
+{
+  "name": "ewaab",
+  "version": "0.0.1",
+  "description": "❤️",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^26.0.14",
+    "husky": "^4.3.0",
+    "npm-check-updates": "^9.0.4"
+  },
+  "husky": {
+    "hooks": {
+      "post-checkout": "echo $HUSKY_GIT_STDIN | scripts/lfs-hooks/post-checkout $HUSKY_GIT_PARAMS",
+      "post-commit": "echo $HUSKY_GIT_STDIN | scripts/lfs-hooks/post-commit $HUSKY_GIT_PARAMS",
+      "post-merge": "echo $HUSKY_GIT_STDIN | scripts/lfs-hooks/post-merge $HUSKY_GIT_PARAMS",
+      "pre-push": "echo $HUSKY_GIT_STDIN | scripts/lfs-hooks/pre-push $HUSKY_GIT_PARAMS",
+      "pre-commit": "./precommit.sh"
+    }
+  },
+  "scripts": {
+    "preinstall": "rm -rf .git/hooks && echo \"removed git hooks to allow for husky to install correctly\"",
+    "lfs-fetch": "git lfs fetch --all && git lfs pull",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jschmidtnj/ewaab.git"
+  },
+  "keywords": [
+    "search"
+  ],
+  "author": "ewaab",
+  "license": "CC-BY-NC-SA-4.0",
+  "bugs": {
+    "url": "https://github.com/jschmidtnj/ewaab/issues"
+  },
+  "homepage": "https://github.com/jschmidtnj/ewaab#readme"
+}

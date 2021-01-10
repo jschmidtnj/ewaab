@@ -1,0 +1,16 @@
+/* base styles */
+
+@tailwind base;
+
+/* add components */
+
+@tailwind components;
+
+/* remove recaptcha badge */
+.grecaptcha-badge {
+  visibility: hidden;
+}
+
+/* utilities */
+
+@tailwind utilities;

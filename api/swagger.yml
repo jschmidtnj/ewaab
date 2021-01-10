@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+    description: 'schema for rest portion of apiKey'
+    license:
+        name: CC-BY-NC-SA-4.0
+    title: 'api rest'
+    version: 0.0.1
+paths:
+    /refreshToken:
+        post:
+            operationId: RefreshTokenRefreshToken
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RestReturnObj'
+            description: ""
+    /hello:
+        get:
+            operationId: HelloHello
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RestReturnObj'
+            description: ""
+    /:
+        get:
+            operationId: IndexIndex
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RestReturnObj'
+            description: ""
+    '/media/*':
+        get:
+            operationId: MediaRawFile
+            responses:
+                '204':
+                    description: 'No content'
+            description: ""
+            parameters:
+                -
+                    description: ""
+                    in: query
+                    name: text
+                    required: false
+                    schema:
+                        type: boolean
+                -
+                    description: ""
+                    in: query
+                    name: download
+                    required: false
+                    schema:
+                        type: boolean
+                -
+                    description: ""
+                    in: query
+                    name: blur
+                    required: false
+                    schema:
+                        type: boolean
+components:
+    schemas:
+        RestReturnObj:
+            description: ""
+            properties:
+                message:
+                    type: string
+                    description: ""
+                data:
+                    type: string
+                    description: ""
+            type: object
+            required:
+                - message

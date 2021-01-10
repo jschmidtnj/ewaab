@@ -1,0 +1,15 @@
+fragment userFields on User {
+  name
+  username
+  email
+  id
+  type
+  avatar
+  mediaAuth
+}
+
+query user {
+  user {
+    ...userFields
+  }
+}

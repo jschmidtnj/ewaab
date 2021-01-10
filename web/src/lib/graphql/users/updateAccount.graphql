@@ -1,0 +1,3 @@
+mutation updateAccount($email: String, $name: String, $password: String, $avatar: Upload) {
+  updateAccount(email: $email, name: $name, password: $password, avatar: $avatar)
+}

@@ -1,0 +1,3 @@
+mutation register($registrationToken: String!, $username: String!, $name: String!, $email: String!, $password: String!, $recaptchaToken: String!) {
+  register(registrationToken: $registrationToken, username: $username, name: $name, email: $email, password: $password, recaptchaToken: $recaptchaToken)
+}
