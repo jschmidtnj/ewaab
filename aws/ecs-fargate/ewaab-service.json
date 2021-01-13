@@ -4,7 +4,7 @@
   "taskDefinition": "ewaab-task:2",
   "loadBalancers": [
     {
-      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-api-target-group/0fd307edf7610459",
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-api-target-group/0b11285468a6a89a",
       "containerName": "api",
       "containerPort": 8080
     },

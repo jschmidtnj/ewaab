@@ -21,8 +21,8 @@
         "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_DB_CONNECTION_URI-EoxBOA",
         "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_JWT_SECRET-bE5y5s",
         "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_REDIS_HOST-GvX5Rm",
-        "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_RECAPTCHA_SECRET-zkX4ow",
-        "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_SENDGRID_API_KEY-ponlm7"
+        "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_RECAPTCHA_SECRET-ponlm7",
+        "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_SENDGRID_API_KEY-zkX4ow"
       ]
     },
     {
