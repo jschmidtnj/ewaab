@@ -15,9 +15,10 @@ RUN yarn install
 # --only=production
 
 # Copy app
-COPY lib .
+COPY lib ./lib
+COPY swagger.yml .
 
 COPY .ewaab-apirc.yml .
 
 EXPOSE 8080
-CMD [ "node", "index.js" ]
+CMD [ "yarn", "start" ]

@@ -28,11 +28,6 @@ type Device {
   type: String!
 }
 
-"""device type"""
-enum DeviceType {
-  lamp
-}
-
 """media object"""
 type Media {
   """file size"""
@@ -49,29 +44,7 @@ type Media {
   user: Float!
 }
 
-"""selectable modes"""
-enum ModeType {
-  colors
-  off
-  thinkingOfYou
-  warm
-}
-
 type Mutation {
-  activateDevice(
-    """device code"""
-    code: String!
-  ): Float!
-  createDevice(
-    """username of connection"""
-    connectionUsername: String
-
-    """name of device"""
-    name: String!
-
-    """device type"""
-    type: DeviceType!
-  ): String!
   deleteAccount(
     """email"""
     email: String
@@ -129,16 +102,6 @@ type Mutation {
   revokeRefresh(
     """email"""
     email: String
-  ): String!
-  sendCommand(
-    """color"""
-    color: String
-
-    """device id"""
-    device: Int!
-
-    """mode"""
-    mode: ModeType!
   ): String!
   sendPasswordReset(
     """email"""
@@ -199,17 +162,6 @@ type PublicUser {
 }
 
 type Query {
-  """get single device"""
-  device(
-    """device id"""
-    id: Int!
-  ): Device!
-
-  """get all devices"""
-  devices(
-    """check if activated"""
-    activated: Boolean
-  ): [Device!]!
   hello: String!
   media(
     """media id"""

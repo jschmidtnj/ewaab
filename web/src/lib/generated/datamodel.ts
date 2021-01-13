@@ -34,11 +34,6 @@ export type Device = {
   type: Scalars['String'];
 };
 
-/** device type */
-export enum DeviceType {
-  Lamp = 'lamp'
-}
-
 /** media object */
 export type Media = {
   __typename?: 'Media';
@@ -53,18 +48,8 @@ export type Media = {
   user: Scalars['Float'];
 };
 
-/** selectable modes */
-export enum ModeType {
-  Colors = 'colors',
-  Off = 'off',
-  ThinkingOfYou = 'thinkingOfYou',
-  Warm = 'warm'
-}
-
 export type Mutation = {
   __typename?: 'Mutation';
-  activateDevice: Scalars['Float'];
-  createDevice: Scalars['String'];
   deleteAccount: Scalars['String'];
   inviteUser: Scalars['String'];
   login: Scalars['String'];
@@ -72,24 +57,11 @@ export type Mutation = {
   passwordReset: Scalars['String'];
   register: Scalars['String'];
   revokeRefresh: Scalars['String'];
-  sendCommand: Scalars['String'];
   sendPasswordReset: Scalars['String'];
   sendTestEmail: Scalars['String'];
   updateAccount: Scalars['String'];
   usernameExists: Scalars['Boolean'];
   verifyEmail: Scalars['String'];
-};
-
-
-export type MutationActivateDeviceArgs = {
-  code: Scalars['String'];
-};
-
-
-export type MutationCreateDeviceArgs = {
-  connectionUsername?: Maybe<Scalars['String']>;
-  name: Scalars['String'];
-  type: DeviceType;
 };
 
 
@@ -131,13 +103,6 @@ export type MutationRegisterArgs = {
 
 export type MutationRevokeRefreshArgs = {
   email?: Maybe<Scalars['String']>;
-};
-
-
-export type MutationSendCommandArgs = {
-  color?: Maybe<Scalars['String']>;
-  device: Scalars['Int'];
-  mode: ModeType;
 };
 
 
@@ -186,26 +151,12 @@ export type PublicUser = {
 
 export type Query = {
   __typename?: 'Query';
-  /** get single device */
-  device: Device;
-  /** get all devices */
-  devices: Array<Device>;
   hello: Scalars['String'];
   media: Media;
   /** public user data */
   publicUser: PublicUser;
   /** user data */
   user: User;
-};
-
-
-export type QueryDeviceArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type QueryDevicesArgs = {
-  activated?: Maybe<Scalars['Boolean']>;
 };
 
 
@@ -242,65 +193,12 @@ export type User = {
   username: Scalars['String'];
 };
 
-export type ActivateDeviceMutationVariables = Exact<{
-  code: Scalars['String'];
-}>;
-
-
-export type ActivateDeviceMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'activateDevice'>
-);
-
 export type DeleteAccountMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type DeleteAccountMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'deleteAccount'>
-);
-
-export type DeviceFieldsFragment = (
-  { __typename?: 'Device' }
-  & Pick<Device, 'id' | 'name' | 'owner' | 'mode'>
-);
-
-export type DeviceQueryVariables = Exact<{
-  id: Scalars['Int'];
-}>;
-
-
-export type DeviceQuery = (
-  { __typename?: 'Query' }
-  & { device: (
-    { __typename?: 'Device' }
-    & DeviceFieldsFragment
-  ) }
-);
-
-export type DevicesQueryVariables = Exact<{
-  activated?: Maybe<Scalars['Boolean']>;
-}>;
-
-
-export type DevicesQuery = (
-  { __typename?: 'Query' }
-  & { devices: Array<(
-    { __typename?: 'Device' }
-    & Pick<Device, 'id' | 'name'>
-  )> }
-);
-
-export type SendCommandMutationVariables = Exact<{
-  device: Scalars['Int'];
-  mode: ModeType;
-  color?: Maybe<Scalars['String']>;
-}>;
-
-
-export type SendCommandMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'sendCommand'>
 );
 
 export type LoginMutationVariables = Exact<{
@@ -400,14 +298,6 @@ export type VerifyEmailMutation = (
   & Pick<Mutation, 'verifyEmail'>
 );
 
-export const DeviceFields = gql`
-    fragment deviceFields on Device {
-  id
-  name
-  owner
-  mode
-}
-    `;
 export const UserFields = gql`
     fragment userFields on User {
   name
@@ -419,34 +309,9 @@ export const UserFields = gql`
   mediaAuth
 }
     `;
-export const ActivateDevice = gql`
-    mutation activateDevice($code: String!) {
-  activateDevice(code: $code)
-}
-    `;
 export const DeleteAccount = gql`
     mutation deleteAccount {
   deleteAccount
-}
-    `;
-export const Device = gql`
-    query device($id: Int!) {
-  device(id: $id) {
-    ...deviceFields
-  }
-}
-    ${DeviceFields}`;
-export const Devices = gql`
-    query devices($activated: Boolean) {
-  devices(activated: $activated) {
-    id
-    name
-  }
-}
-    `;
-export const SendCommand = gql`
-    mutation sendCommand($device: Int!, $mode: ModeType!, $color: String) {
-  sendCommand(device: $device, mode: $mode, color: $color)
 }
     `;
 export const Login = gql`

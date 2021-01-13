@@ -12,7 +12,7 @@ const Index = (): JSX.Element => {
       const loggedIn = await isLoggedIn();
       if (loggedIn) {
         setTimeout(() => {
-          router.push('/devices');
+          router.push('/profile');
         }, 0);
       }
     })();

@@ -23,7 +23,3 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
-
-# workbox
-public/workbox*
-public/sw.js*

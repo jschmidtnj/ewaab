@@ -4,12 +4,12 @@
   "taskDefinition": "ewaab-task:2",
   "loadBalancers": [
     {
-      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:125853090487:targetgroup/ewaab-api-target-group/0fd307edf7610459",
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-api-target-group/0fd307edf7610459",
       "containerName": "api",
       "containerPort": 8080
     },
     {
-      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:125853090487:targetgroup/ewaab-web-target-group/c40c6da24d4a4b94",
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-web-target-group/5907e6669fe7f4c2",
       "containerName": "web",
       "containerPort": 8000
     }
@@ -28,15 +28,14 @@
   "networkConfiguration": {
     "awsvpcConfiguration": {
       "subnets": [
-        "subnet-554ea45a",
-        "subnet-e5d389ae",
-        "subnet-f61d4d92",
-        "subnet-6c4fd343",
-        "subnet-d4930389",
-        "subnet-ca7916f5"
+        "subnet-c2b7f5cc",
+        "subnet-ee1287b1",
+        "subnet-0cde482d",
+        "subnet-27ffa76a",
+        "subnet-8c42caea"
       ],
       "securityGroups": [
-        "sg-0ef97f1b18453320f"
+        "sg-0f4be2cb5cc544c65"
       ],
       "assignPublicIp": "ENABLED"
     }

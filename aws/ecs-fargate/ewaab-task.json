@@ -1,6 +1,6 @@
 {
   "ipcMode": null,
-  "executionRoleArn": "arn:aws:iam::125853090487:role/ewaab-task-execution-role",
+  "executionRoleArn": "arn:aws:iam::557176606917:role/ewaab-task-execution-role",
   "containerDefinitions": [
     {
       "dnsSearchDomains": null,
@@ -38,23 +38,23 @@
       "workingDirectory": null,
       "secrets": [
         {
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:125853090487:secret:EWAAB_DB_CONNECTION_URI-790DOV",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_DB_CONNECTION_URI-EoxBOA",
           "name": "DB_CONNECTION_URI"
         },
         {
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:125853090487:secret:EWAAB_JWT_SECRET-LSsCbM",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_JWT_SECRET-bE5y5s",
           "name": "JWT_SECRET"
         },
         {
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:125853090487:secret:EWAAB_REDIS_HOST-p4VRfn",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_REDIS_HOST-GvX5Rm",
           "name": "REDIS_HOST"
         },
         {
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:125853090487:secret:EWAAB_SENDGRID_API_KEY-5mDjlV",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_SENDGRID_API_KEY-zkX4ow",
           "name": "SENDGRID_API_KEY"
         },
         {
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:125853090487:secret:EWAAB_RECAPTCHA_SECRET-mDduL2",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_RECAPTCHA_SECRET-ponlm7",
           "name": "RECAPTCHA_SECRET"
         }
       ],
@@ -63,7 +63,7 @@
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "125853090487.dkr.ecr.us-east-1.amazonaws.com/ewaab-api:latest",
+      "image": "557176606917.dkr.ecr.us-east-1.amazonaws.com/ewaab-api:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": [
@@ -122,7 +122,7 @@
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "125853090487.dkr.ecr.us-east-1.amazonaws.com/ewaab-web:latest",
+      "image": "557176606917.dkr.ecr.us-east-1.amazonaws.com/ewaab-web:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -143,7 +143,7 @@
     }
   ],
   "memory": "2048",
-  "taskRoleArn": "arn:aws:iam::125853090487:role/ewaab-task-role",
+  "taskRoleArn": "arn:aws:iam::557176606917:role/ewaab-task-role",
   "family": "ewaab-task",
   "pidMode": null,
   "requiresCompatibilities": [
