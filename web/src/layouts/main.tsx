@@ -43,9 +43,7 @@ const Layout = (args: LayoutArgs): JSX.Element => {
   return loading ? null : (
     <IntlProvider locale={router.locale} messages={messages}>
       <div
-        className={`flex flex-col ${
-          currentTheme ? themeMap[currentTheme] : ''
-        }`}
+        className={currentTheme ? themeMap[currentTheme] : ''}
         style={{
           minHeight: '105vh',
         }}
