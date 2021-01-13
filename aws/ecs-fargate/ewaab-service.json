@@ -9,7 +9,7 @@
       "containerPort": 8080
     },
     {
-      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-web-target-group/5907e6669fe7f4c2",
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-web-target-group/5f3b1e4182fd426c",
       "containerName": "web",
       "containerPort": 8000
     }

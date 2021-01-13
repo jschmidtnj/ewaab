@@ -46,7 +46,7 @@
           "name": "JWT_SECRET"
         },
         {
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_RECAPTCHA_SECRET-ponlm7",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_RECAPTCHA_SECRET-zkX4ow",
           "name": "RECAPTCHA_SECRET"
         },
         {
@@ -54,7 +54,7 @@
           "name": "REDIS_HOST"
         },
         {
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_SENDGRID_API_KEY-zkX4ow",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_SENDGRID_API_KEY-ponlm7",
           "name": "SENDGRID_API_KEY"
         }
       ],
