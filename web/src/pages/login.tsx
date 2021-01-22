@@ -5,7 +5,6 @@ import {
   VerifyEmail,
 } from 'lib/generated/datamodel';
 import { useRouter } from 'next/dist/client/router';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -96,16 +95,8 @@ const Login = (): JSX.Element => {
       <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
-            <div className="text-center">
-              <Image
-                src="/assets/img/logo.svg"
-                width={60}
-                height={60}
-                alt="ewaab"
-              />
-            </div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Log In
+            <h2 className="mt-6 text-center text-4xl font-medium text-gray-900">
+              Account Login
             </h2>
           </div>
           <Formik

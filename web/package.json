@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn prebuild && next dev -p 8000",
-    "prebuild": "yarn precommit",
+    "prebuild": "yarn precommit && yarn pwa",
     "build": "next build",
     "predeploy": "yarn build",
     "start": "next start -p 8000",
@@ -13,7 +13,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "codegen": "graphql-codegen --config codegen.yml",
     "codegenREST": "swagger-to-ts ../api/swagger.yml --output src/lib/generated/apiREST.ts",
-    "precommit": "yarn lint && yarn codegen && yarn codegenREST"
+    "precommit": "yarn lint && yarn codegen && yarn codegenREST",
+    "pwa": "cd public && pwa-asset-generator ./assets/img/logo.png ./pwa -m ./manifest.json -f && cd -"
   },
   "module": "commonjs",
   "dependencies": {
@@ -86,6 +87,7 @@
     "graphql-tag": "^2.11.0",
     "postcss": "^8.2.1",
     "prettier": "^2.2.1",
+    "pwa-asset-generator": "^4.1.1",
     "rimraf": "^3.0.2",
     "serve-index": "^1.9.1",
     "serve-static": "^1.14.1",

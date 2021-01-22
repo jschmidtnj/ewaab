@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import PWATags from './PWA';
 
 interface SEOArgs {
   page: string;
@@ -29,8 +30,8 @@ const SEO = (args: SEOArgs): JSX.Element => {
         type="image/png"
         sizes="32x32"
       />
-      <link rel="apple-touch-icon" href="/apple-touch-icon.png"></link>
       <meta name="theme-color" content="#317EFB" />
+      <PWATags />
       <script
         src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
         defer

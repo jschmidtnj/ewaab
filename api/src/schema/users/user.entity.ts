@@ -1,12 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import { ObjectType, Field, registerEnumType } from 'type-graphql';
 import { IsDefined } from 'class-validator';
-
-export enum UserType {
-  user = 'user',
-  visitor = 'vistor',
-  admin = 'admin',
-}
+import { UserType } from '../../shared/variables';
 
 registerEnumType(UserType, {
   name: 'UserType',

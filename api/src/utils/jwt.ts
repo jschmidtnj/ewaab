@@ -1,9 +1,10 @@
 import { sign, verify, SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { Request } from 'express';
-import User, { UserType } from '../schema/users/user.entity';
+import User from '../schema/users/user.entity';
 import { configData } from './config';
 import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
+import { UserType } from '../shared/variables';
 
 export const verifyJWTExpiration = '1h';
 

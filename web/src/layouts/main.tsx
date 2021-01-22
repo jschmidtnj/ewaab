@@ -49,7 +49,7 @@ const Layout = (args: LayoutArgs): JSX.Element => {
         }}
       >
         <Header />
-        <main className="bg-gray-50 dark:bg-gray-800">{args.children}</main>
+        <main className="bg-gray-100 dark:bg-gray-800">{args.children}</main>
         <Footer />
       </div>
     </IntlProvider>

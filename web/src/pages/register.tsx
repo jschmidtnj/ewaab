@@ -5,7 +5,6 @@ import {
   Register,
 } from 'lib/generated/datamodel';
 import { useRouter } from 'next/dist/client/router';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -86,15 +85,7 @@ const RegisterPage = (): JSX.Element => {
         ) : (
           <div className="max-w-md w-full space-y-8">
             <div>
-              <div className="text-center">
-                <Image
-                  src="/assets/img/logo.svg"
-                  width={60}
-                  height={60}
-                  alt="ewaab"
-                />
-              </div>
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              <h2 className="mt-6 text-center text-4xl font-medium text-gray-900">
                 Register
               </h2>
             </div>

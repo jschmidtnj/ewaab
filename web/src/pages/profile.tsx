@@ -32,6 +32,8 @@ import { RootState } from 'state';
 import Image from 'next/image';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { getAPIURL } from 'utils/axios';
+import DeleteAccountModal from 'components/modals/DeleteAccount';
+import Link from 'next/link';
 
 const ProfilePage = (): JSX.Element => {
   let dispatchAuthThunk: AppThunkDispatch<AuthActionTypes>;
@@ -48,6 +50,15 @@ const ProfilePage = (): JSX.Element => {
   const authToken = useSelector<RootState, string | undefined>(
     (state) => state.authReducer.authToken
   );
+  const [showAuthToken, setShowAuthToken] = useState<boolean>(false);
+
+  const [
+    deleteAccountModalIsOpen,
+    setDeleteAccountModalIsOpen,
+  ] = useState<boolean>(false);
+  const toggleDeleteAccountModal = () =>
+    setDeleteAccountModalIsOpen(!deleteAccountModalIsOpen);
+
   useEffect(() => {
     const fileInputElement = document.createElement('input');
     fileInputElement.setAttribute('type', 'file');
@@ -64,6 +75,11 @@ const ProfilePage = (): JSX.Element => {
       reader.readAsDataURL(fileInputElement.files[0]);
     };
     setInputElem(fileInputElement);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('dev')) {
+      setShowAuthToken(true);
+    }
   }, []);
 
   const apiURL = getAPIURL();
@@ -83,6 +99,13 @@ const ProfilePage = (): JSX.Element => {
                     {user.name}
                     {"'"}s Profile
                   </h3>
+                </div>
+                <div className="mt-2 float-right">
+                  <Link href={`/${user.username}`}>
+                    <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                      @ {user.username}
+                    </a>
+                  </Link>
                 </div>
               </div>
               <div className="mt-5 md:mt-0 md:col-span-2">
@@ -335,58 +358,68 @@ const ProfilePage = (): JSX.Element => {
                           <hr />
 
                           <div className="mt-4">
-                            <div>
-                              <label
-                                htmlFor="auth"
-                                className="block text-sm font-medium text-gray-700"
-                              >
-                                Development Auth Token
-                              </label>
-                              <div className="mt-1 flex rounded-md shadow-sm">
-                                <input
-                                  value={authToken}
-                                  onChange={(evt) => evt.preventDefault()}
-                                  disabled={false}
-                                  id="auth"
-                                  onClick={(evt) => {
-                                    evt.currentTarget.select();
-                                  }}
-                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
-                                />
+                            {!showAuthToken ? null : (
+                              <div>
+                                <label
+                                  htmlFor="auth"
+                                  className="block text-sm font-medium text-gray-700"
+                                >
+                                  Development Auth Token
+                                </label>
+                                <div className="mt-1 flex rounded-md shadow-sm">
+                                  <input
+                                    value={authToken}
+                                    onChange={(evt) => evt.preventDefault()}
+                                    disabled={false}
+                                    id="auth"
+                                    onClick={(evt) => {
+                                      evt.currentTarget.select();
+                                    }}
+                                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
+                                  />
+                                </div>
                               </div>
-                            </div>
+                            )}
 
                             <div className="text-center sm:px-6">
-                              <button
-                                onClick={async (evt) => {
-                                  evt.preventDefault();
-                                  try {
-                                    const deleteAccountRes = await client.mutate<
-                                      DeleteAccountMutation,
-                                      DeleteAccountMutationVariables
-                                    >({
-                                      mutation: DeleteAccount,
-                                      variables: {},
-                                    });
-                                    if (deleteAccountRes.errors) {
-                                      throw new Error(
-                                        deleteAccountRes.errors.join(', ')
-                                      );
+                              {!deleteAccountModalIsOpen ? null : (
+                                <DeleteAccountModal
+                                  toggleModal={toggleDeleteAccountModal}
+                                  onSubmit={async () => {
+                                    try {
+                                      const deleteAccountRes = await client.mutate<
+                                        DeleteAccountMutation,
+                                        DeleteAccountMutationVariables
+                                      >({
+                                        mutation: DeleteAccount,
+                                        variables: {},
+                                      });
+                                      if (deleteAccountRes.errors) {
+                                        throw new Error(
+                                          deleteAccountRes.errors.join(', ')
+                                        );
+                                      }
+                                      toast('Deleted Account', {
+                                        type: 'error',
+                                      });
+                                      dispatchAuthThunk(thunkLogout());
+                                    } catch (err) {
+                                      toast(err.message, {
+                                        type: 'error',
+                                      });
                                     }
-                                    toast('Deleted Account', {
-                                      type: 'error',
-                                    });
-                                    dispatchAuthThunk(thunkLogout());
-                                  } catch (err) {
-                                    toast(err.message, {
-                                      type: 'error',
-                                    });
-                                  }
+                                  }}
+                                />
+                              )}
+                              <button
+                                onClick={(evt) => {
+                                  evt.preventDefault();
+                                  toggleDeleteAccountModal();
                                 }}
                                 disabled={isSubmitting}
                                 className="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                               >
-                                Delete
+                                Delete Account
                               </button>
                             </div>
                           </div>

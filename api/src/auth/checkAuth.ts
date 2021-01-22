@@ -1,5 +1,5 @@
 import { GraphQLContext } from '../utils/context';
-import { UserType } from '../schema/users/user.entity';
+import { UserType } from '../shared/variables';
 import { configData } from '../utils/config';
 
 export const verifyGuest = (ctx: GraphQLContext): boolean => {

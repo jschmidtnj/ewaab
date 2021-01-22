@@ -3,7 +3,7 @@ import { Resolver, ArgsType, Field, Args, Mutation } from 'type-graphql';
 import { IsEmail, MinLength, Matches } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, uninitializedKey } from '../shared/variables';
 import { accountExistsEmail, accountExistsUsername } from './shared';
-import User, { UserType } from '../schema/users/user.entity';
+import User from '../schema/users/user.entity';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
@@ -15,6 +15,7 @@ import { getRepository } from 'typeorm';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { InviteNewsletterTokenData } from '../emails/inviteUser.resolver';
+import { UserType } from '../shared/variables';
 
 @ArgsType()
 class RegisterArgs {

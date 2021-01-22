@@ -2,8 +2,9 @@ import PrivateRoute from 'components/PrivateRoute';
 import Layout from 'layouts/main';
 import { useRouter } from 'next/dist/client/router';
 import { useEffect } from 'react';
-import { isLoggedIn } from 'state/auth/getters';
+import { getType, getUsername, isLoggedIn } from 'state/auth/getters';
 import SEO from 'components/SEO';
+import { UserType } from 'shared/variables';
 
 const Index = (): JSX.Element => {
   const router = useRouter();
@@ -11,8 +12,14 @@ const Index = (): JSX.Element => {
     (async () => {
       const loggedIn = await isLoggedIn();
       if (loggedIn) {
+        const userType = getType();
         setTimeout(() => {
-          router.push('/profile');
+          if (userType === UserType.admin) {
+            router.push('/users');
+          } else {
+            const userName = getUsername();
+            router.push(`/${userName}`);
+          }
         }, 0);
       }
     })();

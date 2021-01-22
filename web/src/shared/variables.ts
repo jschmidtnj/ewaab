@@ -7,4 +7,10 @@ export const specialCharacterRegex = /[!@#$%^&*(),.?":{}|<>]/;
 export const passwordMinLen = 6;
 export const minJWTLen = 30;
 export const uninitializedKey = -1;
-export const avatarWidth = 30;
+export const avatarWidth = 50;
+
+export enum UserType {
+  user = 'user',
+  visitor = 'vistor',
+  admin = 'admin',
+}

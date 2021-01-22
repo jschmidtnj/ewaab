@@ -39,7 +39,7 @@ const ResetPage = (): JSX.Element => {
           <div>
             <div className="text-center">
               <Image
-                src="/assets/img/logo.svg"
+                src="/assets/img/logo.png"
                 width={60}
                 height={60}
                 alt="ewaab"
