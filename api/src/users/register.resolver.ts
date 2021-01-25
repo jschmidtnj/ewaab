@@ -14,8 +14,7 @@ import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
-import { InviteNewsletterTokenData } from '../emails/inviteUser.resolver';
-import { UserType } from '../shared/variables';
+import { InviteUserTokenData } from '../emails/inviteUser.resolver';
 
 @ArgsType()
 class RegisterArgs {
@@ -90,7 +89,7 @@ export const generateJWTVerifyEmail = (userID: number): Promise<string> => {
   });
 };
 
-export const decodeInvite = (token: string): Promise<InviteNewsletterTokenData> => {
+export const decodeInvite = (token: string): Promise<InviteUserTokenData> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     try {
@@ -116,7 +115,7 @@ export const decodeInvite = (token: string): Promise<InviteNewsletterTokenData> 
         if (type !== VerifyType.invite) {
           throw new ApolloError(`invalid verify type ${type} provided`, `${statusCodes.BAD_REQUEST}`);
         }
-        resolve(res as InviteNewsletterTokenData);
+        resolve(res as InviteUserTokenData);
       } catch (err) {
         reject(err);
       }
@@ -149,7 +148,7 @@ class RegisterResolver {
       password: hashedPassword,
       tokenVersion: 0,
       emailVerified: false,
-      type: UserType.user,
+      type: inviteData.userType,
       avatar: uninitializedKey,
       username: args.username,
     });

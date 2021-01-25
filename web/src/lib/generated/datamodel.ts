@@ -74,6 +74,7 @@ export type MutationInviteUserArgs = {
   email: Scalars['String'];
   executeAdmin?: Maybe<Scalars['Boolean']>;
   name: Scalars['String'];
+  type?: Maybe<UserType>;
 };
 
 
@@ -141,10 +142,14 @@ export type MutationVerifyEmailArgs = {
 /** public user data */
 export type PublicUser = {
   __typename?: 'PublicUser';
+  /** avatar id */
+  avatar: Scalars['Float'];
   /** email */
   email: Scalars['String'];
   /** name */
   name: Scalars['String'];
+  /** user type */
+  type: Scalars['String'];
   /** username */
   username: Scalars['String'];
 };
@@ -192,6 +197,14 @@ export type User = {
   /** username */
   username: Scalars['String'];
 };
+
+/** user type */
+export enum UserType {
+  Admin = 'admin',
+  ThirdParty = 'thirdParty',
+  User = 'user',
+  Visitor = 'visitor'
+}
 
 export type DeleteAccountMutationVariables = Exact<{ [key: string]: never; }>;
 

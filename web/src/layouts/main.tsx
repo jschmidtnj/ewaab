@@ -41,7 +41,10 @@ const Layout = (args: LayoutArgs): JSX.Element => {
   }, []);
 
   return loading ? null : (
-    <IntlProvider locale={router.locale} messages={messages}>
+    <IntlProvider
+      locale={router.locale}
+      messages={(messages as unknown) as Record<string, string>}
+    >
       <div
         className={currentTheme ? themeMap[currentTheme] : ''}
         style={{

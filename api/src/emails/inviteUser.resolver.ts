@@ -9,6 +9,7 @@ import { GraphQLContext } from '../utils/context';
 import { sendEmailUtil } from './sendEmail.resolver';
 import { loginType } from '../auth/shared';
 import { accountExistsEmail } from '../users/shared';
+import { UserType } from '../shared/variables';
 
 @ArgsType()
 class InviteUserArgs {
@@ -21,17 +22,21 @@ class InviteUserArgs {
   })
   email: string;
 
+  @Field(_type => UserType, { description: 'user type', nullable: true, defaultValue: UserType.user })
+  type: UserType;
+
   @Field({ description: 'execute as pseudo-admin when not in production', nullable: true })
   executeAdmin?: boolean;
 }
 
-export interface InviteNewsletterTokenData {
+export interface InviteUserTokenData {
   email: string;
   name: string;
   type: VerifyType.invite;
+  userType: UserType;
 }
 
-export const generateJWTInviteUser = (email: string, name: string): Promise<string> => {
+export const generateJWTInviteUser = (email: string, name: string, type: UserType): Promise<string> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -42,10 +47,11 @@ export const generateJWTInviteUser = (email: string, name: string): Promise<stri
       reject(err as Error);
       return;
     }
-    const authData: InviteNewsletterTokenData = {
+    const authData: InviteUserTokenData = {
       email,
       name,
-      type: VerifyType.invite
+      type: VerifyType.invite,
+      userType: type,
     };
     const signOptions: SignOptions = {
       issuer: jwtIssuer,
@@ -76,7 +82,7 @@ class InviteUserResolver {
     if (!template) {
       throw new Error('cannot find register email template');
     }
-    const invite_token = await generateJWTInviteUser(args.email, args.name);
+    const invite_token = await generateJWTInviteUser(args.email, args.name, args.type);
     const emailData = template({
       name: args.name,
       verify_url: `${configData.WEBSITE_URL}/register?token=${invite_token}&email=${encodeURIComponent(args.email)}&name=${encodeURIComponent(args.name)}`,

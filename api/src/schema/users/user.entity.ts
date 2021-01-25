@@ -26,6 +26,16 @@ export class PublicUser {
   @Index({ unique: true })
   @IsDefined()
   email: string;
+
+  @Field({ description: 'user type' })
+  @Column({ type: 'enum', enum: UserType })
+  @IsDefined()
+  type: UserType;
+
+  @Field({ description: 'avatar id' })
+  @Column({ type: 'int' })
+  @IsDefined()
+  avatar: number;
 }
 
 @ObjectType({ description: 'user account' })
@@ -40,20 +50,10 @@ export default class User extends PublicUser {
   @IsDefined()
   emailVerified: boolean;
 
-  @Field({ description: 'user type' })
-  @Column({ type: 'enum', enum: UserType })
-  @IsDefined()
-  type: UserType;
-
   @Field({ description: 'current token version' })
   @Column({ type: 'bigint' })
   @IsDefined()
   tokenVersion: number;
-
-  @Field({ description: 'avatar id' })
-  @Column({ type: 'int' })
-  @IsDefined()
-  avatar: number;
 
   @Field({ description: 'media auth token' })
   mediaAuth: string;

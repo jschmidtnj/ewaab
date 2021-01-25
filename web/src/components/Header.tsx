@@ -16,6 +16,7 @@ import { uninitializedKey, avatarWidth } from 'shared/variables';
 import { getAPIURL } from 'utils/axios';
 import { UserFieldsFragment } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
+import { getUsername } from 'state/auth/getters';
 
 interface LinkData {
   name: string;
@@ -44,6 +45,7 @@ const Header = (): JSX.Element => {
   const apiURL = getAPIURL();
 
   const [paths, setPaths] = useState<LinkData[]>([]);
+  const [userPaths, setUserPaths] = useState<LinkData[]>([]);
   useEffect(() => {
     (async () => {
       if (!loggedIn) {
@@ -52,9 +54,18 @@ const Header = (): JSX.Element => {
             name: 'login',
             href: '/login',
           },
+          {
+            name: 'reset',
+            href: '/reset',
+          },
         ]);
       } else {
-        setPaths([]);
+        setPaths([
+          {
+            name: 'users',
+            href: '/users',
+          },
+        ]);
         if (!user) {
           try {
             await dispatchAuthThunk(thunkGetUser());
@@ -65,9 +76,32 @@ const Header = (): JSX.Element => {
             });
           }
         }
+        const username = getUsername();
+        setUserPaths([
+          {
+            name: 'account',
+            href: `/${username}`,
+          },
+          {
+            name: 'profile',
+            href: '/profile',
+          },
+        ]);
       }
     })();
   }, [loggedIn]);
+
+  const allUserPaths: JSX.Element[] = userPaths.map((pathData, i) => {
+    return (
+      <Link href={pathData.href} key={`user-path-${i}`}>
+        <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+          <FormattedMessage id={pathData.name}>
+            {(messages: string[]) => capitalizeFirstLetter(messages[0])}
+          </FormattedMessage>
+        </a>
+      </Link>
+    );
+  });
 
   const allPathElements: JSX.Element[] = paths.map((pathData, i) => {
     const highlighted = pathData.href === router.pathname;
@@ -190,15 +224,7 @@ const Header = (): JSX.Element => {
                   aria-labelledby="user-menu"
                   ref={userMenuRef}
                 >
-                  <Link href="/profile">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <FormattedMessage id="profile">
-                        {(messages: string[]) =>
-                          capitalizeFirstLetter(messages[0])
-                        }
-                      </FormattedMessage>
-                    </a>
-                  </Link>
+                  {allUserPaths}
                   <a
                     href="#"
                     onClick={(evt) => {

@@ -11,6 +11,7 @@ export const avatarWidth = 50;
 
 export enum UserType {
   user = 'user',
-  visitor = 'vistor',
+  visitor = 'visitor',
+  thirdParty = 'thirdParty',
   admin = 'admin',
 }
