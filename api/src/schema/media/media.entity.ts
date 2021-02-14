@@ -2,6 +2,11 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 
+export enum MediaParentType {
+  user = 'user',
+  post = 'post',
+}
+
 @ObjectType({ description: 'media object' })
 @Entity({ name: 'media' })
 export default class Media {
@@ -9,10 +14,14 @@ export default class Media {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field({ description: 'owner' })
+  @Field({ description: 'parent' })
   @Column({ type: 'int' })
   @IsDefined()
-  user: number;
+  parent: number;
+
+  @Column({ type: 'enum', enum: MediaParentType })
+  @IsDefined()
+  parentType: MediaParentType;
 
   @Field({ description: 'mime type of file' })
   @Column({ type: 'text' })

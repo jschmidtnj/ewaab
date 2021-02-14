@@ -15,3 +15,10 @@ export enum UserType {
   thirdParty = 'thirdParty',
   admin = 'admin',
 }
+
+export enum PostType {
+  studentNews = 'studentNews',
+  mentorNews = 'mentorNews',
+  encourageHer = 'encourageHer',
+  studentCommunity = 'studentCommunity',
+}

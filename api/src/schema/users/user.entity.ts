@@ -36,6 +36,38 @@ export class PublicUser {
   @Column({ type: 'int' })
   @IsDefined()
   avatar: number;
+
+  @Field({ description: 'job title' })
+  @Column({ type: 'text' })
+  jobTitle: string;
+
+  @Field({ description: 'location' })
+  @Column({ type: 'text' })
+  location: string;
+
+  @Field({ description: 'personal url' })
+  @Column({ type: 'text' })
+  url: string;
+
+  @Field({ description: 'facebook profile' })
+  @Column({ type: 'text' })
+  facebook: string;
+
+  @Field({ description: 'twitter account' })
+  @Column({ type: 'text' })
+  twitter: string;
+
+  @Field({ description: 'github profile' })
+  @Column({ type: 'text' })
+  github: string;
+
+  @Field({ description: 'short user description' })
+  @Column({ type: 'text' })
+  description: string;
+
+  @Field({ description: 'longer user bio' })
+  @Column({ type: 'text' })
+  bio: string;
 }
 
 @ObjectType({ description: 'user account' })
