@@ -12,7 +12,7 @@ import { AuthActionTypes } from 'state/auth/types';
 import { AppThunkDispatch } from 'state/thunk';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { RootState } from 'state';
-import { uninitializedKey, avatarWidth } from 'shared/variables';
+import { avatarWidth } from 'shared/variables';
 import { getAPIURL } from 'utils/axios';
 import { UserFieldsFragment } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
@@ -196,7 +196,7 @@ const Header = (): JSX.Element => {
                     id="user-menu"
                     aria-haspopup="true"
                   >
-                    {!user || user.avatar === uninitializedKey ? (
+                    {!user || user.avatar ? (
                       <Image
                         className="h-8 w-8 rounded-full"
                         width={avatarWidth}

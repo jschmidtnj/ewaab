@@ -7,7 +7,7 @@ import { passwordMinLen, specialCharacterRegex, numberRegex, capitalLetterRegex,
 import User from '../schema/users/user.entity';
 import { setRefreshToken } from '../utils/refreshToken';
 import { verifyRecaptcha } from '../utils/recaptcha';
-import { getRepository } from 'typeorm';
+import { FindOneOptions, getRepository } from 'typeorm';
 
 @ArgsType()
 class LoginArgs {
@@ -45,10 +45,13 @@ class LoginResolvers {
     }
     const UserModel = getRepository(User);
     let user: User;
+    const findOptions: FindOneOptions<User> = {
+      select: ['id', 'type', 'emailVerified', 'password']
+    };
     if (args.usernameEmail.includes('@')) {
       const userRes = await UserModel.findOne({
         email: args.usernameEmail
-      });
+      }, findOptions);
       if (!userRes) {
         throw new Error(`cannot find user with email ${args.usernameEmail}`);
       }
@@ -56,7 +59,7 @@ class LoginResolvers {
     } else {
       const userRes = await UserModel.findOne({
         username: args.usernameEmail
-      });
+      }, findOptions);
       if (!userRes) {
         throw new Error(`cannot find user with username ${args.usernameEmail}`);
       }

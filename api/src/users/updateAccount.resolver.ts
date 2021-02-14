@@ -20,6 +20,7 @@ import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
 import Media from '../schema/media/media.entity';
 import sharp from 'sharp';
 import { imageMime } from '../utils/misc';
+import { deleteMedia } from './media.resolver';
 
 @ArgsType()
 class UpdateArgs {
@@ -35,7 +36,40 @@ class UpdateArgs {
   email?: string;
 
   @Field(_type => GraphQLUpload, { description: 'avatar', nullable: true })
+  @IsOptional()
   avatar?: Promise<FileUpload>;
+
+  @Field(_type => String, { description: 'job title', nullable: true })
+  @IsOptional()
+  jobTitle?: string;
+
+  @Field(_type => String, { description: 'location', nullable: true })
+  @IsOptional()
+  location?: string;
+
+  @Field(_type => String, { description: 'url', nullable: true })
+  @IsOptional()
+  url?: string;
+
+  @Field(_type => String, { description: 'facebook', nullable: true })
+  @IsOptional()
+  facebook?: string;
+
+  @Field(_type => String, { description: 'github', nullable: true })
+  @IsOptional()
+  github?: string;
+
+  @Field(_type => String, { description: 'twitter', nullable: true })
+  @IsOptional()
+  twitter?: string;
+
+  @Field(_type => String, { description: 'description', nullable: true })
+  @IsOptional()
+  description?: string;
+
+  @Field(_type => String, { description: 'short bio', nullable: true })
+  @IsOptional()
+  bio?: string;
 
   @Field(_type => String, { description: 'password', nullable: true })
   @IsOptional()
@@ -69,15 +103,20 @@ class UpdateAccountResolver {
     }
     const userUpdateData: QueryPartialEntity<User> = {};
     const UserModel = getRepository(User);
+
+    const currentUser = await UserModel.findOne(ctx.auth.id, {
+      select: ['name', 'avatar']
+    });
+    if (!currentUser) {
+      throw new ApolloError('could not get current user', `${statusCodes.INTERNAL_SERVER_ERROR}`);
+    }
+  
     if (args.name && args.name.length > 0) {
       userUpdateData.name = args.name;
     } else {
-      const currentUser = await UserModel.findOne(ctx.auth.id);
-      if (!currentUser) {
-        throw new ApolloError('could not get current user', `${statusCodes.INTERNAL_SERVER_ERROR}`);
-      }
       args.name = currentUser.name;
     }
+  
     if (args.email) {
       userUpdateData.email = args.email;
       userUpdateData.emailVerified = false;
@@ -124,6 +163,9 @@ class UpdateAccountResolver {
           const buffer = Buffer.concat(data);
           const MediaModel = getRepository(Media);
           (async () => {
+            if (currentUser.avatar) {
+              await deleteMedia(currentUser.avatar);
+            }
             const newMedia = await MediaModel.save({
               fileSize: readStream.readableLength,
               mime: file.mimetype,

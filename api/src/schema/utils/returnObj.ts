@@ -8,7 +8,7 @@ export class RestReturnObj {
 @ObjectType({ description: 'return object for graphql mutations' })
 export default class ReturnObj {
   @Field({ description: 'object id', nullable: true })
-  _id?: number;
+  _id?: string;
 
   @Field({ description: 'message' })
   message: string;

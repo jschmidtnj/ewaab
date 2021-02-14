@@ -59,7 +59,9 @@ class VerifyEmailResolver {
   async verifyEmail(@Args() args: VerifyEmailArgs): Promise<string> {
     const verificationData = await decodeVerify(args.token);
     const UserModel = getRepository(User);
-    const user = await UserModel.findOne(verificationData.id);
+    const user = await UserModel.findOne(verificationData.id, {
+      select: ['id', 'email', 'emailVerified']
+    });
     if (!user) {
       throw new ApolloError('cannot find user with given id', `${statusCodes.NOT_FOUND}`);
     }

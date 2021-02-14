@@ -27,8 +27,8 @@ registerEnumType(Mode, {
 @Entity({ name: 'device' })
 export default class Device {
   @Field()
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn({ type: 'uuid' })
+  id: string;
 
   @Field({ description: 'is device activated' })
   @Column({ type: 'boolean' })

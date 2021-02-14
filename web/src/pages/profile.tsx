@@ -19,7 +19,6 @@ import {
   capitalLetterRegex,
   numberRegex,
   specialCharacterRegex,
-  uninitializedKey,
 } from 'shared/variables';
 import { client } from 'utils/apollo';
 import { useDispatch, useSelector } from 'react-redux';
@@ -279,7 +278,7 @@ const ProfilePage = (): JSX.Element => {
                                   width={40}
                                   height={40}
                                 />
-                              ) : user.avatar === uninitializedKey ? (
+                              ) : user.avatar ? (
                                 <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
                                   <svg
                                     className="h-full w-full text-gray-300"

@@ -11,13 +11,13 @@ export enum MediaParentType {
 @Entity({ name: 'media' })
 export default class Media {
   @Field()
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn({ type: 'uuid' })
+  id: string;
 
   @Field({ description: 'parent' })
-  @Column({ type: 'int' })
+  @Column({ type: 'uuid' })
   @IsDefined()
-  parent: number;
+  parent: string;
 
   @Column({ type: 'enum', enum: MediaParentType })
   @IsDefined()

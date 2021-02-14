@@ -8,27 +8,33 @@ registerEnumType(PostType, {
   description: 'post type',
 });
 
-@ObjectType({ description: 'post data' })
-@Entity({ name: 'posts' })
-export default class Post {
-  @Field()
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Field({ description: 'email verified' })
-  @Column({ type: 'boolean' })
+@ObjectType({ description: 'post data, indexed in elasticsearch', isAbstract: true })
+export class SearchPost {
+  @Field({ description: 'post type' })
+  @Column({ type: 'enum', enum: PostType })
   @IsDefined()
-  emailVerified: boolean;
+  type: PostType;
 
-  @Field({ description: 'current token version' })
-  @Column({ type: 'bigint' })
-  @IsDefined()
-  tokenVersion: number;
-
-  @Field({ description: 'media auth token' })
-  mediaAuth: string;
-
+  @Field({ description: 'title' })
   @Column({ type: 'text' })
   @IsDefined()
-  password: string;
+  title: string;
+
+  @Field({ description: 'post content' })
+  @Column({ type: 'text' })
+  @IsDefined()
+  content: string;
+}
+
+@ObjectType({ description: 'post data' })
+@Entity({ name: 'posts' })
+export default class Post extends SearchPost {
+  @Field()
+  @PrimaryGeneratedColumn({ type: 'uuid' })
+  id: string;
+
+  @Field({ description: 'post description', nullable: true })
+  @Column({ type: 'text' })
+  @IsDefined()
+  link: string;
 }

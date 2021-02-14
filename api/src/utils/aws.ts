@@ -45,7 +45,7 @@ export const getS3Data = async (key: string, bucket: string, allowBinary: boolea
   };
 };
 
-export const getMediaKey = (id: number, blur?: boolean): string => {
+export const getMediaKey = (id: string, blur?: boolean): string => {
   const base = `media/${id}`;
   return blur ? base + '_blur' : base;
 };

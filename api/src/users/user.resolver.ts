@@ -7,13 +7,15 @@ import { sign } from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
 import { getSecret, getJWTIssuer, mediaJWTExpiration, MediaAccessType } from '../utils/jwt';
+import { UserType } from '../shared/variables';
 
 export interface MediaAccessTokenData {
-  id: number;
+  id: string;
+  userType: UserType;
   type: MediaAccessType.media;
 }
 
-const generateJWTMediaAccess = (id: number): Promise<string> => {
+const generateJWTMediaAccess = (user: User): Promise<string> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -25,7 +27,8 @@ const generateJWTMediaAccess = (id: number): Promise<string> => {
       return;
     }
     const authData: MediaAccessTokenData = {
-      id,
+      id: user.id,
+      userType: user.type,
       type: MediaAccessType.media
     };
     const signOptions: SignOptions = {
@@ -62,7 +65,7 @@ class UserResolvers implements ResolverInterface<User> {
 
   @FieldResolver()
   async mediaAuth(@Root() user: User): Promise<string> {
-    return await generateJWTMediaAccess(user.id);
+    return await generateJWTMediaAccess(user);
   }
 }
 

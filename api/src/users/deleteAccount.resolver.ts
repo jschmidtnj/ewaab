@@ -4,7 +4,8 @@ import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { IsEmail, IsOptional } from 'class-validator';
 import User from '../schema/users/user.entity';
-import { getRepository } from 'typeorm';
+import { FindOneOptions, getRepository } from 'typeorm';
+import { deleteMedia } from './media.resolver';
 
 @ArgsType()
 class DeleteArgs {
@@ -35,17 +36,23 @@ class DeleteResolver {
     }
     const UserModel = getRepository(User);
     let userFindRes: User | undefined;
+    const findOptions: FindOneOptions<User> = {
+      select: ['id']
+    };
     if (!isAdmin) {
-      userFindRes = await UserModel.findOne(ctx.auth.id);
+      userFindRes = await UserModel.findOne(ctx.auth.id, findOptions);
     } else {
       userFindRes = await UserModel.findOne({
         email
-      });
+      }, findOptions);
     }
     if (!userFindRes) {
       throw new Error('no user found');
     }
     const userData = userFindRes as User;
+    if (userData.avatar) {
+      await deleteMedia(userData.avatar);
+    }
     await UserModel.delete(userData.id);
     return `deleted user ${userData.id}`;
   }

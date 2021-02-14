@@ -17,6 +17,21 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/RestReturnObj'
             description: ""
+    /initializeElastic:
+        post:
+            operationId: InitializeElasticInitializeElastic
+            responses:
+                '204':
+                    description: 'No content'
+            description: ""
+            parameters:
+                -
+                    description: ""
+                    in: header
+                    name: authorization
+                    required: true
+                    schema:
+                        type: string
     /hello:
         get:
             operationId: HelloHello

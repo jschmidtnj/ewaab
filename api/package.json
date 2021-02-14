@@ -38,6 +38,7 @@
     "swagger": "swaggerGen -c ./swaggerConf.yml && cp dist_swagger/swagger.yaml swagger.yml"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^7.11.0",
     "@sendgrid/client": "^7.4.0",
     "apollo-server-express": "^2.19.0",
     "argon2": "^0.27.1",

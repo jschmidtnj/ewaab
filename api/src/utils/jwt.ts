@@ -21,20 +21,20 @@ export enum MediaAccessType {
 }
 
 export interface JWTAuthData {
-  id: number;
+  id: string;
   type: UserType;
   emailVerified: boolean;
 }
 
 export interface AuthData {
-  id: number;
+  id: string;
   type: UserType; // user type
   loginType: loginType;
   emailVerified: boolean;
 }
 
 export interface RefreshTokenData {
-  id: number;
+  id: string;
   tokenVersion: number;
 }
 
@@ -145,7 +145,9 @@ export const handleRefreshToken = (req: Request): Promise<string> => {
           throw err as Error;
         }
         const UserModel = getRepository(User);
-        const user = await UserModel.findOne(res.id);
+        const user = await UserModel.findOne(res.id, {
+          select: ['tokenVersion', 'id', 'type', 'emailVerified']
+        });
         if (!user) {
           throw new Error('user not found');
         }

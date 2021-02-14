@@ -26,6 +26,8 @@ interface ConfigType {
   NOREPLY_EMAIL: string,
   NOREPLY_EMAIL_NAME: string,
   RECAPTCHA_SECRET: string;
+  ELASTICSEARCH_URI: string;
+  INITIALIZATION_KEY: string;
 }
 
 export const configData: ConfigType = {
@@ -50,7 +52,9 @@ export const configData: ConfigType = {
   SENDGRID_API_KEY: '',
   NOREPLY_EMAIL: 'noreply@ewaabweb.org',
   NOREPLY_EMAIL_NAME: 'no reply',
-  RECAPTCHA_SECRET: ''
+  RECAPTCHA_SECRET: '',
+  ELASTICSEARCH_URI: '',
+  INITIALIZATION_KEY: ''
 };
 
 const addToConfig = (conf: any, allString: boolean): void => {

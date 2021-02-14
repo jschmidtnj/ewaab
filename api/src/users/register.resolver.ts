@@ -1,9 +1,9 @@
 import argon2 from 'argon2';
 import { Resolver, ArgsType, Field, Args, Mutation } from 'type-graphql';
 import { IsEmail, MinLength, Matches } from 'class-validator';
-import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, uninitializedKey } from '../shared/variables';
+import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex } from '../shared/variables';
 import { accountExistsEmail, accountExistsUsername } from './shared';
-import User from '../schema/users/user.entity';
+import User, { SearchUser } from '../schema/users/user.entity';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
@@ -15,6 +15,9 @@ import { getRepository } from 'typeorm';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { InviteUserTokenData } from '../emails/inviteUser.resolver';
+import { defaultMajor } from '../shared/majors';
+import { elasticClient } from '../elastic/init';
+import { userIndexName } from '../elastic/settings';
 
 @ArgsType()
 class RegisterArgs {
@@ -56,11 +59,11 @@ class RegisterArgs {
 }
 
 export interface VerifyTokenData {
-  id: number;
+  id: string;
   type: VerifyType.verify;
 }
 
-export const generateJWTVerifyEmail = (userID: number): Promise<string> => {
+export const generateJWTVerifyEmail = (userID: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -142,16 +145,36 @@ class RegisterResolver {
     }
     const hashedPassword = await argon2.hash(args.password);
     const UserModel = getRepository(User);
-    const newUser = await UserModel.save({
+    const searchUser: SearchUser = {
       email: args.email,
       name: args.name,
+      type: inviteData.userType,
+      username: args.username,
+      location: '',
+      major: defaultMajor
+    };
+
+    const newUser = await UserModel.save({
+      ...searchUser,
       password: hashedPassword,
       tokenVersion: 0,
       emailVerified: false,
-      type: inviteData.userType,
-      avatar: uninitializedKey,
-      username: args.username,
+      avatar: '',
+      jobTitle: '',
+      url: '',
+      facebook: '',
+      github: '',
+      twitter: '',
+      description: '',
+      bio: ''
     });
+    await elasticClient.index({
+      id: newUser.id,
+      index: userIndexName,
+      body: searchUser
+    });
+    searchUser.id = newUser.id;
+
     const emailTemplateData = emailTemplateFiles.verifyEmail;
     const template = emailTemplateData.template;
     if (!template) {

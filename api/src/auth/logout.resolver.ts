@@ -4,7 +4,7 @@ import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn, verifyAdmin } from './checkAuth';
 import { IsEmail, IsOptional } from 'class-validator';
 import { clearRefreshToken } from '../utils/refreshToken';
-import { getRepository } from 'typeorm';
+import { FindOneOptions, getRepository } from 'typeorm';
 
 @ArgsType()
 class RevokeArgs {
@@ -41,12 +41,15 @@ export class UserResolver {
     }
     const UserModel = getRepository(User);
     let user: User | undefined;
+    const findOptions: FindOneOptions<User> = {
+      select: ['id']
+    };
     if (!isAdmin) {
-      user = await UserModel.findOne(ctx.auth.id);
+      user = await UserModel.findOne(ctx.auth.id, findOptions);
     } else {
       user = await UserModel.findOne({
         email
-      });
+      }, findOptions);
     }
     if (!user) {
       throw new Error('no user found');

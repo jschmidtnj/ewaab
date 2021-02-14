@@ -3,8 +3,7 @@ import { checkMedia, checkText, contentTypeHeader } from '../utils/misc';
 import { InternalServerError, NotFoundError } from 'typescript-rest/dist/server/model/errors';
 import { getMediaKey, getS3FileData, S3Data } from '../utils/aws';
 import { getContext } from '../utils/context';
-import { verifyLoggedIn } from '../auth/checkAuth';
-import { getMedia, getMediaAuthenticated } from './media.resolver';
+import { getMediaAuthenticated } from './media.resolver';
 import { MediaAccessTokenData } from './user.resolver';
 import { ApolloError } from 'apollo-server-express';
 import { verify } from 'jsonwebtoken';
@@ -66,36 +65,21 @@ export const getFile = async (args: {
   let s3FileData: S3Data;
   let fileName: string;
   try {
-    const mediaIDStr = args.req.path.split('/media/')[1];
-    const mediaIDNum = new Number(mediaIDStr);
-    if (!mediaIDNum) {
-      throw new Error('invalid media id provided');
-    }
-    const mediaID = mediaIDNum.valueOf();
+    const mediaID = args.req.path.split('/media/')[1];
 
-    let userID: number;
     let mediaData: Media;
+    const ctx = await getContext({
+      req: args.req,
+      res: args.res
+    });
     if ('auth' in args.req.query) {
-      const tokenData = await decodeMediaAuth(args.req.query['auth'] as string);
-      userID = tokenData.id;
-      mediaData = await getMedia({
+      mediaData = await getMediaAuthenticated({
         id: mediaID
-      });
+      }, ctx, await decodeMediaAuth(args.req.query['auth'] as string));
     } else {
-      const ctx = await getContext({
-        req: args.req,
-        res: args.res
-      });
-      if (!verifyLoggedIn(ctx) || !ctx.auth) {
-        throw new Error('user not logged in');
-      }
-      userID = ctx.auth.id;
       mediaData = await getMediaAuthenticated({
         id: mediaID,
       }, ctx);
-    }
-    if (mediaData.user !== userID) {
-      throw new Error('user not authorized to view data');
     }
     fileName = mediaData.name;
     const key = getMediaKey(mediaID, args.blur);
