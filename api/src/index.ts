@@ -6,6 +6,7 @@ import { initializeAWS } from './utils/aws';
 import { initializeRedis } from './utils/redis';
 import { initializeSendgrid } from './emails/sendgrid';
 import compileEmailTemplates from './emails/compileEmailTemplates';
+import { initializeElastic } from './elastic/init';
 
 const runAPI = async (): Promise<void> => {
   // initialize config and logger
@@ -17,6 +18,9 @@ const runAPI = async (): Promise<void> => {
     logger.info('start aws initialize');
     await initializeAWS();
     logger.info('aws initialized');
+    logger.info('start elastic initialize');
+    await initializeElastic();
+    logger.info('connected to elasticsearch');
     logger.info('start db initialize');
     await initializeDB(configData.DB_CONNECTION_URI);
     logger.info('database connection set up');

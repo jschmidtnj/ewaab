@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
-import { ObjectType, Field, registerEnumType } from 'type-graphql';
+import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { UserType } from '../../shared/variables';
 
@@ -8,7 +8,7 @@ registerEnumType(UserType, {
   description: 'user type',
 });
 
-@ObjectType({ description: 'user data, indexed for search' })
+@ObjectType({ description: 'user data, indexed for search', isAbstract: true })
 export class SearchUser {
   @Field({ description: 'user id' })
   id?: string;
@@ -40,10 +40,24 @@ export class SearchUser {
   @IsDefined()
   major: string;
 
-  @Field({ description: 'location' })
+  @Field({ description: 'location latitude longitude' })
   @Column({ type: 'text' })
   @IsDefined()
   location: string;
+
+  @Field({ description: 'location name' })
+  @Column({ type: 'text' })
+  @IsDefined()
+  locationName: string;
+}
+
+@ObjectType({ description: 'user data search results' })
+export class SearchUsersResult {
+  @Field(_type => [SearchUser], { description: 'results' })
+  results: SearchUser[];
+
+  @Field(_type => Int, { description: 'total users count' })
+  count: number;
 }
 
 @ObjectType({ description: 'public user data (not in search)' })

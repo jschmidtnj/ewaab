@@ -6,6 +6,8 @@ import { IsEmail, IsOptional } from 'class-validator';
 import User from '../schema/users/user.entity';
 import { FindOneOptions, getRepository } from 'typeorm';
 import { deleteMedia } from './media.resolver';
+import { elasticClient } from '../elastic/init';
+import { userIndexName } from '../elastic/settings';
 
 @ArgsType()
 class DeleteArgs {
@@ -14,7 +16,7 @@ class DeleteArgs {
   @IsEmail({}, {
     message: 'invalid email provided'
   })
-  email: string;
+  email?: string;
 }
 
 @Resolver()
@@ -53,6 +55,10 @@ class DeleteResolver {
     if (userData.avatar) {
       await deleteMedia(userData.avatar);
     }
+    await elasticClient.delete({
+      id: userData.id,
+      index: userIndexName
+    });
     await UserModel.delete(userData.id);
     return `deleted user ${userData.id}`;
   }

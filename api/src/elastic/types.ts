@@ -4,7 +4,3 @@ export interface ElasticProject {
   created: number;
   updated: number;
 }
-
-export interface TermQuery {
-  term: Record<string, unknown>;
-}

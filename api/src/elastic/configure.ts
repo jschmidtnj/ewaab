@@ -8,6 +8,7 @@ import postMappings from './mappings/post';
 import { getRepository } from 'typeorm';
 import User, { SearchUser } from '../schema/users/user.entity';
 import Post, { SearchPost } from '../schema/posts/post.entity';
+import sleep from '../shared/sleep';
 
 const logger = getLogger();
 
@@ -58,6 +59,7 @@ export const initializeMappings = async (): Promise<string> => {
       index: settings.userIndexName,
       body: searchUser
     });
+    await sleep(100);
   }
   await initializeMapping(settings.postIndexName, settings.postIndexSettings, postMappings, settings.postType);
   const PostModel = getRepository(Post);
@@ -70,6 +72,7 @@ export const initializeMappings = async (): Promise<string> => {
       index: settings.postIndexName,
       body: searchPost
     });
+    await sleep(100);
   }
   return 'initialized all mappings';
 };

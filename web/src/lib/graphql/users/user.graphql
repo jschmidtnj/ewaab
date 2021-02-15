@@ -1,11 +1,20 @@
 fragment userFields on User {
+  id
   name
   username
   email
-  id
   type
   avatar
   mediaAuth
+  jobTitle
+  location
+  locationName
+  url
+  facebook
+  github
+  twitter
+  description
+  bio
 }
 
 query user {

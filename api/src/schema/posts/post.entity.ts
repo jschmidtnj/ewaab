@@ -1,7 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { ObjectType, Field, registerEnumType } from 'type-graphql';
+import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { PostType } from '../../shared/variables';
+import { BaseTimestamp } from '../utils/baseTimestamp';
 
 registerEnumType(PostType, {
   name: 'PostType',
@@ -9,11 +10,9 @@ registerEnumType(PostType, {
 });
 
 @ObjectType({ description: 'post data, indexed in elasticsearch', isAbstract: true })
-export class SearchPost {
-  @Field({ description: 'post type' })
-  @Column({ type: 'enum', enum: PostType })
-  @IsDefined()
-  type: PostType;
+export class SearchPost extends BaseTimestamp {
+  @Field({ description: 'post id' })
+  id?: string;
 
   @Field({ description: 'title' })
   @Column({ type: 'text' })
@@ -24,16 +23,44 @@ export class SearchPost {
   @Column({ type: 'text' })
   @IsDefined()
   content: string;
+
+  @Field({ description: 'post type' })
+  @Column({ type: 'enum', enum: PostType })
+  @IsDefined()
+  type: PostType;
+
+  @Field({ description: 'post publisher' })
+  @Column({ type: 'uuid' })
+  @IsDefined()
+  publisher: string;
+}
+
+@ObjectType({ description: 'post data search results' })
+export class SearchPostsResult {
+  @Field(_type => [SearchPost], { description: 'results' })
+  results: SearchPost[];
+
+  @Field(_type => Int, { description: 'total posts count' })
+  count: number;
+
+  @Field(_type => Int, { description: 'student news count' })
+  countStudentNews: number;
+  @Field(_type => Int, { description: 'mentor news count' })
+  countMentorNews: number;
+  @Field(_type => Int, { description: 'encourage her news count' })
+  countEncourageHer: number;
+  @Field(_type => Int, { description: 'student community count' })
+  countStudentCommunity: number;
 }
 
 @ObjectType({ description: 'post data' })
 @Entity({ name: 'posts' })
 export default class Post extends SearchPost {
-  @Field()
+  @Field({ description: 'post id' })
   @PrimaryGeneratedColumn({ type: 'uuid' })
   id: string;
 
-  @Field({ description: 'post description', nullable: true })
+  @Field({ description: 'post link', nullable: true })
   @Column({ type: 'text' })
   @IsDefined()
   link: string;

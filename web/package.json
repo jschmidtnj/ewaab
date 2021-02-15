@@ -33,6 +33,7 @@
     "next": "10.0.3",
     "next-compose-plugins": "^2.2.1",
     "next-pwa": "^5.0.0",
+    "places.js": "^1.19.0",
     "react": "^17.0.1",
     "react-color": "^2.19.3",
     "react-cool-onclickoutside": "^1.5.9",

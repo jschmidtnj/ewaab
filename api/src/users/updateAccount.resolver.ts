@@ -1,9 +1,9 @@
 import argon2 from 'argon2';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { IsEmail, MinLength, Matches, IsOptional } from 'class-validator';
-import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth } from '../shared/variables';
-import { verifyLoggedIn } from '../auth/checkAuth';
+import { IsEmail, MinLength, Matches, IsOptional, IsUrl } from 'class-validator';
+import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen } from '../shared/variables';
+import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
 import User from '../schema/users/user.entity';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -21,11 +21,19 @@ import Media from '../schema/media/media.entity';
 import sharp from 'sharp';
 import { imageMime } from '../utils/misc';
 import { deleteMedia } from './media.resolver';
+import { elasticClient } from '../elastic/init';
+import { userIndexName } from '../elastic/settings';
 
 @ArgsType()
 class UpdateArgs {
+  @Field(_type => String, { description: 'user id', nullable: true })
+  id?: string;
+
   @Field(_type => String, { description: 'name', nullable: true })
   @IsOptional()
+  @MinLength(strMinLen, {
+    message: `name must contain at least ${strMinLen} characters`
+  })
   name?: string;
 
   @Field(_type => String, { description: 'email', nullable: true })
@@ -45,22 +53,41 @@ class UpdateArgs {
 
   @Field(_type => String, { description: 'location', nullable: true })
   @IsOptional()
+  @Matches(locationRegex, {
+    message: 'invalid relative location provided'
+  })
   location?: string;
+
+  @Field(_type => String, { description: 'location name', nullable: true })
+  @IsOptional()
+  locationName?: string;
 
   @Field(_type => String, { description: 'url', nullable: true })
   @IsOptional()
+  @IsUrl({}, {
+    message: 'invalid url provided'
+  })
   url?: string;
 
   @Field(_type => String, { description: 'facebook', nullable: true })
   @IsOptional()
+  @Matches(validUsername, {
+    message: 'invalid facebook username'
+  })
   facebook?: string;
 
   @Field(_type => String, { description: 'github', nullable: true })
   @IsOptional()
+  @Matches(validUsername, {
+    message: 'invalid github handle'
+  })
   github?: string;
 
   @Field(_type => String, { description: 'twitter', nullable: true })
   @IsOptional()
+  @Matches(validUsername, {
+    message: 'invalid twitter handle'
+  })
   twitter?: string;
 
   @Field(_type => String, { description: 'description', nullable: true })
@@ -95,8 +122,17 @@ class UpdateArgs {
 class UpdateAccountResolver {
   @Mutation(_returns => String)
   async updateAccount(@Args() args: UpdateArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
-    if (!verifyLoggedIn(ctx) || !ctx.auth) {
-      throw new Error('user not logged in');
+    let id: string;
+    if (args.id !== undefined) {
+      if (!verifyAdmin(ctx)) {
+        throw new Error('user not admin');
+      }
+      id = args.id;
+    } else {
+      if (!verifyLoggedIn(ctx) || !ctx.auth) {
+        throw new Error('user not logged in');
+      }
+      id = ctx.auth.id;
     }
     if (!Object.values(args).some(elem => elem !== undefined)) {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
@@ -104,19 +140,19 @@ class UpdateAccountResolver {
     const userUpdateData: QueryPartialEntity<User> = {};
     const UserModel = getRepository(User);
 
-    const currentUser = await UserModel.findOne(ctx.auth.id, {
+    const currentUser = await UserModel.findOne(id, {
       select: ['name', 'avatar']
     });
     if (!currentUser) {
       throw new ApolloError('could not get current user', `${statusCodes.INTERNAL_SERVER_ERROR}`);
     }
-  
+
     if (args.name && args.name.length > 0) {
       userUpdateData.name = args.name;
     } else {
       args.name = currentUser.name;
     }
-  
+
     if (args.email) {
       userUpdateData.email = args.email;
       userUpdateData.emailVerified = false;
@@ -125,7 +161,7 @@ class UpdateAccountResolver {
       if (!template) {
         throw new Error('cannot find register email template');
       }
-      const verify_token = await generateJWTVerifyEmail(ctx.auth.id);
+      const verify_token = await generateJWTVerifyEmail(id);
       const emailData = template({
         name: args.name,
         verify_url: `${configData.WEBSITE_URL}/login?token=${verify_token}&verify_email=true`
@@ -140,10 +176,47 @@ class UpdateAccountResolver {
     if (args.password) {
       userUpdateData.password = await argon2.hash(args.password);
     }
+
+    if (+(args.location === undefined) ^ +(args.locationName === undefined)) {
+      throw new Error('location and name must both be defined');
+    }
+    if (args.location !== undefined) {
+      userUpdateData.location = args.location;
+      userUpdateData.locationName = args.locationName;
+    }
+
+    // other fields
+    if (args.jobTitle !== undefined) {
+      userUpdateData.jobTitle = args.jobTitle;
+    }
+    if (args.url !== undefined) {
+      userUpdateData.url = args.url;
+    }
+    if (args.facebook !== undefined) {
+      userUpdateData.facebook = args.facebook;
+    }
+    if (args.github !== undefined) {
+      userUpdateData.github = args.github;
+    }
+    if (args.twitter !== undefined) {
+      userUpdateData.twitter = args.twitter;
+    }
+    if (args.description !== undefined) {
+      userUpdateData.description = args.description;
+    }
+    if (args.bio !== undefined) {
+      userUpdateData.bio = args.bio;
+    }
+
     return new Promise<string>(async (resolve, reject) => {
       const callback = async () => {
-        await UserModel.update(ctx.auth!.id, userUpdateData);
-        return `updated user ${ctx.auth!.id}`;
+        await UserModel.update(id, userUpdateData);
+        await elasticClient.update({
+          id,
+          index: userIndexName,
+          body: userUpdateData
+        });
+        return `updated user ${id}`;
       };
       if (args.avatar) {
         const file = await args.avatar;
@@ -170,7 +243,7 @@ class UpdateAccountResolver {
               fileSize: readStream.readableLength,
               mime: file.mimetype,
               name: file.filename,
-              user: ctx.auth!.id
+              user: id
             });
             const original = await sharp(buffer).resize(avatarWidth).toBuffer();
 

@@ -1,6 +1,12 @@
 const postMappings = {
-  name: {
+  title: {
     type: 'text'
+  },
+  content: {
+    type: 'text'
+  },
+  type: {
+    type: 'keyword'
   }
 };
 

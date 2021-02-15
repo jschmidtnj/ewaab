@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 import { Resolver, ArgsType, Field, Args, Mutation } from 'type-graphql';
 import { IsEmail, MinLength, Matches } from 'class-validator';
-import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex } from '../shared/variables';
+import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, validUsername } from '../shared/variables';
 import { accountExistsEmail, accountExistsUsername } from './shared';
 import User, { SearchUser } from '../schema/users/user.entity';
 import { verifyRecaptcha } from '../utils/recaptcha';
@@ -31,6 +31,9 @@ class RegisterArgs {
   name: string;
 
   @Field(_type => String, { description: 'username' })
+  @Matches(validUsername, {
+    message: 'invalid username provided'
+  })
   username: string;
 
   @Field(_type => String, { description: 'email' })
@@ -151,6 +154,7 @@ class RegisterResolver {
       type: inviteData.userType,
       username: args.username,
       location: '',
+      locationName: '',
       major: defaultMajor
     };
 
