@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 
@@ -11,7 +11,7 @@ export enum MediaParentType {
 @Entity({ name: 'media' })
 export default class Media {
   @Field()
-  @PrimaryGeneratedColumn({ type: 'uuid' })
+  @PrimaryColumn('uuid')
   id: string;
 
   @Field({ description: 'parent' })

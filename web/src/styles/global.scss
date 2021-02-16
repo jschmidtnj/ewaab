@@ -11,6 +11,12 @@
   visibility: hidden;
 }
 
+/* remove algolia watermark */
+.ap-footer {
+  visibility: hidden;
+  height: 0;
+}
+
 /* utilities */
 
 @tailwind utilities;

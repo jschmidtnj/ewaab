@@ -108,9 +108,8 @@ const Header = (): JSX.Element => {
     return (
       <Link href={pathData.href} key={`path-${i}`}>
         <a
-          className={`px-3 py-2 rounded-md font-bold text-blue-700 ${
-            highlighted ? 'bg-blue-100' : 'bg-none'
-          } ${!mobileMenuOpen ? 'text-lg' : 'text-base block'}`}
+          className={`px-3 py-2 rounded-md font-bold text-blue-700 ${highlighted ? 'bg-blue-100' : 'bg-none'
+            } ${!mobileMenuOpen ? 'text-lg' : 'text-base block'}`}
         >
           <FormattedMessage id={pathData.name}>
             {(messages: string[]) => capitalizeFirstLetter(messages[0])}
@@ -196,15 +195,7 @@ const Header = (): JSX.Element => {
                     id="user-menu"
                     aria-haspopup="true"
                   >
-                    {!user || user.avatar ? (
-                      <Image
-                        className="h-8 w-8 rounded-full"
-                        width={avatarWidth}
-                        height={avatarWidth}
-                        src="/assets/img/default_avatar.png"
-                        alt="avatar"
-                      />
-                    ) : (
+                    {user && user.avatar ? (
                       <LazyLoadImage
                         className="h-8 w-8 rounded-full"
                         alt={`${apiURL}/media/${user.avatar}/blur?auth=${user.mediaAuth}`}
@@ -212,13 +203,20 @@ const Header = (): JSX.Element => {
                         src={`${apiURL}/media/${user.avatar}?auth=${user.mediaAuth}`}
                         width={avatarWidth}
                       />
-                    )}
+                    ) : (
+                        <Image
+                          className="h-8 w-8 rounded-full"
+                          width={avatarWidth}
+                          height={avatarWidth}
+                          src="/assets/img/default_avatar.png"
+                          alt="avatar"
+                        />
+                      )}
                   </button>
                 </div>
                 <div
-                  className={`${
-                    !userMenuOpen ? 'hidden' : ''
-                  } origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5`}
+                  className={`${!userMenuOpen ? 'hidden' : ''
+                    } origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5`}
                   role="menu"
                   aria-orientation="vertical"
                   aria-labelledby="user-menu"

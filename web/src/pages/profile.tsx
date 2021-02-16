@@ -19,6 +19,7 @@ import {
   capitalLetterRegex,
   numberRegex,
   specialCharacterRegex,
+  validUsername,
 } from 'shared/variables';
 import { client } from 'utils/apollo';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,15 +27,35 @@ import { thunkGetUser, thunkLogout } from 'state/auth/thunks';
 import { AuthActionTypes } from 'state/auth/types';
 import { AppThunkDispatch } from 'state/thunk';
 import { isSSR } from 'utils/checkSSR';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RootState } from 'state';
 import Image from 'next/image';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { getAPIURL } from 'utils/axios';
 import DeleteAccountModal from 'components/modals/DeleteAccount';
-import places from 'places.js';
 import Link from 'next/link';
-import { useRouter } from 'next/dist/client/router';
+import dynamic from "next/dynamic";
+
+const LocationSelect = dynamic(() => import('components/LocationSelect'), { ssr: false });
+
+interface LinkSpanArgs {
+  link: string;
+};
+const LinkSpan = ({ link }: LinkSpanArgs): JSX.Element => {
+  if (link.length > 0) {
+    return (
+      <a href={link} target="_blank"
+        className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+        @
+      </a>
+    );
+  }
+  return (
+    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+      @
+    </span>
+  );
+}
 
 const ProfilePage = (): JSX.Element => {
   let dispatchAuthThunk: AppThunkDispatch<AuthActionTypes>;
@@ -53,17 +74,15 @@ const ProfilePage = (): JSX.Element => {
   );
   const [showAuthToken, setShowAuthToken] = useState<boolean>(false);
 
+  const [locationName, setLocationName] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+
   const [
     deleteAccountModalIsOpen,
     setDeleteAccountModalIsOpen,
   ] = useState<boolean>(false);
   const toggleDeleteAccountModal = () =>
     setDeleteAccountModalIsOpen(!deleteAccountModalIsOpen);
-
-  const locationRef = useRef(null);
-  const [locationName, setLocationName] = useState<string>(user.locationName);
-  const [location, setLocation] = useState<string>('');
-  const router = useRouter();
 
   useEffect(() => {
     const fileInputElement = document.createElement('input');
@@ -86,30 +105,6 @@ const ProfilePage = (): JSX.Element => {
     if (urlParams.has('dev')) {
       setShowAuthToken(true);
     }
-
-    // handle places api
-    const autocomplete = places({
-      container: locationRef.current,
-      appId: 'plZKWPS6ZYDB',
-      apiKey: 'df0a67b74974d08874e104241db429be',
-      language: router.locale,
-    });
-    autocomplete.on('change', (evt) => {
-      console.log(evt.query);
-      setLocationName(evt.suggestion.value);
-      setLocation(`${evt.suggestion.latlng.lat},${evt.suggestion.latlng.lng}`);
-    });
-    autocomplete.on('error', (err) => {
-      toast(err.message, {
-        type: 'error'
-      });
-    });
-
-    return () => {
-      autocomplete.removeAllListeners('change');
-      autocomplete.removeAllListeners('clear');
-      autocomplete.removeAllListeners('error');
-    };
   }, []);
 
   const apiURL = getAPIURL();
@@ -122,7 +117,7 @@ const ProfilePage = (): JSX.Element => {
           {user === undefined ? (
             <p className="text-sm">loading...</p>
           ) : (
-              <div className="md:grid md:grid-cols-3 md:gap-6">
+              <div className="md:grid md:grid-cols-4 md:gap-6">
                 <div className="md:col-span-1">
                   <div className="px-4 sm:px-0">
                     <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -138,16 +133,30 @@ const ProfilePage = (): JSX.Element => {
                     </Link>
                   </div>
                 </div>
-                <div className="mt-5 md:mt-0 md:col-span-2">
+                <div className="mt-5 md:mt-0 md:col-span-3">
                   <Formik
                     initialValues={{
                       email: user.email,
                       name: user.name,
+                      jobTitle: user.jobTitle,
+                      url: user.url,
+                      facebook: user.facebook,
+                      github: user.github,
+                      twitter: user.twitter,
+                      description: user.description,
+                      bio: user.bio,
                       password: '',
                     }}
                     validationSchema={yup.object({
                       email: yup.string().email('invalid email address'),
                       name: yup.string(),
+                      jobTitle: yup.string(),
+                      url: yup.string().url(),
+                      facebook: yup.string().matches(validUsername, 'invalid facebook account'),
+                      github: yup.string().matches(validUsername, 'invalid github account'),
+                      twitter: yup.string().matches(validUsername, 'invalid twitter account'),
+                      description: yup.string(),
+                      bio: yup.string(),
                       password: yup
                         .string()
                         .min(
@@ -187,9 +196,39 @@ const ProfilePage = (): JSX.Element => {
                           updates.name = formData.name;
                           foundUpdate = true;
                         }
-                        if (location !== user.location || locationName !== user.locationName) {
+                        if (formData.jobTitle !== user.jobTitle) {
+                          updates.jobTitle = formData.jobTitle;
+                          foundUpdate = true;
+                        }
+                        if (location.length > 0 && (
+                          location !== user.location ||
+                          locationName !== user.locationName)) {
                           updates.locationName = locationName;
                           updates.location = location;
+                          foundUpdate = true;
+                        }
+                        if (formData.url !== user.url) {
+                          updates.url = formData.url;
+                          foundUpdate = true;
+                        }
+                        if (formData.facebook !== user.facebook) {
+                          updates.facebook = formData.facebook;
+                          foundUpdate = true;
+                        }
+                        if (formData.github !== user.github) {
+                          updates.github = formData.github;
+                          foundUpdate = true;
+                        }
+                        if (formData.twitter !== user.twitter) {
+                          updates.twitter = formData.twitter;
+                          foundUpdate = true;
+                        }
+                        if (formData.description !== user.description) {
+                          updates.description = formData.description;
+                          foundUpdate = true;
+                        }
+                        if (formData.bio !== user.bio) {
+                          updates.bio = formData.bio;
                           foundUpdate = true;
                         }
                         if (inputElem.files.length > 0) {
@@ -227,6 +266,7 @@ const ProfilePage = (): JSX.Element => {
                           });
                         }
                       } catch (err) {
+                        console.error(JSON.stringify(err, null, 2));
                         toast(err.message, {
                           type: 'error',
                         });
@@ -253,7 +293,7 @@ const ProfilePage = (): JSX.Element => {
                               >
                                 Email
                             </label>
-                              <div className="mt-1">
+                              <div className="mt-2">
                                 <input
                                   onChange={handleChange}
                                   onBlur={handleBlur}
@@ -262,7 +302,7 @@ const ProfilePage = (): JSX.Element => {
                                   type="email"
                                   name="email"
                                   id="email"
-                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 />
                               </div>
                               <p
@@ -279,8 +319,8 @@ const ProfilePage = (): JSX.Element => {
                                 className="block text-sm font-medium text-gray-700"
                               >
                                 Name
-                            </label>
-                              <div className="mt-1 flex rounded-md shadow-sm">
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
                                 <input
                                   onChange={handleChange}
                                   onBlur={handleBlur}
@@ -289,7 +329,7 @@ const ProfilePage = (): JSX.Element => {
                                   type="text"
                                   name="name"
                                   id="name"
-                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 />
                               </div>
                               <p
@@ -302,30 +342,214 @@ const ProfilePage = (): JSX.Element => {
 
                             <div>
                               <label
-                                htmlFor="location"
+                                htmlFor="jobTitle"
                                 className="block text-sm font-medium text-gray-700"
                               >
-                                Location
-                            </label>
-                              <div className="mt-1 flex rounded-md shadow-sm">
+                                Job Title
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
                                 <input
                                   onChange={handleChange}
                                   onBlur={handleBlur}
-                                  value={locationName}
+                                  value={values.jobTitle}
                                   disabled={isSubmitting}
                                   type="text"
-                                  name="location"
-                                  id="location"
-                                  ref={locationRef}
-                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
+                                  name="jobTitle"
+                                  id="jobTitle"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 />
                               </div>
+                              <p
+                                className={`${touched.jobTitle && errors.jobTitle ? '' : 'hidden'
+                                  } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                              >
+                                {errors.jobTitle}
+                              </p>
+                            </div>
+
+                            <LocationSelect
+                              disabled={isSubmitting}
+                              defaultLocation={user.locationName}
+                              onChange={(newLocationName, newLocation) => {
+                                setLocationName(newLocationName);
+                                if (newLocation) {
+                                  setLocation(newLocation);
+                                }
+                              }}
+                            />
+
+                            <div>
+                              <label
+                                htmlFor="url"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                Website
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
+                                <input
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={values.url}
+                                  disabled={isSubmitting}
+                                  type="text"
+                                  name="url"
+                                  id="url"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                />
+                              </div>
+                              <p
+                                className={`${touched.url && errors.url ? '' : 'hidden'
+                                  } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                              >
+                                {errors.url}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="facebook"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                Facebook
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
+                                <LinkSpan link={values.facebook.length === 0 || errors.facebook ?
+                                  '' : `https://facebook.com/${values.facebook}`} />
+                                <input
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={values.facebook}
+                                  disabled={isSubmitting}
+                                  type="text"
+                                  name="facebook"
+                                  id="facebook"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none rounded-r-md"
+                                />
+                              </div>
+                              <p
+                                className={`${touched.facebook && errors.facebook ? '' : 'hidden'
+                                  } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                              >
+                                {errors.facebook}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="github"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                GitHub
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
+                                <LinkSpan link={values.github.length === 0 || errors.github ?
+                                  '' : `https://github.com/${values.github}`} />
+                                <input
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={values.github}
+                                  disabled={isSubmitting}
+                                  type="text"
+                                  name="github"
+                                  id="github"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none rounded-r-md"
+                                />
+                              </div>
+                              <p
+                                className={`${touched.github && errors.github ? '' : 'hidden'
+                                  } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                              >
+                                {errors.github}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="twitter"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                Twitter
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
+                                <LinkSpan link={values.twitter.length === 0 || errors.twitter ?
+                                  '' : `https://twitter.com/${values.twitter}`} />
+                                <input
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={values.twitter}
+                                  disabled={isSubmitting}
+                                  type="text"
+                                  name="twitter"
+                                  id="twitter"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none rounded-r-md"
+                                />
+                              </div>
+                              <p
+                                className={`${touched.twitter && errors.twitter ? '' : 'hidden'
+                                  } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                              >
+                                {errors.twitter}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="description"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                Description
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
+                                <input
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={values.description}
+                                  disabled={isSubmitting}
+                                  type="text"
+                                  name="description"
+                                  id="description"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                />
+                              </div>
+                              <p
+                                className={`${touched.description && errors.description ? '' : 'hidden'
+                                  } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                              >
+                                {errors.description}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="bio"
+                                className="block text-sm font-medium text-gray-700"
+                              >
+                                Bio
+                              </label>
+                              <div className="mt-2 flex rounded-md shadow-sm">
+                                <textarea
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={values.bio}
+                                  disabled={isSubmitting}
+                                  rows={3}
+                                  name="bio"
+                                  id="bio"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                />
+                              </div>
+                              <p
+                                className={`${touched.bio && errors.bio ? '' : 'hidden'
+                                  } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                              >
+                                {errors.bio}
+                              </p>
                             </div>
 
                             <div>
                               <label className="block text-sm font-medium text-gray-700">
                                 Avatar
-                            </label>
+                              </label>
                               <div className="mt-2 flex items-center">
                                 {previewImage.length > 0 ? (
                                   <Image
@@ -335,23 +559,23 @@ const ProfilePage = (): JSX.Element => {
                                     height={40}
                                   />
                                 ) : user.avatar ? (
-                                  <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
-                                    <svg
-                                      className="h-full w-full text-gray-300"
-                                      fill="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                                    </svg>
-                                  </span>
+                                  <LazyLoadImage
+                                    className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100"
+                                    alt={`${apiURL}/media/${user.avatar}/blur?auth=${user.mediaAuth}`}
+                                    height={40}
+                                    src={`${apiURL}/media/${user.avatar}?auth=${user.mediaAuth}`}
+                                    width={40}
+                                  />
                                 ) : (
-                                      <LazyLoadImage
-                                        className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100"
-                                        alt={`${apiURL}/media/${user.avatar}/blur?auth=${user.mediaAuth}`}
-                                        height={40}
-                                        src={`${apiURL}/media/${user.avatar}?auth=${user.mediaAuth}`}
-                                        width={40}
-                                      />
+                                      <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                                        <svg
+                                          className="h-full w-full text-gray-300"
+                                          fill="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                      </span>
                                     )}
                                 <button
                                   onClick={(evt) => {
@@ -373,7 +597,7 @@ const ProfilePage = (): JSX.Element => {
                               >
                                 Password
                             </label>
-                              <div className="mt-1 flex rounded-md shadow-sm">
+                              <div className="mt-2 flex rounded-md shadow-sm">
                                 <input
                                   onChange={handleChange}
                                   onBlur={handleBlur}
@@ -382,13 +606,13 @@ const ProfilePage = (): JSX.Element => {
                                   type="password"
                                   name="password"
                                   id="password"
-                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
+                                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 />
                               </div>
                               <p
                                 className={`${touched.password && errors.password
-                                    ? ''
-                                    : 'hidden'
+                                  ? ''
+                                  : 'hidden'
                                   } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                               >
                                 {errors.password}
@@ -420,7 +644,7 @@ const ProfilePage = (): JSX.Element => {
                                   >
                                     Development Auth Token
                                 </label>
-                                  <div className="mt-1 flex rounded-md shadow-sm">
+                                  <div className="mt-2 flex rounded-md shadow-sm">
                                     <input
                                       value={authToken}
                                       onChange={(evt) => evt.preventDefault()}
@@ -429,7 +653,7 @@ const ProfilePage = (): JSX.Element => {
                                       onClick={(evt) => {
                                         evt.currentTarget.select();
                                       }}
-                                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
+                                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                     />
                                   </div>
                                 </div>

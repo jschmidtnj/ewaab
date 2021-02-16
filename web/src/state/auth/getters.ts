@@ -26,7 +26,7 @@ export const refreshAuth = async (): Promise<void> => {
 
 export const getType = (): UserType => {
   const state = (store.getState() as RootState).authReducer;
-  if (!state.loggedIn) {
+  if (!state.loggedIn || !state.user) {
     return UserType.visitor;
   }
   return UserType[state.user.type];

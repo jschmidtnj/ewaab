@@ -14,6 +14,7 @@ import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
+import { v4 as uuidv4 } from 'uuid';
 import { InviteUserTokenData } from '../emails/inviteUser.resolver';
 import { defaultMajor } from '../shared/majors';
 import { elasticClient } from '../elastic/init';
@@ -153,17 +154,23 @@ class RegisterResolver {
       name: args.name,
       type: inviteData.userType,
       username: args.username,
-      location: '',
       locationName: '',
       major: defaultMajor
     };
 
+    const id = uuidv4();
+
+    await elasticClient.index({
+      id,
+      index: userIndexName,
+      body: searchUser
+    });
     const newUser = await UserModel.save({
       ...searchUser,
+      id,
       password: hashedPassword,
       tokenVersion: 0,
       emailVerified: false,
-      avatar: '',
       jobTitle: '',
       url: '',
       facebook: '',
@@ -172,19 +179,13 @@ class RegisterResolver {
       description: '',
       bio: ''
     });
-    await elasticClient.index({
-      id: newUser.id,
-      index: userIndexName,
-      body: searchUser
-    });
-    searchUser.id = newUser.id;
 
     const emailTemplateData = emailTemplateFiles.verifyEmail;
     const template = emailTemplateData.template;
     if (!template) {
       throw new Error('cannot find register email template');
     }
-    const verify_token = await generateJWTVerifyEmail(newUser.id);
+    const verify_token = await generateJWTVerifyEmail(id);
     const emailData = template({
       name: newUser.name,
       verify_url: `${configData.WEBSITE_URL}/login?token=${verify_token}&verify_email=true`
@@ -195,7 +196,7 @@ class RegisterResolver {
       name: newUser.name,
       subject: emailTemplateData.subject
     });
-    return `created user ${newUser.id}`;
+    return `created user ${id}`;
   }
 }
 

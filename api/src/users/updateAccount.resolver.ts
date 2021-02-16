@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { IsEmail, MinLength, Matches, IsOptional, IsUrl } from 'class-validator';
+import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
@@ -11,6 +11,7 @@ import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
 import { configData } from '../utils/config';
 import { generateJWTVerifyEmail } from './register.resolver';
+import { v4 as uuidv4 } from 'uuid';
 import statusCodes from 'http-status-codes';
 import { ApolloError } from 'apollo-server-express';
 import { GraphQLUpload } from 'graphql-upload';
@@ -53,6 +54,7 @@ class UpdateArgs {
 
   @Field(_type => String, { description: 'location', nullable: true })
   @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
   @Matches(locationRegex, {
     message: 'invalid relative location provided'
   })
@@ -64,6 +66,7 @@ class UpdateArgs {
 
   @Field(_type => String, { description: 'url', nullable: true })
   @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
   @IsUrl({}, {
     message: 'invalid url provided'
   })
@@ -71,6 +74,7 @@ class UpdateArgs {
 
   @Field(_type => String, { description: 'facebook', nullable: true })
   @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
   @Matches(validUsername, {
     message: 'invalid facebook username'
   })
@@ -78,6 +82,7 @@ class UpdateArgs {
 
   @Field(_type => String, { description: 'github', nullable: true })
   @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
   @Matches(validUsername, {
     message: 'invalid github handle'
   })
@@ -85,6 +90,7 @@ class UpdateArgs {
 
   @Field(_type => String, { description: 'twitter', nullable: true })
   @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
   @Matches(validUsername, {
     message: 'invalid twitter handle'
   })
@@ -214,7 +220,9 @@ class UpdateAccountResolver {
         await elasticClient.update({
           id,
           index: userIndexName,
-          body: userUpdateData
+          body: {
+            doc: userUpdateData
+          }
         });
         return `updated user ${id}`;
       };
@@ -240,6 +248,7 @@ class UpdateAccountResolver {
               await deleteMedia(currentUser.avatar);
             }
             const newMedia = await MediaModel.save({
+              id: uuidv4(),
               fileSize: readStream.readableLength,
               mime: file.mimetype,
               name: file.filename,

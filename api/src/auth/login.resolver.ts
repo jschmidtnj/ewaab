@@ -46,7 +46,7 @@ class LoginResolvers {
     const UserModel = getRepository(User);
     let user: User;
     const findOptions: FindOneOptions<User> = {
-      select: ['id', 'type', 'emailVerified', 'password']
+      select: ['id', 'type', 'emailVerified', 'password', 'tokenVersion']
     };
     if (args.usernameEmail.includes('@')) {
       const userRes = await UserModel.findOne({

@@ -3,36 +3,11 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
-"""device object"""
-type Device {
-  """is device activated"""
-  activated: Boolean!
-
-  """activation code"""
-  activationCode: String!
-
-  """id of user that can send thinking of you commands (and vice-versa)"""
-  connection: Float!
-  id: Float!
-
-  """current mode"""
-  mode: String!
-
-  """device name"""
-  name: String!
-
-  """owner"""
-  owner: Float!
-
-  """device type"""
-  type: String!
-}
-
 """media object"""
 type Media {
   """file size"""
   fileSize: Float!
-  id: Float!
+  id: String!
 
   """mime type of file"""
   mime: String!
@@ -40,14 +15,31 @@ type Media {
   """file name"""
   name: String!
 
-  """owner"""
-  user: Float!
+  """parent"""
+  parent: String!
 }
 
 type Mutation {
+  addPost(
+    """post content"""
+    content: String!
+
+    """username"""
+    link: String!
+
+    """post title"""
+    title: String!
+
+    """post type"""
+    type: PostType!
+  ): String!
   deleteAccount(
     """email"""
     email: String
+  ): String!
+  deletePost(
+    """post id"""
+    id: String!
   ): String!
   inviteUser(
     """email"""
@@ -130,14 +122,57 @@ type Mutation {
     """avatar"""
     avatar: Upload
 
+    """short bio"""
+    bio: String
+
+    """description"""
+    description: String
+
     """email"""
     email: String
+
+    """facebook"""
+    facebook: String
+
+    """github"""
+    github: String
+
+    """user id"""
+    id: String
+
+    """job title"""
+    jobTitle: String
+
+    """location"""
+    location: String
+
+    """location name"""
+    locationName: String
 
     """name"""
     name: String
 
     """password"""
     password: String
+
+    """twitter"""
+    twitter: String
+
+    """url"""
+    url: String
+  ): String!
+  updatePost(
+    """content"""
+    content: String
+
+    """post id"""
+    id: String!
+
+    """link"""
+    link: String
+
+    """title"""
+    title: String
   ): String!
   usernameExists(
     """recaptcha token"""
@@ -152,19 +187,96 @@ type Mutation {
   ): String!
 }
 
-"""public user data"""
+"""post data"""
+type Post {
+  """post content"""
+  content: String!
+
+  """date created"""
+  created: Float!
+
+  """post id"""
+  id: String!
+
+  """post link"""
+  link: String
+
+  """post publisher"""
+  publisher: String!
+
+  """title"""
+  title: String!
+
+  """post type"""
+  type: String!
+
+  """date updated"""
+  updated: Float!
+}
+
+"""post sort options"""
+enum PostSortOption {
+  content
+  created
+  publisher
+  title
+  updated
+}
+
+"""post type"""
+enum PostType {
+  encourageHer
+  mentorNews
+  studentCommunity
+  studentNews
+}
+
+"""public user data (not in search)"""
 type PublicUser {
   """avatar id"""
-  avatar: Float!
+  avatar: String
+
+  """longer user bio"""
+  bio: String!
+
+  """short user description"""
+  description: String!
 
   """email"""
   email: String!
 
+  """facebook profile"""
+  facebook: String!
+
+  """github profile"""
+  github: String!
+
+  """user id"""
+  id: String!
+
+  """job title"""
+  jobTitle: String!
+
+  """location latitude longitude"""
+  location: String
+
+  """location name"""
+  locationName: String!
+
+  """major"""
+  major: String!
+
   """name"""
   name: String!
 
+  """twitter account"""
+  twitter: String!
+
   """user type"""
   type: String!
+
+  """personal url"""
+  url: String!
 
   """username"""
   username: String!
@@ -174,8 +286,36 @@ type Query {
   hello: String!
   media(
     """media id"""
-    id: Float
+    id: String!
   ): Media!
+
+  """post data"""
+  post(
+    """search query"""
+    id: String!
+  ): Post!
+  posts(
+    """sort direction"""
+    ascending: Boolean = true
+
+    """created after this date"""
+    created: Int
+
+    """page number"""
+    page: Int = 0
+
+    """number per page"""
+    perpage: Int = 10
+
+    """search query"""
+    query: String
+
+    """sort by this field"""
+    sortBy: PostSortOption
+
+    """post type"""
+    type: PostType
+  ): SearchPostsResult!
 
   """public user data"""
   publicUser(
@@ -188,6 +328,115 @@ type Query {
 
   """user data"""
   user: User!
+  users(
+    """sort direction"""
+    ascending: Boolean = true
+
+    """distance (km)"""
+    distance: Float = 100
+
+    """relative location"""
+    location: String
+
+    """user major"""
+    majors: [String!]
+
+    """page number"""
+    page: Int = 0
+
+    """number per page"""
+    perpage: Int = 10
+
+    """search query"""
+    query: String
+
+    """sort by this field"""
+    sortBy: UserSortOption
+
+    """user type"""
+    type: UserType
+  ): SearchUsersResult!
+}
+
+"""post data, indexed in elasticsearch"""
+type SearchPost {
+  """post content"""
+  content: String!
+
+  """date created"""
+  created: Float!
+
+  """post id"""
+  id: String!
+
+  """post publisher"""
+  publisher: String!
+
+  """title"""
+  title: String!
+
+  """post type"""
+  type: String!
+
+  """date updated"""
+  updated: Float!
+}
+
+"""post data search results"""
+type SearchPostsResult {
+  """total posts count"""
+  count: Int!
+
+  """encourage her news count"""
+  countEncourageHer: Int!
+
+  """mentor news count"""
+  countMentorNews: Int!
+
+  """student community count"""
+  countStudentCommunity: Int!
+
+  """student news count"""
+  countStudentNews: Int!
+
+  """results"""
+  results: [SearchPost!]!
+}
+
+"""user data, indexed for search"""
+type SearchUser {
+  """email"""
+  email: String!
+
+  """user id"""
+  id: String!
+
+  """location latitude longitude"""
+  location: String
+
+  """location name"""
+  locationName: String!
+
+  """major"""
+  major: String!
+
+  """name"""
+  name: String!
+
+  """user type"""
+  type: String!
+
+  """username"""
+  username: String!
+}
+
+"""user data search results"""
+type SearchUsersResult {
+  """total users count"""
+  count: Int!
+
+  """results"""
+  results: [SearchUser!]!
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -196,14 +445,40 @@ scalar Upload
 """user account"""
 type User {
   """avatar id"""
-  avatar: Float!
+  avatar: String
+
+  """longer user bio"""
+  bio: String!
+
+  """short user description"""
+  description: String!
 
   """email"""
   email: String!
 
   """email verified"""
   emailVerified: Boolean!
-  id: Float!
+
+  """facebook profile"""
+  facebook: String!
+
+  """github profile"""
+  github: String!
+
+  """user id"""
+  id: String!
+
+  """job title"""
+  jobTitle: String!
+
+  """location latitude longitude"""
+  location: String
+
+  """location name"""
+  locationName: String!
+
+  """major"""
+  major: String!
 
   """media auth token"""
   mediaAuth: String!
@@ -214,11 +489,25 @@ type User {
   """current token version"""
   tokenVersion: Float!
 
+  """twitter account"""
+  twitter: String!
+
   """user type"""
   type: String!
 
+  """personal url"""
+  url: String!
+
   """username"""
   username: String!
+}
+
+"""user sort options"""
+enum UserSortOption {
+  email
+  location
+  major
+  name
 }
 
 """user type"""

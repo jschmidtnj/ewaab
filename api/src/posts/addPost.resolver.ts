@@ -1,6 +1,7 @@
 import { Resolver, ArgsType, Field, Args, Mutation, Ctx } from 'type-graphql';
 import { MinLength, IsUrl } from 'class-validator';
 import { getRepository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import Post, { SearchPost } from '../schema/posts/post.entity';
@@ -47,7 +48,7 @@ class AddPostResolver {
       throw new Error('user not logged in');
     }
     if (!userAccessMap[ctx.auth.type].includes(args.type)) {
-      throw new Error(`user of type ${ctx.auth.type} not authorized to post ${args.type}`)
+      throw new Error(`user of type ${ctx.auth.type} not authorized to post ${args.type}`);
     }
 
     const PostModel = getRepository(Post);
@@ -61,15 +62,16 @@ class AddPostResolver {
       publisher: ctx.auth.id
     };
 
-    const newPost = await PostModel.save({
-      ...searchPost,
-    });
+    const id = uuidv4();
     await elasticClient.index({
-      id: newPost.id,
+      id,
       index: postIndexName,
       body: searchPost
     });
-    searchPost.id = newPost.id;
+    const newPost = await PostModel.save({
+      ...searchPost,
+      id,
+    });
 
     return `created post ${newPost.id}`;
   }

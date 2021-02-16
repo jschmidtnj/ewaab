@@ -80,7 +80,9 @@ class UpdatePostResolver {
     await elasticClient.update({
       id: args.id,
       index: postIndexName,
-      body: postUpdateData
+      body: {
+        doc: postUpdateData
+      }
     });
     return `updated post ${args.id}`;
   }

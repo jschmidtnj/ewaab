@@ -2426,14 +2426,6 @@ ajv@^7.0.2:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-algolia-places-react@^1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/algolia-places-react/-/algolia-places-react-1.6.1.tgz#4f33078183f664cc42b4ae45438e4896fba109c6"
-  integrity sha512-+TguN3QudkXbe6UKj8q40Yva4wtrdNhXJlcv1RD86Xi7znJcP8QBJhR/h/yvyNqO4G+otC03en0V96GAWTMQsw==
-  dependencies:
-    places.js "1.19.0"
-    prop-types "^15.6.0"
-
 algoliasearch@^3.35.1:
   version "3.35.1"
   resolved "https://registry.yarnpkg.com/algoliasearch/-/algoliasearch-3.35.1.tgz#297d15f534a3507cab2f5dfb996019cac7568f0c"
@@ -3212,9 +3204,9 @@ camelcase@^6.0.0:
   integrity sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
 
 caniuse-lite@^1.0.30001093, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001113, caniuse-lite@^1.0.30001154, caniuse-lite@^1.0.30001173:
-  version "1.0.30001176"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001176.tgz#e44bac506d4656bae4944a1417f41597bd307335"
-  integrity sha512-VWdkYmqdkDLRe0lvfJlZQ43rnjKqIGKHWhWWRbkqMsJIUaYDNf/K/sdZZcVO6YKQklubokdkJY+ujArsuJ5cag==
+  version "1.0.30001187"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001187.tgz"
+  integrity sha512-w7/EP1JRZ9552CyrThUnay2RkZ1DXxKe/Q2swTC4+LElLh9RRYrL1Z+27LlakB8kzY0fSmHw9mc7XYDUKAKWMA==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -7377,7 +7369,7 @@ pkg-dir@^5.0.0:
   dependencies:
     find-up "^5.0.0"
 
-places.js@1.19.0, places.js@^1.19.0:
+places.js@^1.19.0:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/places.js/-/places.js-1.19.0.tgz#6361c240713e20713f9f4124181752a257059f92"
   integrity sha512-OtX8kMT1K2uhwoHZoyMuHWZ3CrkNfjxRDsG2hBHye4S1dsTLU4MlwEmUrlKYYefYXiV6JCvd7bULU3uoJ6NcoA==

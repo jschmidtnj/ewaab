@@ -152,7 +152,7 @@ export const handleRefreshToken = (req: Request): Promise<string> => {
           throw new Error('user not found');
         }
         if (user.tokenVersion !== res.tokenVersion) {
-          throw new Error('user not found');
+          throw new Error('invalid token version');
         }
         resolve(await generateJWTAccess(user));
       } catch (err) {

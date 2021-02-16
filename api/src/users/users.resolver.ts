@@ -5,7 +5,7 @@ import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { Min, Max, isEmail, Matches, ArrayContains, IsOptional } from 'class-validator';
-import { SearchUser, SearchUsersResult } from '../schema/users/user.entity';
+import { SearchUser, SearchUsersResult, UserSortOption } from '../schema/users/user.entity';
 import { locationRegex, UserType } from '../shared/variables';
 import majors from '../shared/majors';
 
@@ -44,6 +44,13 @@ export class UsersArgs {
     message: 'distance must be greater than 0'
   })
   distance: number;
+
+  @Field(_type => UserSortOption, { description: 'sort by this field', nullable: true })
+  @IsOptional()
+  sortBy?: UserSortOption;
+
+  @Field(_type => Boolean, { description: 'sort direction', nullable: true, defaultValue: true })
+  ascending: boolean;
 
   @Min(0, {
     message: 'page number must be greater than or equal to 0'
@@ -130,11 +137,19 @@ class UsersResolver {
       });
     }
 
+    const sort: Record<string, string>[] = [];
+    if (args.sortBy) {
+      sort.push({
+        [args.sortBy]: args.ascending ? 'asc' : 'desc'
+      });
+    }
+
     const searchParams: RequestParams.Search = {
       index: userIndexName,
       from: args.page,
       size: args.perpage,
       body: {
+        sort,
         query: {
           bool: {
             should: shouldParams,

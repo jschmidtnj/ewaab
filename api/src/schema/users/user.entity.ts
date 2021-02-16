@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import { Entity, Column, Index, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { UserType } from '../../shared/variables';
@@ -40,16 +40,28 @@ export class SearchUser {
   @IsDefined()
   major: string;
 
-  @Field({ description: 'location latitude longitude' })
-  @Column({ type: 'text' })
+  @Field({ description: 'location latitude longitude', nullable: true })
+  @Column({ type: 'text', nullable: true })
   @IsDefined()
-  location: string;
+  location?: string;
 
   @Field({ description: 'location name' })
   @Column({ type: 'text' })
   @IsDefined()
   locationName: string;
 }
+
+export enum UserSortOption {
+  name = 'name',
+  email = 'email',
+  major = 'major',
+  location = 'location',
+}
+
+registerEnumType(UserSortOption, {
+  name: 'UserSortOption',
+  description: 'user sort options',
+});
 
 @ObjectType({ description: 'user data search results' })
 export class SearchUsersResult {
@@ -63,12 +75,12 @@ export class SearchUsersResult {
 @ObjectType({ description: 'public user data (not in search)' })
 export class PublicUser extends SearchUser {
   @Field({ description: 'user id' })
-  @PrimaryGeneratedColumn({ type: 'uuid' })
+  @PrimaryColumn('uuid')
   id: string;
 
   @Field({ description: 'avatar id', nullable: true })
   @Column({ type: 'uuid', nullable: true })
-  avatar?: string;
+  avatar: string;
 
   @Field({ description: 'job title' })
   @Column({ type: 'text' })

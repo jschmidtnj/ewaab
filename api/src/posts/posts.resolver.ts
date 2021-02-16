@@ -5,7 +5,7 @@ import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { Min, Max, IsOptional } from 'class-validator'; import { PostType } from '../shared/variables';
-import { SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
+import { PostSortOption, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import { postViewMap } from './post.resolver';
 
 const maxPerPage = 20;
@@ -19,6 +19,17 @@ export class PostsArgs {
   @Field(_type => PostType, { description: 'post type', nullable: true })
   @IsOptional()
   type?: PostType;
+
+  @Field(_type => Int, { description: 'created after this date', nullable: true })
+  @IsOptional()
+  created?: number;
+
+  @Field(_type => PostSortOption, { description: 'sort by this field', nullable: true })
+  @IsOptional()
+  sortBy?: PostSortOption;
+
+  @Field(_type => Boolean, { description: 'sort direction', nullable: true, defaultValue: true })
+  ascending: boolean;
 
   @Min(0, {
     message: 'page number must be greater than or equal to 0'
@@ -68,6 +79,23 @@ class PostsResolver {
       });
     }
 
+    if (args.created !== undefined) {
+      filterParams.push({
+        range: {
+          created: {
+            gte: args.created
+          }
+        }
+      });
+    }
+
+    const sort: Record<string, string>[] = [];
+    if (args.sortBy) {
+      sort.push({
+        [args.sortBy]: args.ascending ? 'asc' : 'desc'
+      });
+    }
+
     if (args.type) {
       if (!postViewMap[ctx.auth.type].includes(args.type)) {
         throw new Error(`user of type ${ctx.auth.type} not authorized to find posts of type ${args.type}`);
@@ -96,7 +124,7 @@ class PostsResolver {
           match: {
             type
           }
-        })
+        });
         map[type] = {
           filters: {
             filters
@@ -112,6 +140,7 @@ class PostsResolver {
       from: args.page,
       size: args.perpage,
       body: {
+        sort,
         query: {
           bool: {
             should: shouldParams,

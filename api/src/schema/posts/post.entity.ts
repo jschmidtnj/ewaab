@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { PostType } from '../../shared/variables';
@@ -35,6 +35,19 @@ export class SearchPost extends BaseTimestamp {
   publisher: string;
 }
 
+export enum PostSortOption {
+  title = 'title',
+  content = 'content',
+  publisher = 'publisher',
+  created = 'created',
+  updated = 'updated',
+}
+
+registerEnumType(PostSortOption, {
+  name: 'PostSortOption',
+  description: 'post sort options',
+});
+
 @ObjectType({ description: 'post data search results' })
 export class SearchPostsResult {
   @Field(_type => [SearchPost], { description: 'results' })
@@ -57,7 +70,7 @@ export class SearchPostsResult {
 @Entity({ name: 'posts' })
 export default class Post extends SearchPost {
   @Field({ description: 'post id' })
-  @PrimaryGeneratedColumn({ type: 'uuid' })
+  @PrimaryColumn('uuid')
   id: string;
 
   @Field({ description: 'post link', nullable: true })

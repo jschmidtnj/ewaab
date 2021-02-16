@@ -8,7 +8,7 @@ const userMappings = {
   username: {
     type: 'text'
   },
-  term: {
+  type: {
     type: 'keyword'
   },
   major: {
