@@ -1,3 +1,5 @@
+import { ApolloError } from '@apollo/react-hooks';
+
 export const locales: string[] = ['en'];
 
 export const capitalizeOnlyFirstLetter = (elem: string): string => {
@@ -6,4 +8,18 @@ export const capitalizeOnlyFirstLetter = (elem: string): string => {
 
 export const capitalizeFirstLetter = (elem: string): string => {
   return elem.split(' ').map(capitalizeOnlyFirstLetter).join(' ');
+};
+
+export const getErrorCode = (err: ApolloError): number | null => {
+  if (err.graphQLErrors.length > 0) {
+    const graphqlError = err.graphQLErrors[0];
+    if ('code' in graphqlError) {
+      const errorCodeObj = new Number(graphqlError['code']);
+      if (errorCodeObj) {
+        const errorCode = errorCodeObj.valueOf();
+        return errorCode;
+      }
+    }
+  }
+  return null;
 };

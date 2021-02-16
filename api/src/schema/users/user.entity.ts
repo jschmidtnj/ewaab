@@ -80,7 +80,11 @@ export class PublicUser extends SearchUser {
 
   @Field({ description: 'avatar id', nullable: true })
   @Column({ type: 'uuid', nullable: true })
-  avatar: string;
+  avatar?: string;
+
+  @Field({ description: 'resume id', nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  resume?: string;
 
   @Field({ description: 'job title' })
   @Column({ type: 'text' })

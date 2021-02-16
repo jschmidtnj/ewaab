@@ -92,7 +92,7 @@ const Login = (): JSX.Element => {
   return (
     <Layout>
       <SEO page="login" />
-      <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 flex justify-center pt-28">
         <div className="max-w-md w-full space-y-8">
           <div>
             <h2 className="mt-6 text-center text-4xl font-medium text-gray-900">

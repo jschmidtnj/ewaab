@@ -79,7 +79,7 @@ const RegisterPage = (): JSX.Element => {
   return (
     <Layout>
       <SEO page="register" />
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 flex justify-center pt-28">
         {loading ? (
           <p className="text-sm">loading...</p>
         ) : (

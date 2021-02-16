@@ -45,14 +45,16 @@ const Layout = (args: LayoutArgs): JSX.Element => {
       locale={router.locale}
       messages={(messages as unknown) as Record<string, string>}
     >
-      <div
-        className={currentTheme ? themeMap[currentTheme] : ''}
-        style={{
-          minHeight: '105vh',
-        }}
-      >
+      <div className={currentTheme ? themeMap[currentTheme] : ''}>
         <Header />
-        <main className="bg-gray-100 dark:bg-gray-800">{args.children}</main>
+        <main
+          style={{
+            minHeight: '90vh',
+          }}
+          className="bg-gray-100 dark:bg-gray-800"
+        >
+          {args.children}
+        </main>
         <Footer />
       </div>
     </IntlProvider>

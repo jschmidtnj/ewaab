@@ -9,7 +9,7 @@ const UsersPage = (): JSX.Element => {
     <PrivateRoute>
       <Layout>
         <SEO page="user page" />
-        <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
           <p className="text-sm">
             stuff to go on this page name, major, link to user
           </p>

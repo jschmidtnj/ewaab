@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf } from 'class-validator';
+import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
@@ -18,12 +18,13 @@ import { GraphQLUpload } from 'graphql-upload';
 import { FileUpload } from 'graphql-upload';
 import { blurredWidth, maxFileUploadSize } from '../utils/variables';
 import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
-import Media from '../schema/media/media.entity';
+import Media, { MediaParentType } from '../schema/media/media.entity';
 import sharp from 'sharp';
-import { imageMime } from '../utils/misc';
+import { checkTextFile, imageMime } from '../utils/misc';
 import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
+import majors from '../shared/majors';
 
 @ArgsType()
 class UpdateArgs {
@@ -48,6 +49,10 @@ class UpdateArgs {
   @IsOptional()
   avatar?: Promise<FileUpload>;
 
+  @Field(_type => GraphQLUpload, { description: 'resume', nullable: true })
+  @IsOptional()
+  resume?: Promise<FileUpload>;
+
   @Field(_type => String, { description: 'job title', nullable: true })
   @IsOptional()
   jobTitle?: string;
@@ -63,6 +68,14 @@ class UpdateArgs {
   @Field(_type => String, { description: 'location name', nullable: true })
   @IsOptional()
   locationName?: string;
+
+  @Field(_type => String, { description: 'major', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
+  @IsIn(majors, {
+    message: 'invalid major provided'
+  })
+  major?: string;
 
   @Field(_type => String, { description: 'url', nullable: true })
   @IsOptional()
@@ -192,6 +205,9 @@ class UpdateAccountResolver {
     }
 
     // other fields
+    if (args.major !== undefined) {
+      userUpdateData.major = args.major;
+    }
     if (args.jobTitle !== undefined) {
       userUpdateData.jobTitle = args.jobTitle;
     }
@@ -226,21 +242,76 @@ class UpdateAccountResolver {
         });
         return `updated user ${id}`;
       };
-      if (args.avatar) {
-        const file = await args.avatar;
-        if (!file.mimetype.startsWith(imageMime)) {
-          reject(new Error('invalid image provided for avatar'));
+
+      let numReading = 0;
+
+      if (args.resume) {
+        numReading++;
+        const resumeFile = await args.resume;
+        if (!checkTextFile(resumeFile.mimetype)) {
+          reject(new Error('invalid text file provided for resume'));
           return;
         }
-        const readStream = file.createReadStream();
-        if (readStream.readableLength > maxFileUploadSize) {
-          reject(new Error(`file ${file.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
+        const resumeReadStream = resumeFile.createReadStream();
+        if (resumeReadStream.readableLength > maxFileUploadSize) {
+          reject(new Error(`resume file ${resumeFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
           return;
         }
         const data: Uint8Array[] = [];
-        readStream.on('data', (chunk: Uint8Array) => data.push(chunk));
-        readStream.on('error', reject);
-        readStream.on('end', () => {
+        resumeReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
+        resumeReadStream.on('error', reject);
+        resumeReadStream.on('end', () => {
+          const buffer = Buffer.concat(data);
+          const MediaModel = getRepository(Media);
+          (async () => {
+            if (currentUser.resume) {
+              await deleteMedia(currentUser.resume);
+            }
+            const newMedia = await MediaModel.save({
+              id: uuidv4(),
+              fileSize: resumeReadStream.readableLength,
+              mime: resumeFile.mimetype,
+              name: resumeFile.filename,
+              parent: id,
+              parentType: MediaParentType.user,
+            });
+
+            // upload original
+            await s3Client.upload({
+              Bucket: fileBucket,
+              Key: getMediaKey(newMedia.id),
+              Body: buffer,
+              ContentType: resumeFile.mimetype,
+              ContentEncoding: resumeFile.encoding,
+            }).promise();
+
+            userUpdateData.resume = newMedia.id;
+
+            numReading--;
+            if (numReading === 0) {
+              resolve(await callback());
+            }
+          })();
+        });
+        resumeReadStream.read();
+      }
+
+      if (args.avatar) {
+        numReading++;
+        const avatarFile = await args.avatar;
+        if (!avatarFile.mimetype.startsWith(imageMime)) {
+          reject(new Error('invalid image provided for avatar'));
+          return;
+        }
+        const avatarReadStream = avatarFile.createReadStream();
+        if (avatarReadStream.readableLength > maxFileUploadSize) {
+          reject(new Error(`avatar file ${avatarFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
+          return;
+        }
+        const data: Uint8Array[] = [];
+        avatarReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
+        avatarReadStream.on('error', reject);
+        avatarReadStream.on('end', () => {
           const buffer = Buffer.concat(data);
           const MediaModel = getRepository(Media);
           (async () => {
@@ -249,10 +320,11 @@ class UpdateAccountResolver {
             }
             const newMedia = await MediaModel.save({
               id: uuidv4(),
-              fileSize: readStream.readableLength,
-              mime: file.mimetype,
-              name: file.filename,
-              user: id
+              fileSize: avatarReadStream.readableLength,
+              mime: avatarFile.mimetype,
+              name: avatarFile.filename,
+              parent: id,
+              parentType: MediaParentType.user,
             });
             const original = await sharp(buffer).resize(avatarWidth).toBuffer();
 
@@ -261,8 +333,8 @@ class UpdateAccountResolver {
               Bucket: fileBucket,
               Key: getMediaKey(newMedia.id),
               Body: original,
-              ContentType: file.mimetype,
-              ContentEncoding: file.encoding,
+              ContentType: avatarFile.mimetype,
+              ContentEncoding: avatarFile.encoding,
             }).promise();
 
             const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
@@ -271,17 +343,22 @@ class UpdateAccountResolver {
               Bucket: fileBucket,
               Key: getMediaKey(newMedia.id, true),
               Body: blurred,
-              ContentType: file.mimetype,
-              ContentEncoding: file.encoding,
+              ContentType: avatarFile.mimetype,
+              ContentEncoding: avatarFile.encoding,
             }).promise();
 
             userUpdateData.avatar = newMedia.id;
 
-            resolve(await callback());
+            numReading--;
+            if (numReading === 0) {
+              resolve(await callback());
+            }
           })();
         });
-        readStream.read();
-      } else {
+        avatarReadStream.read();
+      }
+
+      if (numReading === 0) {
         resolve(await callback());
       }
     });

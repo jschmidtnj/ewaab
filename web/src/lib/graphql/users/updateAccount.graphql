@@ -1,9 +1,9 @@
-mutation updateAccount($email: String, $name: String, $avatar: Upload,
+mutation updateAccount($email: String, $name: String, $avatar: Upload, $resume: Upload,
                         $jobTitle: String, $location: String, $locationName: String, $url: String,
                         $facebook: String, $github: String, $twitter: String, $description: String,
-                        $bio: String, $password: String) {
-  updateAccount(email: $email, name: $name, avatar: $avatar,
+                        $major: String, $bio: String, $password: String) {
+  updateAccount(email: $email, name: $name, avatar: $avatar, resume: $resume,
                 jobTitle: $jobTitle, location: $location, locationName: $locationName, url: $url,
                 facebook: $facebook, github: $github, twitter: $twitter, description: $description,
-                bio: $bio, password: $password)
+                major: $major, bio: $bio, password: $password)
 }

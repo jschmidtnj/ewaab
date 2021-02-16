@@ -1,4 +1,4 @@
-export const defaultMajor = 'n/a';
+export const defaultMajor = '-';
 
 const majors: string[] = [
   defaultMajor,

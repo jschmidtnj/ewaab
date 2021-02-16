@@ -128,8 +128,10 @@ export type MutationUpdateAccountArgs = {
   jobTitle?: Maybe<Scalars['String']>;
   location?: Maybe<Scalars['String']>;
   locationName?: Maybe<Scalars['String']>;
+  major?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
+  resume?: Maybe<Scalars['Upload']>;
   twitter?: Maybe<Scalars['String']>;
   url?: Maybe<Scalars['String']>;
 };
@@ -218,6 +220,8 @@ export type PublicUser = {
   major: Scalars['String'];
   /** name */
   name: Scalars['String'];
+  /** resume id */
+  resume?: Maybe<Scalars['String']>;
   /** twitter account */
   twitter: Scalars['String'];
   /** user type */
@@ -380,6 +384,8 @@ export type User = {
   mediaAuth: Scalars['String'];
   /** name */
   name: Scalars['String'];
+  /** resume id */
+  resume?: Maybe<Scalars['String']>;
   /** current token version */
   tokenVersion: Scalars['Float'];
   /** twitter account */
@@ -448,6 +454,24 @@ export type PasswordResetMutation = (
   & Pick<Mutation, 'passwordReset'>
 );
 
+export type PublicUserFieldsFragment = (
+  { __typename?: 'PublicUser' }
+  & Pick<PublicUser, 'name' | 'username' | 'email' | 'major' | 'resume' | 'locationName' | 'avatar' | 'jobTitle' | 'url' | 'facebook' | 'twitter' | 'github' | 'description' | 'bio'>
+);
+
+export type PublicUserQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type PublicUserQuery = (
+  { __typename?: 'Query' }
+  & { publicUser: (
+    { __typename?: 'PublicUser' }
+    & PublicUserFieldsFragment
+  ) }
+);
+
 export type RegisterMutationVariables = Exact<{
   registrationToken: Scalars['String'];
   username: Scalars['String'];
@@ -478,6 +502,7 @@ export type UpdateAccountMutationVariables = Exact<{
   email?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   avatar?: Maybe<Scalars['Upload']>;
+  resume?: Maybe<Scalars['Upload']>;
   jobTitle?: Maybe<Scalars['String']>;
   location?: Maybe<Scalars['String']>;
   locationName?: Maybe<Scalars['String']>;
@@ -486,6 +511,7 @@ export type UpdateAccountMutationVariables = Exact<{
   github?: Maybe<Scalars['String']>;
   twitter?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  major?: Maybe<Scalars['String']>;
   bio?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 }>;
@@ -498,7 +524,7 @@ export type UpdateAccountMutation = (
 
 export type UserFieldsFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'name' | 'username' | 'email' | 'type' | 'avatar' | 'mediaAuth' | 'jobTitle' | 'location' | 'locationName' | 'url' | 'facebook' | 'github' | 'twitter' | 'description' | 'bio'>
+  & Pick<User, 'id' | 'name' | 'username' | 'email' | 'major' | 'resume' | 'type' | 'avatar' | 'mediaAuth' | 'jobTitle' | 'location' | 'locationName' | 'url' | 'facebook' | 'github' | 'twitter' | 'description' | 'bio'>
 );
 
 export type UserQueryVariables = Exact<{ [key: string]: never; }>;
@@ -522,12 +548,32 @@ export type VerifyEmailMutation = (
   & Pick<Mutation, 'verifyEmail'>
 );
 
+export const PublicUserFields = gql`
+    fragment publicUserFields on PublicUser {
+  name
+  username
+  email
+  major
+  resume
+  locationName
+  avatar
+  jobTitle
+  url
+  facebook
+  twitter
+  github
+  description
+  bio
+}
+    `;
 export const UserFields = gql`
     fragment userFields on User {
   id
   name
   username
   email
+  major
+  resume
   type
   avatar
   mediaAuth
@@ -570,6 +616,13 @@ export const PasswordReset = gql`
   )
 }
     `;
+export const PublicUser = gql`
+    query publicUser($username: String!) {
+  publicUser(username: $username) {
+    ...publicUserFields
+  }
+}
+    ${PublicUserFields}`;
 export const Register = gql`
     mutation register($registrationToken: String!, $username: String!, $name: String!, $email: String!, $password: String!, $recaptchaToken: String!) {
   register(
@@ -588,11 +641,12 @@ export const SendPasswordReset = gql`
 }
     `;
 export const UpdateAccount = gql`
-    mutation updateAccount($email: String, $name: String, $avatar: Upload, $jobTitle: String, $location: String, $locationName: String, $url: String, $facebook: String, $github: String, $twitter: String, $description: String, $bio: String, $password: String) {
+    mutation updateAccount($email: String, $name: String, $avatar: Upload, $resume: Upload, $jobTitle: String, $location: String, $locationName: String, $url: String, $facebook: String, $github: String, $twitter: String, $description: String, $major: String, $bio: String, $password: String) {
   updateAccount(
     email: $email
     name: $name
     avatar: $avatar
+    resume: $resume
     jobTitle: $jobTitle
     location: $location
     locationName: $locationName
@@ -601,6 +655,7 @@ export const UpdateAccount = gql`
     github: $github
     twitter: $twitter
     description: $description
+    major: $major
     bio: $bio
     password: $password
   )

@@ -7,7 +7,7 @@ interface LocationSelectArgs {
   onChange: (locationName: string, location?: string) => void;
   defaultLocation: string;
   disabled: boolean;
-};
+}
 
 const LocationSelect = (args: LocationSelectArgs): JSX.Element => {
   const locationRef = useRef(null);
@@ -22,13 +22,17 @@ const LocationSelect = (args: LocationSelectArgs): JSX.Element => {
       language: router.locale,
     });
     autocomplete.on('change', (evt) => {
-      const locationName = evt.suggestion.value;
+      const city =
+        evt.suggestion.type === 'city'
+          ? evt.suggestion.name
+          : evt.suggestion.city;
+      const locationName = `${city}, ${evt.suggestion.administrative}`;
       const locationVal = `${evt.suggestion.latlng.lat},${evt.suggestion.latlng.lng}`;
       args.onChange(locationName, locationVal);
     });
     autocomplete.on('clear', () => {
       args.onChange('', '');
-    })
+    });
     autocomplete.on('error', (err) => {
       toast(err.message, {
         type: 'error',

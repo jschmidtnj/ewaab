@@ -1,0 +1,22 @@
+fragment publicUserFields on PublicUser {
+  name
+  username
+  email
+  major
+  resume
+  locationName
+  avatar
+  jobTitle
+  url
+  facebook
+  twitter
+  github
+  description
+  bio
+}
+
+query publicUser($username: String!) {
+  publicUser(username: $username) {
+    ...publicUserFields
+  }
+}

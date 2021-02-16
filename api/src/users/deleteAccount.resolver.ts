@@ -55,6 +55,9 @@ class DeleteResolver {
     if (userData.avatar) {
       await deleteMedia(userData.avatar);
     }
+    if (userData.resume) {
+      await deleteMedia(userData.resume);
+    }
     await elasticClient.delete({
       id: userData.id,
       index: userIndexName

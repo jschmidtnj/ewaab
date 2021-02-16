@@ -24,3 +24,9 @@ const textMimes = new Set<string>(['application/json', 'application/ld+json']);
 export const checkText = (mime: string): boolean => {
   return mime.startsWith('text/') || textMimes.has(mime);
 };
+
+const textFileMimes = new Set<string>(['application/pdf', 'application/msword']);
+
+export const checkTextFile = (mime: string): boolean => {
+  return checkText(mime) || textFileMimes.has(mime);
+};

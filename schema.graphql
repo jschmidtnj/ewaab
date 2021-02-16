@@ -149,11 +149,17 @@ type Mutation {
     """location name"""
     locationName: String
 
+    """major"""
+    major: String
+
     """name"""
     name: String
 
     """password"""
     password: String
+
+    """resume"""
+    resume: Upload
 
     """twitter"""
     twitter: String
@@ -268,6 +274,9 @@ type PublicUser {
 
   """name"""
   name: String!
+
+  """resume id"""
+  resume: String
 
   """twitter account"""
   twitter: String!
@@ -485,6 +494,9 @@ type User {
 
   """name"""
   name: String!
+
+  """resume id"""
+  resume: String
 
   """current token version"""
   tokenVersion: Float!
