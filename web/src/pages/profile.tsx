@@ -48,12 +48,10 @@ interface SelectMajorObject {
 }
 
 const majorOptions = majors.map(
-  (major): SelectMajorObject => {
-    return {
-      label: capitalizeFirstLetter(major),
-      value: major,
-    };
-  }
+  (major): SelectMajorObject => ({
+    label: capitalizeFirstLetter(major),
+    value: major,
+  })
 );
 
 const LocationSelect = dynamic(() => import('components/LocationSelect'), {
@@ -480,6 +478,10 @@ const ProfilePage = (): JSX.Element => {
                                       touched.major && errors.major
                                         ? 'red'
                                         : styles.borderColor,
+                                  }),
+                                  input: (provided) => ({
+                                    ...provided,
+                                    boxShadow: 'none',
                                   }),
                                 }}
                                 invalid={!!(touched.major && errors.major)}

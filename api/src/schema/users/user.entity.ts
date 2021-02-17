@@ -1,7 +1,13 @@
 import { Entity, Column, Index, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
-import { UserType } from '../../shared/variables';
+
+export enum UserType {
+  user = 'user',
+  visitor = 'visitor',
+  thirdParty = 'thirdParty',
+  admin = 'admin',
+}
 
 registerEnumType(UserType, {
   name: 'UserType',
@@ -49,6 +55,10 @@ export class SearchUser {
   @Column({ type: 'text' })
   @IsDefined()
   locationName: string;
+
+  @Field({ description: 'avatar id', nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  avatar?: string;
 }
 
 export enum UserSortOption {
@@ -77,10 +87,6 @@ export class PublicUser extends SearchUser {
   @Field({ description: 'user id' })
   @PrimaryColumn('uuid')
   id: string;
-
-  @Field({ description: 'avatar id', nullable: true })
-  @Column({ type: 'uuid', nullable: true })
-  avatar?: string;
 
   @Field({ description: 'resume id', nullable: true })
   @Column({ type: 'uuid', nullable: true })

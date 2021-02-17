@@ -1,7 +1,7 @@
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { MinLength, IsOptional, IsUrl } from 'class-validator';
-import { strMinLen, UserType } from '../shared/variables';
+import { strMinLen } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -10,6 +10,7 @@ import { ApolloError } from 'apollo-server-express';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import Post from '../schema/posts/post.entity';
+import { UserType } from '../schema/users/user.entity';
 
 @ArgsType()
 class UpdatePostArgs {

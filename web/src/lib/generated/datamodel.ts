@@ -325,6 +325,8 @@ export type SearchPostsResult = {
 /** user data, indexed for search */
 export type SearchUser = {
   __typename?: 'SearchUser';
+  /** avatar id */
+  avatar?: Maybe<Scalars['String']>;
   /** email */
   email: Scalars['String'];
   /** user id */
@@ -538,6 +540,29 @@ export type UserQuery = (
   ) }
 );
 
+export type UsersQueryVariables = Exact<{
+  query?: Maybe<Scalars['String']>;
+  type?: Maybe<UserType>;
+  majors?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+  sortBy?: Maybe<UserSortOption>;
+  ascending?: Maybe<Scalars['Boolean']>;
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UsersQuery = (
+  { __typename?: 'Query' }
+  & { users: (
+    { __typename?: 'SearchUsersResult' }
+    & Pick<SearchUsersResult, 'count'>
+    & { results: Array<(
+      { __typename?: 'SearchUser' }
+      & Pick<SearchUser, 'name' | 'username' | 'type' | 'major' | 'avatar'>
+    )> }
+  ) }
+);
+
 export type VerifyEmailMutationVariables = Exact<{
   token: Scalars['String'];
 }>;
@@ -668,6 +693,28 @@ export const User = gql`
   }
 }
     ${UserFields}`;
+export const Users = gql`
+    query users($query: String, $type: UserType, $majors: [String!], $sortBy: UserSortOption, $ascending: Boolean, $page: Int, $perpage: Int) {
+  users(
+    query: $query
+    type: $type
+    majors: $majors
+    sortBy: $sortBy
+    ascending: $ascending
+    page: $page
+    perpage: $perpage
+  ) {
+    count
+    results {
+      name
+      username
+      type
+      major
+      avatar
+    }
+  }
+}
+    `;
 export const VerifyEmail = gql`
     mutation verifyEmail($token: String!) {
   verifyEmail(token: $token)

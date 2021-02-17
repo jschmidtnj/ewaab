@@ -2,8 +2,8 @@ import { verifyLoggedIn } from '../auth/checkAuth';
 import { Resolver, Ctx, Query, ArgsType, Field, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
 import { getRepository } from 'typeorm';
-import { PostType, UserType } from '../shared/variables';
-import Post from '../schema/posts/post.entity';
+import Post, { PostType } from '../schema/posts/post.entity';
+import { UserType } from '../schema/users/user.entity';
 
 export const postViewMap: Record<UserType, PostType[]> = {
   [UserType.admin]: Object.values(PostType),

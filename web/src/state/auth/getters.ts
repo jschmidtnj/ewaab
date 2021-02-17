@@ -5,7 +5,7 @@ import { axiosClient } from 'utils/axios';
 import { runLogout } from './thunks';
 import { RootState } from '..';
 import { components as restRef } from 'lib/generated/apiREST';
-import { UserType } from 'shared/variables';
+import { UserType } from 'lib/generated/datamodel';
 
 export const getAuthToken = (): string => {
   return (store.getState() as RootState).authReducer.authToken;
@@ -27,7 +27,7 @@ export const refreshAuth = async (): Promise<void> => {
 export const getType = (): UserType => {
   const state = (store.getState() as RootState).authReducer;
   if (!state.loggedIn || !state.user) {
-    return UserType.visitor;
+    return UserType.Visitor;
   }
   return UserType[state.user.type];
 };

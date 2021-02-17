@@ -1,13 +1,13 @@
 import { Resolver, Query, Ctx, ArgsType, Field, Int, Float, Args } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
-import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
-import { Min, Max, isEmail, Matches, ArrayContains, IsOptional } from 'class-validator';
-import { SearchUser, SearchUsersResult, UserSortOption } from '../schema/users/user.entity';
-import { locationRegex, UserType } from '../shared/variables';
+import { Min, Max, isEmail, Matches, IsOptional, IsIn } from 'class-validator';
+import { SearchUser, SearchUsersResult, UserSortOption, UserType } from '../schema/users/user.entity';
+import { locationRegex } from '../shared/variables';
 import majors from '../shared/majors';
+import esb from 'elastic-builder';
 
 const maxPerPage = 20;
 
@@ -23,8 +23,9 @@ export class UsersArgs {
 
   @Field(_type => [String], { description: 'user major', nullable: true })
   @IsOptional()
-  @ArrayContains(majors, {
-    message: 'major must be in list of allowed majors'
+  @IsIn(majors, {
+    message: 'major must be in list of allowed majors',
+    each: true
   })
   majors?: string[];
 
@@ -84,87 +85,53 @@ class UsersResolver {
       throw new Error('user not logged in');
     }
 
-    const shouldParams: Record<string, unknown>[] = [];
-    const filterShouldParams: Record<string, unknown>[] = [];
-    const filterMustParams: Record<string, unknown>[] = [];
+    const mustShouldParams: esb.Query[] = [];
+    const filterShouldParams: esb.Query[] = [];
+    const filterMustParams: esb.Query[] = [];
 
     if (args.query) {
-      shouldParams.push({
-        term: {
-          name: args.query
-        }
-      });
+      mustShouldParams.push(esb.termQuery('name', args.query));
       if (isEmail(args.query)) {
-        shouldParams.push({
-          term: {
-            email: args.query
-          }
-        });
+        mustShouldParams.push(esb.termQuery('email', args.query));
       }
-      shouldParams.push({
-        term: {
-          username: args.query
-        }
-      });
-      shouldParams.push({
-        term: {
-          location: args.query
-        }
-      });
+      mustShouldParams.push(esb.termQuery('username', args.query));
+      mustShouldParams.push(esb.termQuery('locationName', args.query));
     }
     if (args.type) {
-      filterMustParams.push({
-        term: {
-          type: args.type
-        }
-      });
+      filterMustParams.push(esb.termQuery('type', args.type));
     }
     if (args.majors) {
       for (const major of args.majors) {
-        filterShouldParams.push({
-          term: {
-            major
-          }
-        });
+        filterShouldParams.push(esb.termQuery('major', major));
       }
     }
     if (args.location) {
-      filterMustParams.push({
-        geo_distance: {
-          distance: `${args.distance}km`,
-          location: args.location
-        }
-      });
+      filterMustParams.push(esb.geoDistanceQuery('location',
+        esb.geoPoint().string(args.location)).distance(`${args.distance}km`));
     }
 
-    const sort: Record<string, string>[] = [];
+    let requestBody = esb.requestBodySearch().query(
+      esb.boolQuery()
+        .must(
+          esb.boolQuery()
+            .should(mustShouldParams)
+        )
+        .filter(
+          esb.boolQuery()
+            .should(filterShouldParams)
+            .must(filterMustParams)
+        )
+    );
     if (args.sortBy) {
-      sort.push({
-        [args.sortBy]: args.ascending ? 'asc' : 'desc'
-      });
+      requestBody = requestBody.sort(esb.sort(args.sortBy,
+        args.ascending ? 'asc' : 'desc'));
     }
+    requestBody = requestBody.from(args.page).size(args.perpage);
 
-    const searchParams: RequestParams.Search = {
+    const elasticUserData = await elasticClient.search({
       index: userIndexName,
-      from: args.page,
-      size: args.perpage,
-      body: {
-        sort,
-        query: {
-          bool: {
-            should: shouldParams,
-            filter: {
-              bool: {
-                should: filterShouldParams,
-                must: filterMustParams
-              }
-            }
-          }
-        }
-      }
-    };
-
-    const elasticUserData = await elasticClient.search(searchParams);
+      body: requestBody.toJSON()
+    });
     const results: SearchUser[] = [];
     for (const hit of elasticUserData.body.hits.hits) {
       const currentUser: SearchUser = {
@@ -175,7 +142,7 @@ class UsersResolver {
     }
     return {
       results,
-      count: elasticUserData.body.hits.total
+      count: elasticUserData.body.hits.total.value
     };
   }
 }

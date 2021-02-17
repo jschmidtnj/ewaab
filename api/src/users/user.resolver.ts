@@ -1,13 +1,12 @@
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { Resolver, Ctx, Query, ResolverInterface, FieldResolver, Root } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
-import User from '../schema/users/user.entity';
+import User, { UserType } from '../schema/users/user.entity';
 import { getRepository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
 import { getSecret, getJWTIssuer, mediaJWTExpiration, MediaAccessType } from '../utils/jwt';
-import { UserType } from '../shared/variables';
 
 export interface MediaAccessTokenData {
   id: string;

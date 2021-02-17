@@ -1,8 +1,14 @@
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
-import { PostType } from '../../shared/variables';
 import { BaseTimestamp } from '../utils/baseTimestamp';
+
+export enum PostType {
+  studentNews = 'studentNews',
+  mentorNews = 'mentorNews',
+  encourageHer = 'encourageHer',
+  studentCommunity = 'studentCommunity',
+}
 
 registerEnumType(PostType, {
   name: 'PostType',

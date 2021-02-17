@@ -1,0 +1,14 @@
+query users($query: String, $type: UserType, $majors: [String!], $sortBy: UserSortOption,
+            $ascending: Boolean, $page: Int, $perpage: Int) {
+  users(query: $query, type: $type, majors: $majors, sortBy: $sortBy,
+        ascending: $ascending, page: $page, perpage: $perpage) {
+    count
+    results {
+      name
+      username
+      type
+      major
+      avatar
+    }
+  }
+}

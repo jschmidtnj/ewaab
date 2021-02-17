@@ -1,8 +1,8 @@
 import { GraphQLContext } from '../utils/context';
-import { PostType, UserType } from '../shared/variables';
 import { configData } from '../utils/config';
 import { getRepository } from 'typeorm';
-import Post from '../schema/posts/post.entity';
+import Post, { PostType } from '../schema/posts/post.entity';
+import { UserType } from '../schema/users/user.entity';
 
 export const verifyGuest = (ctx: GraphQLContext): boolean => {
   return ctx.auth !== undefined;

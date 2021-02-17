@@ -5,7 +5,7 @@ import { getRepository } from 'typeorm';
 import Post from '../schema/posts/post.entity';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
-import { UserType } from '../shared/variables';
+import { UserType } from '../schema/users/user.entity';
 
 @ArgsType()
 class DeleteArgs {

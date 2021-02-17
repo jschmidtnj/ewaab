@@ -414,6 +414,9 @@ type SearchPostsResult {
 
 """user data, indexed for search"""
 type SearchUser {
+  """avatar id"""
+  avatar: String
+
   """email"""
   email: String!
 

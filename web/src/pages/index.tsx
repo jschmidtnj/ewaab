@@ -4,7 +4,7 @@ import { useRouter } from 'next/dist/client/router';
 import { useEffect } from 'react';
 import { getType, getUsername, isLoggedIn } from 'state/auth/getters';
 import SEO from 'components/SEO';
-import { UserType } from 'shared/variables';
+import { UserType } from 'lib/generated/datamodel';
 
 const Index = (): JSX.Element => {
   const router = useRouter();
@@ -14,7 +14,7 @@ const Index = (): JSX.Element => {
       if (loggedIn) {
         const userType = getType();
         setTimeout(() => {
-          if (userType === UserType.admin) {
+          if (userType === UserType.Admin) {
             router.push('/users');
           } else {
             const userName = getUsername();

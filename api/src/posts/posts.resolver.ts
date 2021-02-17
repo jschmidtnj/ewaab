@@ -4,8 +4,8 @@ import { postIndexName } from '../elastic/settings';
 import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
-import { Min, Max, IsOptional } from 'class-validator'; import { PostType } from '../shared/variables';
-import { PostSortOption, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
+import { Min, Max, IsOptional } from 'class-validator';
+import { PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import { postViewMap } from './post.resolver';
 
 const maxPerPage = 20;
@@ -160,7 +160,7 @@ class PostsResolver {
       };
       results.push(currentPost);
     }
-    const totalCount = elasticPostData.body.hits.total;
+    const totalCount = elasticPostData.body.hits.total.value;
     const counts: Record<PostType, number> = Object.values(PostType).reduce((map, type) => {
       map[type] = 0;
       return map;

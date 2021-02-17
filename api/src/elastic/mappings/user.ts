@@ -1,12 +1,27 @@
 const userMappings = {
   name: {
-    type: 'text'
+    type: 'keyword',
+    fields: {
+      text: {
+        type: 'text'
+      }
+    }
   },
   email: {
-    type: 'text'
+    type: 'keyword',
+    fields: {
+      text: {
+        type: 'text'
+      }
+    }
   },
   username: {
-    type: 'text'
+    type: 'keyword',
+    fields: {
+      text: {
+        type: 'text'
+      }
+    }
   },
   type: {
     type: 'keyword'
@@ -18,7 +33,15 @@ const userMappings = {
     type: 'geo_point'
   },
   locationName: {
-    type: 'text'
+    type: 'keyword',
+    fields: {
+      text: {
+        type: 'text'
+      }
+    }
+  },
+  avatar: {
+    type: 'keyword'
   }
 };
 

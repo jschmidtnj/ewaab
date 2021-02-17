@@ -9,7 +9,7 @@ import { GraphQLContext } from '../utils/context';
 import { sendEmailUtil } from './sendEmail.resolver';
 import { loginType } from '../auth/shared';
 import { accountExistsEmail } from '../users/shared';
-import { UserType } from '../shared/variables';
+import { UserType } from '../schema/users/user.entity';
 
 @ArgsType()
 class InviteUserArgs {

@@ -1,0 +1,440 @@
+import PrivateRoute from 'components/PrivateRoute';
+import Layout from 'layouts/main';
+import SEO from 'components/SEO';
+import Link from 'next/link';
+import {
+  UserQueryVariables,
+  Users,
+  UserSortOption,
+  UsersQuery,
+  UsersQueryVariables,
+  UserType,
+} from 'lib/generated/datamodel';
+import Select, { ValueType } from 'react-select';
+import { useEffect, useRef, useState } from 'react';
+import { ApolloError, ApolloQueryResult } from 'apollo-client';
+import * as yup from 'yup';
+import { Formik, FormikHandlers, FormikHelpers, FormikState } from 'formik';
+import {
+  defaultPerPage,
+  perPageOptions,
+  SelectNumberObject,
+  SelectStringObject,
+} from 'utils/variables';
+import { toast } from 'react-toastify';
+import { client } from 'utils/apollo';
+import isDebug from 'utils/mode';
+import majors from 'shared/majors';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { getAPIURL } from 'utils/axios';
+import { isSSR } from 'utils/checkSSR';
+import { useSelector } from 'react-redux';
+import { RootState } from 'state';
+import Image from 'next/image';
+import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
+
+const avatarWidth = 40;
+
+const majorsOptions: SelectStringObject[] = majors.map((major) => ({
+  label: major,
+  value: major,
+}));
+
+const userTypeLabels: Record<UserType, string> = {
+  [UserType.User]: 'student',
+  [UserType.ThirdParty]: 'recruiter',
+  [UserType.Visitor]: '',
+  [UserType.Admin]: 'management',
+};
+
+interface SortableColumnArgs {
+  text: string;
+  sortBy?: UserSortOption;
+  elemTarget: UserSortOption;
+  ascending?: boolean;
+  setFieldValue: FormikHelpers<UserQueryVariables>['setFieldValue'];
+  handleSubmit: FormikHandlers['handleSubmit'];
+}
+
+const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
+  return (
+    <th
+      scope="col"
+      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+      onClick={(evt) => {
+        evt.preventDefault();
+        if (args.elemTarget === args.sortBy) {
+          args.setFieldValue('ascending', !args.ascending);
+        } else {
+          args.setFieldValue('sortBy', args.elemTarget);
+        }
+        args.handleSubmit();
+      }}
+    >
+      <span>{args.text}</span>
+      {args.elemTarget !== args.sortBy ? null : args.ascending ? (
+        <AiFillCaretDown className="inline-block ml-2 text-md" />
+      ) : (
+        <AiFillCaretUp className="inline-block ml-2 text-md" />
+      )}
+    </th>
+  );
+};
+
+const UsersPage = (): JSX.Element => {
+  const mediaAuth = isSSR
+    ? undefined
+    : useSelector<RootState, string>(
+        (state) => state.authReducer.user.mediaAuth
+      );
+
+  const [users, setUsers] = useState<ApolloQueryResult<UsersQuery> | undefined>(
+    undefined
+  );
+
+  const [defaultQuery, setDefaultQuery] = useState<string>('');
+
+  const runQuery = async (variables: UsersQueryVariables): Promise<void> => {
+    if (variables.majors?.length === 0) {
+      variables.majors = undefined;
+    }
+    if (variables.query?.length === 0) {
+      variables.query = undefined;
+    }
+    const res = await client.query<UsersQuery, UsersQueryVariables>({
+      query: Users,
+      variables,
+      fetchPolicy: isDebug() ? 'no-cache' : 'cache-first', // disable cache if in debug
+    });
+    if (res.errors) {
+      throw new Error(res.errors.join(', '));
+    }
+    setUsers(res);
+  };
+
+  const initialValues: UsersQueryVariables = {
+    query: defaultQuery,
+    majors: [],
+    ascending: false,
+    sortBy: UserSortOption.Name,
+    page: 0,
+    perpage: defaultPerPage,
+  };
+
+  const formRef = useRef<
+    FormikHelpers<UsersQueryVariables> &
+      FormikState<UsersQueryVariables> &
+      FormikHandlers
+  >();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('q')) {
+      initialValues.query = decodeURIComponent(urlParams.get('q') as string);
+      setDefaultQuery(initialValues.query);
+    }
+    (async () => {
+      try {
+        await runQuery(initialValues);
+      } catch (err) {
+        console.log(JSON.stringify(err));
+        toast((err as ApolloError).message, {
+          type: 'error',
+        });
+      }
+    })();
+  }, []);
+
+  const apiURL = getAPIURL();
+
+  return (
+    <PrivateRoute>
+      <Layout>
+        <SEO page="user page" />
+        <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
+          <Formik
+            innerRef={(formRef as unknown) as (instance: any) => void}
+            initialValues={initialValues}
+            validationSchema={yup.object({
+              query: yup.string(),
+              majors: yup.array(),
+              ascending: yup.bool(),
+              page: yup.number().integer(),
+              perpage: yup.number().integer(),
+            })}
+            onSubmit={async (formData, { setSubmitting, setStatus }) => {
+              const onError = () => {
+                setStatus({ success: false });
+                setSubmitting(false);
+              };
+              try {
+                await runQuery(formData);
+              } catch (err) {
+                console.error(JSON.stringify(err, null, 2));
+                toast(err.message, {
+                  type: 'error',
+                });
+                onError();
+              }
+            }}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleBlur,
+              handleSubmit,
+              handleChange,
+              isSubmitting,
+              setFieldValue,
+              setFieldTouched,
+            }) => (
+              <form>
+                <div className="my-2 flex sm:flex-row flex-col">
+                  <div className="block relative">
+                    <div>
+                      <div className="mt-1 flex rounded-md shadow-sm">
+                        <span className="h-full absolute inset-y-0 left-0 pl-2">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="mt-4 h-4 w-4 fill-current text-gray-500"
+                          >
+                            <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z"></path>
+                          </svg>
+                        </span>
+                        <input
+                          onChange={handleChange}
+                          onKeyDown={(evt) => {
+                            if (evt.key === 'Enter') {
+                              handleSubmit();
+                            }
+                          }}
+                          onBlur={handleBlur}
+                          value={values.query}
+                          disabled={isSubmitting}
+                          type="text"
+                          name="query"
+                          id="query"
+                          placeholder="Search"
+                          className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none rounded-l"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-row mb-1 sm:mb-0">
+                    <div>
+                      <div className="mt-1 shadow-sm -space-y-px">
+                        <Select
+                          id="perpage"
+                          name="perpage"
+                          isMulti={false}
+                          options={perPageOptions}
+                          cacheOptions={true}
+                          defaultValue={perPageOptions.find(
+                            (elem) => elem.value === defaultPerPage
+                          )}
+                          onChange={(
+                            selectedOption: ValueType<SelectNumberObject, false>
+                          ) => {
+                            setFieldValue('perpage', selectedOption.value);
+                            handleSubmit();
+                          }}
+                          onBlur={(evt) => {
+                            handleBlur(evt);
+                            setFieldTouched('perpage', true);
+                          }}
+                          className={
+                            (touched.perpage && errors.perpage
+                              ? 'is-invalid'
+                              : '') + 'w-24'
+                          }
+                          styles={{
+                            control: (styles) => ({
+                              ...styles,
+                              borderColor:
+                                touched.perpage && errors.perpage
+                                  ? 'red'
+                                  : styles.borderColor,
+                              borderRadius: 0,
+                            }),
+                            input: (provided) => ({
+                              ...provided,
+                              boxShadow: 'none',
+                            }),
+                          }}
+                          invalid={!!(touched.perpage && errors.perpage)}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <p
+                        className={`${
+                          touched.majors && errors.majors ? '' : 'hidden'
+                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                      >
+                        {errors.majors}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="mt-1 shadow-sm -space-y-px">
+                        <Select
+                          id="majors"
+                          name="majors"
+                          isMulti={true}
+                          options={majorsOptions}
+                          cacheOptions={true}
+                          defaultValue={[]}
+                          placeholder="Major"
+                          onChange={(
+                            selectedOptions: ValueType<
+                              SelectStringObject[],
+                              false
+                            > | null
+                          ) => {
+                            setFieldValue(
+                              'majors',
+                              selectedOptions
+                                ? selectedOptions.map((elem) => elem.value)
+                                : undefined
+                            );
+                            handleSubmit();
+                          }}
+                          onBlur={(evt) => {
+                            handleBlur(evt);
+                            setFieldTouched('majors', true);
+                          }}
+                          className={
+                            (touched.majors && errors.majors
+                              ? 'is-invalid'
+                              : '') + 'w-52'
+                          }
+                          styles={{
+                            control: (styles) => ({
+                              ...styles,
+                              borderColor:
+                                touched.majors && errors.majors
+                                  ? 'red'
+                                  : styles.borderColor,
+                              borderTopLeftRadius: 2,
+                              borderBottomLeftRadius: 2,
+                            }),
+                            input: (provided) => ({
+                              ...provided,
+                              boxShadow: 'none', // TODO - for some reason this doesn't work still
+                            }),
+                          }}
+                          invalid={!!(touched.majors && errors.majors)}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <p
+                        className={`${
+                          touched.majors && errors.majors ? '' : 'hidden'
+                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                      >
+                        {errors.majors}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            )}
+          </Formik>
+          {!users ||
+          users.loading ||
+          !users.data ||
+          users.data.users.results.length === 0 ? (
+            <p className="text-md pt-4">No users found</p>
+          ) : (
+            <div className="flex flex-col mt-4">
+              <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                  <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                    <table className="min-w-full divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="w-0 relative">
+                            <span className="sr-only">Avatar</span>
+                          </th>
+                          <th scope="col" className="w-0 relative">
+                            <span className="sr-only">Open</span>
+                          </th>
+                          <SortableColumn
+                            text="Name"
+                            elemTarget={UserSortOption.Name}
+                            ascending={formRef.current.values.ascending}
+                            setFieldValue={formRef.current.setFieldValue}
+                            sortBy={formRef.current.values.sortBy}
+                            handleSubmit={formRef.current.handleSubmit}
+                          />
+                          <SortableColumn
+                            text="Major"
+                            elemTarget={UserSortOption.Major}
+                            ascending={formRef.current.values.ascending}
+                            setFieldValue={formRef.current.setFieldValue}
+                            sortBy={formRef.current.values.sortBy}
+                            handleSubmit={formRef.current.handleSubmit}
+                          />
+                          <th
+                            scope="col"
+                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
+                            Type
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-gray-200">
+                        {users.data.users.results.map((user, i) => (
+                          <tr key={`user-${i}-${user.username}`}>
+                            <td className="w-16 pl-4 py-4 whitespace-nowrap">
+                              {user && user.avatar ? (
+                                <LazyLoadImage
+                                  className="h-5 w-5 rounded-full"
+                                  alt={`${apiURL}/media/${user.avatar}/blur?auth=${mediaAuth}`}
+                                  height={avatarWidth}
+                                  src={`${apiURL}/media/${user.avatar}?auth=${mediaAuth}`}
+                                  width={avatarWidth}
+                                />
+                              ) : (
+                                <Image
+                                  className="h-5 w-5 rounded-full"
+                                  width={avatarWidth}
+                                  height={avatarWidth}
+                                  src="/assets/img/default_avatar.png"
+                                  alt="avatar"
+                                />
+                              )}
+                            </td>
+                            <td className="w-0 px-4 py-4 whitespace-nowrap text-sm font-medium">
+                              <Link href={`/${user.username}`}>
+                                <a className="text-indigo-600 hover:text-indigo-900">
+                                  @ {user.username}
+                                </a>
+                              </Link>
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {user.name}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {user.major}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {userTypeLabels[user.type]}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </Layout>
+    </PrivateRoute>
+  );
+};
+
+export default UsersPage;

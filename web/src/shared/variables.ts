@@ -14,17 +14,3 @@ export const locationRegex = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.
 export const baseFacebook = 'https://facebook.com';
 export const baseTwitter = 'https://twitter.com';
 export const baseGitHub = 'https://github.com';
-
-export enum UserType {
-  user = 'user',
-  visitor = 'visitor',
-  thirdParty = 'thirdParty',
-  admin = 'admin',
-}
-
-export enum PostType {
-  studentNews = 'studentNews',
-  mentorNews = 'mentorNews',
-  encourageHer = 'encourageHer',
-  studentCommunity = 'studentCommunity',
-}

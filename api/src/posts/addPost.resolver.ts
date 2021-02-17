@@ -4,10 +4,11 @@ import { getRepository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
-import Post, { SearchPost } from '../schema/posts/post.entity';
-import { strMinLen, PostType, UserType } from '../shared/variables';
+import Post, { PostType, SearchPost } from '../schema/posts/post.entity';
+import { strMinLen } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
+import { UserType } from '../schema/users/user.entity';
 
 @ArgsType()
 class AddPostArgs {
