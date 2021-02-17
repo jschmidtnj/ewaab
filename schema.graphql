@@ -27,6 +27,9 @@ type Mutation {
     """username"""
     link: String!
 
+    """media"""
+    media: Upload
+
     """post title"""
     title: String!
 
@@ -64,6 +67,7 @@ type Mutation {
     """username or email"""
     usernameEmail: String!
   ): String!
+  loginGuest: String!
   logout: String!
   passwordReset(
     """password"""
@@ -171,11 +175,17 @@ type Mutation {
     """content"""
     content: String
 
+    """delete media"""
+    deleteMedia: Boolean = false
+
     """post id"""
     id: String!
 
     """link"""
     link: String
+
+    """media"""
+    media: Upload
 
     """title"""
     title: String
@@ -195,6 +205,9 @@ type Mutation {
 
 """post data"""
 type Post {
+  """avatar for publisher"""
+  avatar: String
+
   """post content"""
   content: String!
 
@@ -206,6 +219,9 @@ type Post {
 
   """post link"""
   link: String
+
+  """media for post"""
+  media: String
 
   """post publisher"""
   publisher: String!
@@ -222,7 +238,6 @@ type Post {
 
 """post sort options"""
 enum PostSortOption {
-  content
   created
   publisher
   title
@@ -320,7 +335,7 @@ type Query {
     query: String
 
     """sort by this field"""
-    sortBy: PostSortOption
+    sortBy: PostSortOption = created
 
     """post type"""
     type: PostType
@@ -369,6 +384,9 @@ type Query {
 
 """post data, indexed in elasticsearch"""
 type SearchPost {
+  """avatar for publisher"""
+  avatar: String
+
   """post content"""
   content: String!
 
@@ -377,6 +395,9 @@ type SearchPost {
 
   """post id"""
   id: String!
+
+  """media for post"""
+  media: String
 
   """post publisher"""
   publisher: String!
@@ -528,7 +549,7 @@ enum UserSortOption {
 """user type"""
 enum UserType {
   admin
-  thirdParty
+  mentor
   user
   visitor
 }

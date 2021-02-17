@@ -70,7 +70,7 @@ const Login = (): JSX.Element => {
           toast(message, {
             type: 'success',
           });
-          router.push('/login');
+          router.push('/users');
         } catch (err) {
           toast(err.message, {
             type: 'error',

@@ -25,6 +25,7 @@ import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import majors from '../shared/majors';
+import Post from '../schema/posts/post.entity';
 
 @ArgsType()
 class UpdateArgs {
@@ -240,6 +241,10 @@ class UpdateAccountResolver {
             doc: userUpdateData
           }
         });
+        // delete at the end, after new avatar is created
+        if (args.avatar && currentUser.avatar) {
+          await deleteMedia(currentUser.avatar);
+        }
         return `updated user ${id}`;
       };
 
@@ -315,9 +320,6 @@ class UpdateAccountResolver {
           const buffer = Buffer.concat(data);
           const MediaModel = getRepository(Media);
           (async () => {
-            if (currentUser.avatar) {
-              await deleteMedia(currentUser.avatar);
-            }
             const newMedia = await MediaModel.save({
               id: uuidv4(),
               fileSize: avatarReadStream.readableLength,
@@ -346,6 +348,14 @@ class UpdateAccountResolver {
               ContentType: avatarFile.mimetype,
               ContentEncoding: avatarFile.encoding,
             }).promise();
+
+            // update avatars in posts
+            const PostModel = getRepository(Post);
+            await PostModel.update({
+              publisher: id,
+            }, {
+              avatar: newMedia.id
+            });
 
             userUpdateData.avatar = newMedia.id;
 

@@ -12,20 +12,21 @@ interface PrivateRouteData {
 const PrivateRoute = (args: PrivateRouteData): JSX.Element => {
   const [isLoading, setLoading] = useState(true);
   const router = useRouter();
+  const getRedirect = (): string =>
+    `?redirect=${encodeURIComponent(router.asPath)}`;
   useEffect(() => {
     (async () => {
       // trigger check to see if user is logged in
-      const redirectParams = `?redirect=${encodeURIComponent(router.asPath)}`;
       try {
         const loggedIn = await isLoggedIn();
         if (!loggedIn) {
-          router.push('/login' + redirectParams);
+          router.push('/login' + getRedirect());
         } else {
           setLoading(false);
         }
       } catch (_err) {
         // handle error
-        router.push('/login' + redirectParams);
+        router.push('/login' + getRedirect());
       }
     })();
   }, []);
@@ -37,7 +38,7 @@ const PrivateRoute = (args: PrivateRouteData): JSX.Element => {
   useEffect(() => {
     if (!currentlyLoggedIn) {
       setLoading(true);
-      router.push('/login');
+      router.push('/login' + getRedirect());
     }
   }, [currentlyLoggedIn]);
   return <>{isLoading ? null : args.children}</>;

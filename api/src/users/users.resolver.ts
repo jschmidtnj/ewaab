@@ -1,8 +1,6 @@
-import { Resolver, Query, Ctx, ArgsType, Field, Int, Float, Args } from 'type-graphql';
+import { Resolver, Query, ArgsType, Field, Int, Float, Args } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
-import { GraphQLContext } from '../utils/context';
-import { verifyLoggedIn } from '../auth/checkAuth';
 import { Min, Max, isEmail, Matches, IsOptional, IsIn } from 'class-validator';
 import { SearchUser, SearchUsersResult, UserSortOption, UserType } from '../schema/users/user.entity';
 import { locationRegex } from '../shared/variables';
@@ -80,11 +78,7 @@ export class UsersArgs {
 @Resolver()
 class UsersResolver {
   @Query(_returns => SearchUsersResult)
-  async users(@Args() args: UsersArgs, @Ctx() ctx: GraphQLContext): Promise<SearchUsersResult> {
-    if (!verifyLoggedIn(ctx) || !ctx.auth) {
-      throw new Error('user not logged in');
-    }
-
+  async users(@Args() args: UsersArgs): Promise<SearchUsersResult> {
     const mustShouldParams: esb.Query[] = [];
     const filterShouldParams: esb.Query[] = [];
     const filterMustParams: esb.Query[] = [];

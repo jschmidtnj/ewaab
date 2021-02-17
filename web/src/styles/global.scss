@@ -17,6 +17,11 @@
   height: 0;
 }
 
+/* fix select dropdown thing */
+.select-dropdown input:focus {
+  box-shadow: none;
+}
+
 /* utilities */
 
 @tailwind utilities;

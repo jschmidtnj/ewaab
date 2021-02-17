@@ -6,5 +6,6 @@ export default interface Messages {
   reset: string;
   'sign out': string;
   users: string;
+  search: string;
   account: string;
 }

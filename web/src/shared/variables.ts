@@ -9,6 +9,7 @@ export const passwordMinLen = 6;
 export const validUsername = /^[A-z0-9-_.]+$/;
 export const minJWTLen = 30;
 export const avatarWidth = 50;
+export const postMediaWidth = 500;
 export const locationRegex = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
 export const baseFacebook = 'https://facebook.com';

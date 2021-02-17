@@ -1,0 +1,17 @@
+query posts($query: String, $type: PostType, $page: Int, $perpage: Int, $ascending: Boolean) {
+  posts(query: $query, type: $type, page: $page, perpage: $perpage, ascending: $ascending) {
+    results {
+      title
+      content
+      publisher
+      created
+      updated
+      avatar
+    }
+    count
+    countStudentNews
+    countMentorNews
+    countEncourageHer
+    countStudentCommunity
+  }
+}

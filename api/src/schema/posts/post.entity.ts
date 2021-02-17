@@ -39,11 +39,18 @@ export class SearchPost extends BaseTimestamp {
   @Column({ type: 'uuid' })
   @IsDefined()
   publisher: string;
+
+  @Field({ description: 'avatar for publisher', nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  avatar?: string;
+
+  @Field({ description: 'media for post', nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  media?: string;
 }
 
 export enum PostSortOption {
   title = 'title',
-  content = 'content',
   publisher = 'publisher',
   created = 'created',
   updated = 'updated',

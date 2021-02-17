@@ -4,6 +4,7 @@ import User, { UserType } from '../schema/users/user.entity';
 import { configData } from './config';
 import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
+import { nanoid } from 'nanoid';
 
 export const verifyJWTExpiration = '1h';
 
@@ -58,6 +59,36 @@ export const getJWTIssuer = (): string => {
     throw new Error('no jwt issuer found');
   }
   return jwtIssuer;
+};
+
+export const generateJWTGuest = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    let secret: string;
+    let jwtIssuer: string;
+    try {
+      secret = getSecret(loginType.LOCAL);
+      jwtIssuer = getJWTIssuer();
+    } catch (err) {
+      reject(err as Error);
+      return;
+    }
+    const authData: JWTAuthData = {
+      id: nanoid(),
+      type: UserType.visitor,
+      emailVerified: false,
+    };
+    const signOptions: SignOptions = {
+      issuer: jwtIssuer,
+      expiresIn: accessJWTExpiration
+    };
+    sign(authData, secret, signOptions, (err, token) => {
+      if (err) {
+        reject(err as Error);
+      } else {
+        resolve(token as string);
+      }
+    });
+  });
 };
 
 export const generateJWTAccess = (user: User): Promise<string> => {

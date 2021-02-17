@@ -6,6 +6,7 @@ import Post from '../schema/posts/post.entity';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import { UserType } from '../schema/users/user.entity';
+import { deleteMedia } from '../users/media.resolver';
 
 @ArgsType()
 class DeleteArgs {
@@ -21,13 +22,14 @@ class DeletePostResolver {
       throw new Error('cannot find auth data');
     }
     const PostModel = getRepository(Post);
+    const postData = await PostModel.findOne(id, {
+      select: ['id', 'publisher', 'media']
+    });
+    if (!postData) {
+      throw new Error('no post found');
+    }
+
     if (ctx.auth.type !== UserType.admin) {
-      const postData = await PostModel.findOne(id, {
-        select: ['id', 'publisher']
-      });
-      if (!postData) {
-        throw new Error('no post found');
-      }
       if (postData.publisher !== ctx.auth.id) {
         throw new Error(`user ${ctx.auth.id} is not publisher of post ${id}`);
       }
@@ -37,6 +39,11 @@ class DeletePostResolver {
       index: postIndexName
     });
     await PostModel.delete(id);
+
+    if (postData.media) {
+      await deleteMedia(postData.media);
+    }
+
     return `deleted post ${id}`;
   }
 }

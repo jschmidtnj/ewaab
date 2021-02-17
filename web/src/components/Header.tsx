@@ -58,12 +58,20 @@ const Header = (): JSX.Element => {
             name: 'reset',
             href: '/reset',
           },
+          {
+            name: 'users',
+            href: '/users',
+          },
         ]);
       } else {
         setPaths([
           {
             name: 'users',
             href: '/users',
+          },
+          {
+            name: 'search',
+            href: '/search',
           },
         ]);
         if (!user) {

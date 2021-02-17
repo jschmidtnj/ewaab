@@ -1,11 +1,28 @@
+import timestampMappings from './timestamp';
+
 const postMappings = {
+  ...timestampMappings,
   title: {
-    type: 'text'
+    type: 'keyword',
+    fields: {
+      text: {
+        type: 'text'
+      }
+    }
   },
   content: {
     type: 'text'
   },
   type: {
+    type: 'keyword'
+  },
+  publisher: {
+    type: 'keyword'
+  },
+  avatar: {
+    type: 'keyword'
+  },
+  media: {
     type: 'keyword'
   }
 };

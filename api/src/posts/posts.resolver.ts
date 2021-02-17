@@ -7,6 +7,7 @@ import { verifyLoggedIn } from '../auth/checkAuth';
 import { Min, Max, IsOptional } from 'class-validator';
 import { PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import { postViewMap } from './post.resolver';
+import esb from 'elastic-builder';
 
 const maxPerPage = 20;
 
@@ -24,9 +25,8 @@ export class PostsArgs {
   @IsOptional()
   created?: number;
 
-  @Field(_type => PostSortOption, { description: 'sort by this field', nullable: true })
-  @IsOptional()
-  sortBy?: PostSortOption;
+  @Field(_type => PostSortOption, { description: 'sort by this field', defaultValue: PostSortOption.created })
+  sortBy: PostSortOption;
 
   @Field(_type => Boolean, { description: 'sort direction', nullable: true, defaultValue: true })
   ascending: boolean;
@@ -55,6 +55,15 @@ export class PostsArgs {
   perpage: number;
 }
 
+const buildFilters = (mustShouldParams: esb.Query[], filterParams: esb.Query[]): esb.BoolQuery => {
+  return esb.boolQuery()
+    .must(
+      esb.boolQuery()
+        .should(mustShouldParams)
+    )
+    .filter(filterParams);
+};
+
 @Resolver()
 class PostsResolver {
   @Query(_returns => SearchPostsResult)
@@ -63,92 +72,51 @@ class PostsResolver {
       throw new Error('user not logged in');
     }
 
-    const shouldParams: Record<string, unknown>[] = [];
-    const filterParams: Record<string, unknown>[] = [];
+    const mustShouldParams: esb.Query[] = [];
+    const filterParams: esb.Query[] = [];
 
     if (args.query) {
-      shouldParams.push({
-        term: {
-          title: args.query
-        }
-      });
-      shouldParams.push({
-        term: {
-          content: args.query
-        }
-      });
+      mustShouldParams.push(esb.termQuery('title', args.query));
+      mustShouldParams.push(esb.termQuery('content', args.query));
     }
 
     if (args.created !== undefined) {
-      filterParams.push({
-        range: {
-          created: {
-            gte: args.created
-          }
-        }
-      });
-    }
-
-    const sort: Record<string, string>[] = [];
-    if (args.sortBy) {
-      sort.push({
-        [args.sortBy]: args.ascending ? 'asc' : 'desc'
-      });
+      filterParams.push(esb.rangeQuery('created').gte(args.created));
     }
 
     if (args.type) {
       if (!postViewMap[ctx.auth.type].includes(args.type)) {
         throw new Error(`user of type ${ctx.auth.type} not authorized to find posts of type ${args.type}`);
       }
-      filterParams.push({
-        term: {
-          type: args.type
-        }
-      });
+      filterParams.push(esb.termQuery('type', args.type));
     }
-
-    const filters: Record<string, unknown> = {
-      bool: {
-        should: shouldParams,
-        filter: filterParams,
-      }
-    };
 
     const getAggregates = args.type === undefined;
 
-    let aggregates: Record<string, unknown> = {};
+    const aggregates: esb.Aggregation[] = [];
 
     if (getAggregates) {
-      aggregates = Object.values(PostType).reduce((map, type) => {
-        filterParams.push({
-          match: {
-            type
-          }
-        });
-        map[type] = {
-          filters: {
-            filters
-          }
-        };
-        filterParams.pop();
-        return map;
-      }, {} as Record<string, unknown>);
+      for (const postType of Object.values(PostType)) {
+        const filters = [...filterParams, esb.matchQuery('type', postType)];
+        aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters)));
+      }
+    }
+
+    let requestBody = esb.requestBodySearch().query(buildFilters(mustShouldParams, filterParams));
+    if (args.sortBy) {
+      requestBody = requestBody.sort(esb.sort(args.sortBy,
+        args.ascending ? 'asc' : 'desc'));
+    }
+    requestBody = requestBody.from(args.page).size(args.perpage);
+    if (getAggregates) {
+      requestBody = requestBody.aggregations(aggregates);
     }
 
     const searchParams: RequestParams.Search = {
       index: postIndexName,
       from: args.page,
       size: args.perpage,
-      body: {
-        sort,
-        query: {
-          bool: {
-            should: shouldParams,
-            filter: filterParams,
-          }
-        },
-        aggs: aggregates
-      }
+      body: requestBody.toJSON()
     };
 
     const elasticPostData = await elasticClient.search(searchParams);
@@ -169,8 +137,8 @@ class PostsResolver {
     if (!getAggregates) {
       counts[args.type!] = totalCount;
     } else {
-      for (const type of Object.values(PostType)) {
-        counts[type] = elasticPostData.body.aggregations[type];
+      for (const postType of Object.values(PostType)) {
+        counts[postType] = elasticPostData.body.aggregations[postType].buckets[postType].doc_count;
       }
     }
 

@@ -8,6 +8,7 @@ const englishMessages: Messages = {
   profile: 'profile',
   'sign out': 'sign out',
   users: 'users',
+  search: 'search',
   account: 'account',
 };
 

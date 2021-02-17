@@ -13,7 +13,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "codegen": "graphql-codegen --config codegen.yml",
     "codegenREST": "swagger-to-ts ../api/swagger.yml --output src/lib/generated/apiREST.ts",
-    "precommit": "yarn lint && yarn codegen && yarn codegenREST",
+    "precommit": "yarn codegen && yarn codegenREST && yarn lint",
     "pwa": "cd public && pwa-asset-generator ./assets/img/logo.png ./pwa -m ./manifest.json -f && cd -"
   },
   "module": "commonjs",

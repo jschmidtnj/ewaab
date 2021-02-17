@@ -467,9 +467,9 @@ const ProfilePage = (): JSX.Element => {
                                   setFieldTouched('major', true);
                                 }}
                                 className={
-                                  touched.major && errors.major
+                                  (touched.major && errors.major
                                     ? 'is-invalid'
-                                    : ''
+                                    : '') + ' select-dropdown'
                                 }
                                 styles={{
                                   control: (styles) => ({
@@ -478,10 +478,6 @@ const ProfilePage = (): JSX.Element => {
                                       touched.major && errors.major
                                         ? 'red'
                                         : styles.borderColor,
-                                  }),
-                                  input: (provided) => ({
-                                    ...provided,
-                                    boxShadow: 'none',
                                   }),
                                 }}
                                 invalid={!!(touched.major && errors.major)}

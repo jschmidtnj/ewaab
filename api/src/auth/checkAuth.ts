@@ -40,9 +40,9 @@ export const checkPostAccess = async (ctx: GraphQLContext, id: string, postType?
     }
     postType = post.type;
   }
-  const thirdPartyPostTypes = [PostType.mentorNews];
-  if (thirdPartyPostTypes.includes(postType)) {
-    return ctx.auth?.type === UserType.thirdParty;
+  const mentorPostTypes = [PostType.mentorNews];
+  if (mentorPostTypes.includes(postType)) {
+    return ctx.auth?.type === UserType.mentor;
   }
   return true;
 };

@@ -5,7 +5,7 @@ import { IsDefined } from 'class-validator';
 export enum UserType {
   user = 'user',
   visitor = 'visitor',
-  thirdParty = 'thirdParty',
+  mentor = 'mentor',
   admin = 'admin',
 }
 
@@ -142,7 +142,7 @@ export default class User extends PublicUser {
   tokenVersion: number;
 
   @Field({ description: 'media auth token' })
-  mediaAuth: string;
+  mediaAuth?: string;
 
   @Column({ type: 'text' })
   @IsDefined()
