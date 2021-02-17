@@ -84,9 +84,10 @@ const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
 const UsersPage = (): JSX.Element => {
   const mediaAuth = isSSR
     ? undefined
-    : useSelector<RootState, string>(
-        (state) => state.authReducer.user.mediaAuth
-      );
+    : useSelector<RootState, string>((state) => {
+        const mediaAuth = state.authReducer.user?.mediaAuth;
+        return mediaAuth ? mediaAuth : '';
+      });
 
   const [users, setUsers] = useState<ApolloQueryResult<UsersQuery> | undefined>(
     undefined
@@ -426,6 +427,50 @@ const UsersPage = (): JSX.Element => {
                         ))}
                       </tbody>
                     </table>
+                    <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                      <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <span className="text-sm text-gray-700 mr-4">
+                          Showing {users.data.users.results.length} /{' '}
+                          {users.data.users.count}
+                        </span>
+                        <div
+                          className="relative inline-flex shadow-sm -space-x-px"
+                          aria-label="Pagination"
+                        >
+                          <button
+                            className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l"
+                            onClick={(evt) => {
+                              evt.preventDefault();
+                              formRef.current.setFieldValue(
+                                'page',
+                                formRef.current.values.page - 1
+                              );
+                            }}
+                            disabled={formRef.current.values.page === 0}
+                          >
+                            Prev
+                          </button>
+                          <button
+                            className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r"
+                            onClick={(evt) => {
+                              evt.preventDefault();
+                              formRef.current.setFieldValue(
+                                'page',
+                                formRef.current.values.page + 1
+                              );
+                            }}
+                            disabled={
+                              formRef.current.values.page *
+                                formRef.current.values.perpage +
+                                users.data.users.results.length ===
+                              users.data.users.count
+                            }
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

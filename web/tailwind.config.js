@@ -6,7 +6,9 @@ module.exports = {
   darkMode: 'media', // 'media' or 'class'
   theme: {},
   variants: {
-    extend: {},
+    extend: {
+      backgroundColor: ['disabled'],
+    },
   },
   plugins: [require('@tailwindcss/forms')],
 };
