@@ -158,13 +158,13 @@ const SearchPage = (): JSX.Element => {
                           name="query"
                           id="query"
                           placeholder="Search"
-                          className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none rounded-l"
+                          className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none sm:rounded-l"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-row mb-1 sm:mb-0">
+                  <div className="flex flex-row sm:mb-0">
                     <div>
                       <div className="mt-1 shadow-sm -space-y-px">
                         <Select
@@ -213,18 +213,18 @@ const SearchPage = (): JSX.Element => {
                         {errors.perpage}
                       </p>
                     </div>
-                  </div>
 
-                  <button
-                    className="mt-1 text-sm bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none md:rounded-r w-20"
-                    onClick={(evt) => {
-                      evt.preventDefault();
-                      toggleNewPostModal();
-                    }}
-                  >
-                    <span>New</span>
-                    <AiOutlinePlus className="inline-block ml-1 text-md text-white mb-0.5" />
-                  </button>
+                    <button
+                      className="mt-1 text-sm bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none sm:rounded-r w-20"
+                      onClick={(evt) => {
+                        evt.preventDefault();
+                        toggleNewPostModal();
+                      }}
+                    >
+                      <span>New</span>
+                      <AiOutlinePlus className="inline-block ml-1 text-md text-white mb-0.5" />
+                    </button>
+                  </div>
                 </div>
               </form>
             )}

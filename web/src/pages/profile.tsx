@@ -89,10 +89,13 @@ const ProfilePage = (): JSX.Element => {
   const [avatarInputElem, setAvatarInputElem] = useState<
     HTMLInputElement | undefined
   >(undefined);
+  const [previewImage, setPreviewImage] = useState<string>('');
+
   const [resumeInputElem, setResumeInputElem] = useState<
     HTMLInputElement | undefined
   >(undefined);
-  const [previewImage, setPreviewImage] = useState<string>('');
+  const [previewResume, setPreviewResume] = useState<string>('');
+
   const user = useSelector<RootState, UserFieldsFragment | undefined>(
     (state) => state.authReducer.user
   );
@@ -114,7 +117,7 @@ const ProfilePage = (): JSX.Element => {
   useEffect(() => {
     const avatarInputElement = document.createElement('input');
     avatarInputElement.setAttribute('type', 'file');
-    avatarInputElement.setAttribute('accept', 'image/x-png,image/jpeg');
+    avatarInputElement.setAttribute('accept', 'image/jpeg,image/png');
     avatarInputElement.onchange = (_change_evt) => {
       if (avatarInputElement.files.length === 0) {
         setPreviewImage('');
@@ -134,6 +137,17 @@ const ProfilePage = (): JSX.Element => {
       'accept',
       'application/pdf,application/msword,text/*'
     );
+    resumeInputElement.onchange = (_change_evt) => {
+      if (resumeInputElement.files.length === 0) {
+        setPreviewResume('');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (read_event) => {
+        setPreviewResume(read_event.target.result as string);
+      };
+      reader.readAsDataURL(resumeInputElement.files[0]);
+    };
     setResumeInputElem(resumeInputElement);
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -694,9 +708,14 @@ const ProfilePage = (): JSX.Element => {
                               Resume
                             </label>
                             <div className="mt-2 flex items-center">
-                              {!user.resume ? null : (
+                              {!user.resume &&
+                              previewResume.length === 0 ? null : (
                                 <a
-                                  href={`${apiURL}/media/${user.resume}?auth=${user.mediaAuth}`}
+                                  href={
+                                    previewResume
+                                      ? previewResume
+                                      : `${apiURL}/media/${user.resume}?auth=${user.mediaAuth}`
+                                  }
                                   target="_blank"
                                   rel="noreferrer"
                                 >

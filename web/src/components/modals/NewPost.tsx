@@ -6,17 +6,28 @@ import {
   PostType,
   UserFieldsFragment,
 } from 'lib/generated/datamodel';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 import * as yup from 'yup';
 import Avatar from 'components/avatar';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
+import NextImage from 'next/image';
+import { BsFillImageFill, BsPencil } from 'react-icons/bs';
+import { FaTimes } from 'react-icons/fa';
+import { FiFileText } from 'react-icons/fi';
+import { postMediaWidth } from 'shared/variables';
 
 interface ModalArgs {
   defaultPostType: PostType;
   toggleModal: () => void;
+}
+
+interface PreviewImageData {
+  preview: string;
+  width: number;
+  height: number;
 }
 
 const NewPost = (args: ModalArgs): JSX.Element => {
@@ -33,18 +44,78 @@ const NewPost = (args: ModalArgs): JSX.Element => {
     formRef.current.setFieldValue('type', args.defaultPostType);
   }, [args.defaultPostType]);
 
+  const [imageInputElem, setImageInputElem] = useState<
+    HTMLInputElement | undefined
+  >(undefined);
+  const [previewImage, setPreviewImage] = useState<
+    PreviewImageData | undefined
+  >(undefined);
+
+  const [fileInputElem, setFileInputElem] = useState<
+    HTMLInputElement | undefined
+  >(undefined);
+  const [fileName, setFileName] = useState<string>('');
+  const [previewFile, setPreviewFile] = useState<string>('');
+
+  useEffect(() => {
+    const imageElem = document.createElement('input');
+    imageElem.setAttribute('type', 'file');
+    imageElem.setAttribute('accept', 'image/jpeg,image/png');
+    imageElem.onchange = (_change_evt) => {
+      if (imageElem.files.length === 0) {
+        setPreviewImage(undefined);
+        imageElem.value = '';
+        return;
+      }
+      if (fileElem && fileElem.files.length > 0) {
+        setFileName('');
+        setPreviewFile('');
+        fileElem.value = '';
+      }
+      const reader = new FileReader();
+      reader.onload = (readEvt) => {
+        const image = new Image();
+        const imagePreview = readEvt.target.result as string;
+        image.onload = () => {
+          const scaleFactor = postMediaWidth / image.width;
+          setPreviewImage({
+            preview: imagePreview,
+            height: image.height * scaleFactor,
+            width: image.width * scaleFactor,
+          });
+        };
+        image.src = imagePreview;
+      };
+      reader.readAsDataURL(imageElem.files[0]);
+    };
+    setImageInputElem(imageElem);
+
+    const fileElem = document.createElement('input');
+    fileElem.setAttribute('type', 'file');
+    fileElem.setAttribute('accept', '*');
+    fileElem.onchange = (_change_evt) => {
+      console.log('found file');
+      if (imageElem && imageElem.files.length > 0) {
+        console.log('delete image');
+        setPreviewImage(undefined);
+        imageElem.value = '';
+      }
+      const reader = new FileReader();
+      reader.onload = (read_event) => {
+        setPreviewFile(read_event.target.result as string);
+        setFileName(fileElem.value.split(/[\\/]/).pop());
+      };
+      reader.readAsDataURL(fileElem.files[0]);
+    };
+    setFileInputElem(fileElem);
+  }, []);
+
   return (
     <div className="fixed z-10 inset-0 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-end justify-center min-h-screen pt-4 px-2 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
-        >
-          &#8203;
-        </span>
         <div
           className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
           role="dialog"
@@ -221,27 +292,128 @@ const NewPost = (args: ModalArgs): JSX.Element => {
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                onClick={(evt) => {
-                  evt.preventDefault();
-                  formRef.current.handleSubmit();
-                }}
-                type="submit"
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-700 text-base font-medium text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Post
-              </button>
-              <button
-                type="button"
-                onClick={(evt) => {
-                  evt.preventDefault();
-                  args.toggleModal();
-                }}
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </button>
+            {!previewImage ? null : (
+              <>
+                <hr />
+                <div className="my-4">
+                  <div className="flex justify-center text-2xl ml-36 text-gray-300">
+                    <button
+                      className="absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
+                      onClick={(evt) => {
+                        evt.preventDefault();
+                        setPreviewImage(undefined);
+                        imageInputElem.value = '';
+                      }}
+                    >
+                      <FaTimes />
+                    </button>
+                    <button
+                      className="ml-20 absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
+                      onClick={(evt) => {
+                        evt.preventDefault();
+                        imageInputElem.click();
+                      }}
+                    >
+                      <BsPencil />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <div className="bg-gray-200 p-4 rounded-xl">
+                      <NextImage
+                        src={previewImage.preview}
+                        width={previewImage.width}
+                        height={previewImage.height}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+            {fileName.length === 0 ? null : (
+              <>
+                <hr />
+                <div className="my-4 flex items-center justify-center">
+                  <div className="bg-gray-100 p-4 rounded-md">
+                    <div className="flex justify-end text-2xl text-gray-300">
+                      <button
+                        className="absolute z-10 rounded-full bg-gray-700 p-1"
+                        onClick={(evt) => {
+                          evt.preventDefault();
+                          fileInputElem.click();
+                        }}
+                      >
+                        <BsPencil />
+                      </button>
+                      <button
+                        className="mr-10 absolute z-10 rounded-full bg-gray-700 p-1"
+                        onClick={(evt) => {
+                          evt.preventDefault();
+                          setFileName('');
+                          setPreviewFile('');
+                          fileInputElem.value = '';
+                        }}
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                    <a
+                      href={previewFile}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mr-36"
+                    >
+                      <FiFileText className="inline-block text-4xl mr-1" />
+                      <span className="text-sm">{fileName}</span>
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
+            <div className="bg-gray-50 px-4 py-3 grid grid-cols-2 items-center">
+              <div className="col-start-1 col-auto text-left">
+                <button
+                  onClick={(evt) => {
+                    evt.preventDefault();
+                    imageInputElem.click();
+                  }}
+                  type="button"
+                  className="text-2xl mr-2 sm:ml-2 text-gray-500"
+                >
+                  <BsFillImageFill />
+                </button>
+                <button
+                  onClick={(evt) => {
+                    evt.preventDefault();
+                    fileInputElem.click();
+                  }}
+                  type="button"
+                  className="text-2xl ml-2 text-gray-500"
+                >
+                  <FiFileText />
+                </button>
+              </div>
+              <div className="col-start-2 col-auto text-right">
+                <button
+                  type="button"
+                  onClick={(evt) => {
+                    evt.preventDefault();
+                    args.toggleModal();
+                  }}
+                  className="mt-2 text-sm rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={(evt) => {
+                    evt.preventDefault();
+                    formRef.current.handleSubmit();
+                  }}
+                  type="submit"
+                  className="mt-2 ml-2 text-sm rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-700 font-medium text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Post
+                </button>
+              </div>
             </div>
           </div>
         </div>
