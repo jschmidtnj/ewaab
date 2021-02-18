@@ -40,6 +40,10 @@ export class SearchPost extends BaseTimestamp {
   @IsDefined()
   publisher: string;
 
+  @Field({ description: 'post link', nullable: true })
+  @Column({ type: 'text', nullable: true })
+  link?: string;
+
   @Field({ description: 'avatar for publisher', nullable: true })
   @Column({ type: 'uuid', nullable: true })
   avatar?: string;
@@ -85,9 +89,4 @@ export default class Post extends SearchPost {
   @Field({ description: 'post id' })
   @PrimaryColumn('uuid')
   id: string;
-
-  @Field({ description: 'post link', nullable: true })
-  @Column({ type: 'text' })
-  @IsDefined()
-  link: string;
 }

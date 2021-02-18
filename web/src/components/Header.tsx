@@ -10,10 +10,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { thunkGetUser, thunkLogout } from 'state/auth/thunks';
 import { AuthActionTypes } from 'state/auth/types';
 import { AppThunkDispatch } from 'state/thunk';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
+import Avatar from 'components/avatar';
 import { RootState } from 'state';
 import { avatarWidth } from 'shared/variables';
-import { getAPIURL } from 'utils/axios';
 import { UserFieldsFragment } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
 import { getUsername } from 'state/auth/getters';
@@ -41,8 +40,6 @@ const Header = (): JSX.Element => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const router = useRouter();
-
-  const apiURL = getAPIURL();
 
   const [paths, setPaths] = useState<LinkData[]>([]);
   const [userPaths, setUserPaths] = useState<LinkData[]>([]);
@@ -204,23 +201,7 @@ const Header = (): JSX.Element => {
                     id="user-menu"
                     aria-haspopup="true"
                   >
-                    {user && user.avatar ? (
-                      <LazyLoadImage
-                        className="h-8 w-8 rounded-full"
-                        alt={`${apiURL}/media/${user.avatar}/blur?auth=${user.mediaAuth}`}
-                        height={avatarWidth}
-                        src={`${apiURL}/media/${user.avatar}?auth=${user.mediaAuth}`}
-                        width={avatarWidth}
-                      />
-                    ) : (
-                      <Image
-                        className="h-8 w-8 rounded-full"
-                        width={avatarWidth}
-                        height={avatarWidth}
-                        src="/assets/img/default_avatar.png"
-                        alt="avatar"
-                      />
-                    )}
+                    <Avatar avatar={user?.avatar} avatarWidth={avatarWidth} />
                   </button>
                 </div>
                 <div

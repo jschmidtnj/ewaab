@@ -32,7 +32,7 @@ import { isSSR } from 'utils/checkSSR';
 import React, { useEffect, useState } from 'react';
 import { RootState } from 'state';
 import Image from 'next/image';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
+import Avatar from 'components/avatar';
 import { getAPIURL } from 'utils/axios';
 import DeleteAccountModal from 'components/modals/DeleteAccount';
 import Link from 'next/link';
@@ -506,7 +506,7 @@ const ProfilePage = (): JSX.Element => {
                                 onBlur={handleBlur}
                                 value={values.url}
                                 disabled={isSubmitting}
-                                type="text"
+                                type="url"
                                 name="url"
                                 id="url"
                                 className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
@@ -728,24 +728,11 @@ const ProfilePage = (): JSX.Element => {
                                   width={40}
                                   height={40}
                                 />
-                              ) : user.avatar ? (
-                                <LazyLoadImage
-                                  className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100"
-                                  alt={`${apiURL}/media/${user.avatar}/blur?auth=${user.mediaAuth}`}
-                                  height={40}
-                                  src={`${apiURL}/media/${user.avatar}?auth=${user.mediaAuth}`}
-                                  width={40}
-                                />
                               ) : (
-                                <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
-                                  <svg
-                                    className="h-full w-full text-gray-300"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                                  </svg>
-                                </span>
+                                <Avatar
+                                  avatar={user?.avatar}
+                                  avatarWidth={40}
+                                />
                               )}
                               <button
                                 onClick={(evt) => {

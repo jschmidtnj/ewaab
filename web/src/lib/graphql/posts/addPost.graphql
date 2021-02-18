@@ -1,0 +1,5 @@
+mutation addPost($title: String!, $content: String!, $type: PostType!,
+                 $link: String, $media: Upload) {
+  addPost(title: $title, content: $content, type: $type
+          link: $link, media: $media)
+}

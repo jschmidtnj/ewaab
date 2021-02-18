@@ -24,8 +24,8 @@ type Mutation {
     """post content"""
     content: String!
 
-    """username"""
-    link: String!
+    """link"""
+    link: String
 
     """media"""
     media: Upload
@@ -395,6 +395,9 @@ type SearchPost {
 
   """post id"""
   id: String!
+
+  """post link"""
+  link: String
 
   """media for post"""
   media: String

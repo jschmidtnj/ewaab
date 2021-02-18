@@ -5,6 +5,7 @@ import {
   Posts,
   PostsQuery,
   PostsQueryVariables,
+  PostType,
 } from 'lib/generated/datamodel';
 import Select, { ValueType } from 'react-select';
 import { useEffect, useRef, useState } from 'react';
@@ -56,6 +57,7 @@ const SearchPage = (): JSX.Element => {
     ascending: false,
     page: 0,
     perpage: defaultPerPage,
+    type: PostType.StudentCommunity,
   };
 
   const formRef = useRef<
@@ -213,14 +215,6 @@ const SearchPage = (): JSX.Element => {
                     </div>
                   </div>
 
-                  {!newPostModalIsOpen ? null : (
-                    <NewPostModal
-                      toggleModal={toggleNewPostModal}
-                      onSubmit={() => {
-                        // console.log('created new post');
-                      }}
-                    />
-                  )}
                   <button
                     className="mt-1 text-sm bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none md:rounded-r w-20"
                     onClick={(evt) => {
@@ -235,6 +229,12 @@ const SearchPage = (): JSX.Element => {
               </form>
             )}
           </Formik>
+          {!newPostModalIsOpen ? null : (
+            <NewPostModal
+              toggleModal={toggleNewPostModal}
+              defaultPostType={formRef.current.values.type}
+            />
+          )}
           {!posts ||
           posts.loading ||
           !posts.data ||

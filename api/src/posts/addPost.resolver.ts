@@ -17,6 +17,7 @@ import { s3Client, fileBucket, getMediaKey } from '../utils/aws';
 import { imageMime } from '../utils/misc';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
+import { getTime } from '../shared/time';
 
 @ArgsType()
 class AddPostArgs {
@@ -35,11 +36,12 @@ class AddPostArgs {
   @Field(_type => PostType, { description: 'post type' })
   type: PostType;
 
-  @Field(_type => String, { description: 'username' })
+  @Field(_type => String, { description: 'link', nullable: true })
+  @IsOptional()
   @IsUrl({}, {
     message: 'invalid link provided'
   })
-  link: string;
+  link?: string;
 
   @Field(_type => GraphQLUpload, { description: 'media', nullable: true })
   @IsOptional()
@@ -77,7 +79,7 @@ class AddPostResolver {
     return new Promise<string>(async (resolve, reject) => {
       const callback = async (mediaID: string | undefined) => {
         const PostModel = getRepository(Post);
-        const now = new Date().getTime();
+        const now = getTime();
         const searchPost: SearchPost = {
           title: args.title,
           content: args.content,

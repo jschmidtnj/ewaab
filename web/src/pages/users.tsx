@@ -24,13 +24,8 @@ import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 import isDebug from 'utils/mode';
 import majors from 'shared/majors';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { getAPIURL } from 'utils/axios';
-import { isSSR } from 'utils/checkSSR';
-import { useSelector } from 'react-redux';
-import { RootState } from 'state';
-import Image from 'next/image';
 import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
+import Avatar from 'components/avatar';
 
 const avatarWidth = 40;
 
@@ -81,13 +76,6 @@ const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
 };
 
 const UsersPage = (): JSX.Element => {
-  const mediaAuth = isSSR
-    ? undefined
-    : useSelector<RootState, string>((state) => {
-        const mediaAuth = state.authReducer.user?.mediaAuth;
-        return mediaAuth ? mediaAuth : '';
-      });
-
   const [users, setUsers] = useState<ApolloQueryResult<UsersQuery> | undefined>(
     undefined
   );
@@ -144,8 +132,6 @@ const UsersPage = (): JSX.Element => {
       }
     })();
   }, []);
-
-  const apiURL = getAPIURL();
 
   return (
     <Layout>
@@ -379,23 +365,10 @@ const UsersPage = (): JSX.Element => {
                       {users.data.users.results.map((user, i) => (
                         <tr key={`user-${i}-${user.username}`}>
                           <td className="w-16 pl-4 py-4 whitespace-nowrap">
-                            {user && user.avatar ? (
-                              <LazyLoadImage
-                                className="h-5 w-5 rounded-full"
-                                alt={`${apiURL}/media/${user.avatar}/blur?auth=${mediaAuth}`}
-                                height={avatarWidth}
-                                src={`${apiURL}/media/${user.avatar}?auth=${mediaAuth}`}
-                                width={avatarWidth}
-                              />
-                            ) : (
-                              <Image
-                                className="h-5 w-5 rounded-full"
-                                width={avatarWidth}
-                                height={avatarWidth}
-                                src="/assets/img/default_avatar.png"
-                                alt="avatar"
-                              />
-                            )}
+                            <Avatar
+                              avatar={user.avatar}
+                              avatarWidth={avatarWidth}
+                            />
                           </td>
                           <td className="w-0 px-4 py-4 whitespace-nowrap text-sm font-medium">
                             <Link href={`/${user.username}`}>

@@ -19,6 +19,7 @@ import { maxFileUploadSize, blurredWidth } from '../utils/variables';
 import { ApolloError } from 'apollo-server-express';
 import { deleteMedia } from '../users/media.resolver';
 import { v4 as uuidv4 } from 'uuid';
+import { getTime } from '../shared/time';
 
 @ArgsType()
 class UpdatePostArgs {
@@ -89,7 +90,7 @@ class UpdatePostResolver {
     if (args.link !== undefined) {
       postUpdateData.link = args.link;
     }
-    const now = new Date().getTime();
+    const now = getTime();
     postUpdateData.updated = now;
 
     return new Promise<string>(async (resolve, reject) => {

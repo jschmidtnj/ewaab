@@ -19,6 +19,9 @@ const postMappings = {
   publisher: {
     type: 'keyword'
   },
+  link: {
+    type: 'keyword'
+  },
   avatar: {
     type: 'keyword'
   },

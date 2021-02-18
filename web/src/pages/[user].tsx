@@ -19,7 +19,6 @@ import { isSSR } from 'utils/checkSSR';
 import { useRouter } from 'next/dist/client/router';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
-import Image from 'next/image';
 import { getAPIURL } from 'utils/axios';
 import { FaFacebook, FaTwitter, FaGithub, FaEnvelope } from 'react-icons/fa';
 import { FiFileText } from 'react-icons/fi';
@@ -27,8 +26,8 @@ import { IoMdSchool } from 'react-icons/io';
 import { GrLocation } from 'react-icons/gr';
 import { BsLink45Deg } from 'react-icons/bs';
 import { baseFacebook, baseGitHub, baseTwitter } from 'shared/variables';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { defaultMajor } from 'shared/majors';
+import Avatar from 'components/avatar';
 
 const avatarWidth = 40;
 
@@ -88,23 +87,7 @@ const UserPage = (): JSX.Element => {
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center">
-                  {user && user.avatar ? (
-                    <LazyLoadImage
-                      className="h-5 w-5 rounded-full"
-                      alt={`${apiURL}/media/${user.avatar}/blur`}
-                      height={avatarWidth}
-                      src={`${apiURL}/media/${user.avatar}`}
-                      width={avatarWidth}
-                    />
-                  ) : (
-                    <Image
-                      className="h-5 w-5 rounded-full"
-                      width={avatarWidth}
-                      height={avatarWidth}
-                      src="/assets/img/default_avatar.png"
-                      alt="avatar"
-                    />
-                  )}
+                  <Avatar avatar={user?.avatar} avatarWidth={avatarWidth} />
                   <h2 className="ml-3 inline-block text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                     {user.name}
                   </h2>

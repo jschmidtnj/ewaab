@@ -54,7 +54,7 @@ export type Mutation = {
 
 export type MutationAddPostArgs = {
   content: Scalars['String'];
-  link: Scalars['String'];
+  link?: Maybe<Scalars['String']>;
   media?: Maybe<Scalars['Upload']>;
   title: Scalars['String'];
   type: PostType;
@@ -289,6 +289,8 @@ export type SearchPost = {
   created: Scalars['Float'];
   /** post id */
   id: Scalars['String'];
+  /** post link */
+  link?: Maybe<Scalars['String']>;
   /** media for post */
   media?: Maybe<Scalars['String']>;
   /** post publisher */
@@ -410,6 +412,19 @@ export enum UserType {
   User = 'user',
   Visitor = 'visitor',
 }
+
+export type AddPostMutationVariables = Exact<{
+  title: Scalars['String'];
+  content: Scalars['String'];
+  type: PostType;
+  link?: Maybe<Scalars['String']>;
+  media?: Maybe<Scalars['Upload']>;
+}>;
+
+export type AddPostMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'addPost'
+>;
 
 export type PostsQueryVariables = Exact<{
   query?: Maybe<Scalars['String']>;
@@ -652,6 +667,23 @@ export const UserFields = gql`
     twitter
     description
     bio
+  }
+`;
+export const AddPost = gql`
+  mutation addPost(
+    $title: String!
+    $content: String!
+    $type: PostType!
+    $link: String
+    $media: Upload
+  ) {
+    addPost(
+      title: $title
+      content: $content
+      type: $type
+      link: $link
+      media: $media
+    )
   }
 `;
 export const Posts = gql`
