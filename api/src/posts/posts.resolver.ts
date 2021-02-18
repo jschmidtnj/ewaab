@@ -5,7 +5,7 @@ import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { Min, Max, IsOptional } from 'class-validator';
-import { PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
+import { PostCount, PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import { postViewMap } from './post.resolver';
 import esb from 'elastic-builder';
 
@@ -30,6 +30,9 @@ export class PostsArgs {
 
   @Field(_type => Boolean, { description: 'sort direction', nullable: true, defaultValue: true })
   ascending: boolean;
+
+  @Field(_type => [PostType], { description: 'post counts', nullable: true })
+  postCounts?: PostType[];
 
   @Min(0, {
     message: 'page number must be greater than or equal to 0'
@@ -91,15 +94,17 @@ class PostsResolver {
       filterParams.push(esb.termQuery('type', args.type));
     }
 
-    const getAggregates = args.type === undefined;
+    if (args.postCounts === undefined) {
+      args.postCounts = postViewMap[ctx.auth.type];
+    } else if (args.postCounts.some(postType => !postViewMap[ctx.auth!.type].includes(postType))) {
+      throw new Error(`user of type ${ctx.auth!.type} not authorized to aggregate over given post types`);
+    }
 
     const aggregates: esb.Aggregation[] = [];
 
-    if (getAggregates) {
-      for (const postType of Object.values(PostType)) {
-        const filters = [...filterParams, esb.matchQuery('type', postType)];
-        aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters)));
-      }
+    for (const postType of Object.values(PostType)) {
+      const filters = [...filterParams, esb.matchQuery('type', postType)];
+      aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters)));
     }
 
     let requestBody = esb.requestBodySearch().query(buildFilters(mustShouldParams, filterParams));
@@ -107,10 +112,7 @@ class PostsResolver {
       requestBody = requestBody.sort(esb.sort(args.sortBy,
         args.ascending ? 'asc' : 'desc'));
     }
-    requestBody = requestBody.from(args.page).size(args.perpage);
-    if (getAggregates) {
-      requestBody = requestBody.aggregations(aggregates);
-    }
+    requestBody = requestBody.from(args.page).size(args.perpage).aggregations(aggregates);
 
     const searchParams: RequestParams.Search = {
       index: postIndexName,
@@ -129,26 +131,20 @@ class PostsResolver {
       results.push(currentPost);
     }
     const totalCount = elasticPostData.body.hits.total.value;
-    const counts: Record<PostType, number> = Object.values(PostType).reduce((map, type) => {
-      map[type] = 0;
-      return map;
-    }, {} as Record<PostType, number>);
+    const counts: PostCount[] = [];
 
-    if (!getAggregates) {
-      counts[args.type!] = totalCount;
-    } else {
-      for (const postType of Object.values(PostType)) {
-        counts[postType] = elasticPostData.body.aggregations[postType].buckets[postType].doc_count;
-      }
+    for (const postType of args.postCounts) {
+      const count: number = elasticPostData.body.aggregations[postType].buckets[postType].doc_count;
+      counts.push({
+        count,
+        type: postType
+      });
     }
 
     return {
       results,
       count: totalCount,
-      countEncourageHer: counts[PostType.encourageHer],
-      countStudentCommunity: counts[PostType.studentCommunity],
-      countMentorNews: counts[PostType.mentorNews],
-      countStudentNews: counts[PostType.studentNews]
+      postCounts: counts
     };
   }
 }

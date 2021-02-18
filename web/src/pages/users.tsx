@@ -409,7 +409,10 @@ const UsersPage = (): JSX.Element => {
                               formRef.current.values.page - 1
                             );
                           }}
-                          disabled={formRef.current.values.page === 0}
+                          disabled={
+                            formRef?.current &&
+                            formRef.current.values.page === 0
+                          }
                         >
                           Prev
                         </button>
@@ -423,10 +426,11 @@ const UsersPage = (): JSX.Element => {
                             );
                           }}
                           disabled={
+                            formRef?.current &&
                             formRef.current.values.page *
                               formRef.current.values.perpage +
                               users.data.users.results.length ===
-                            users.data.users.count
+                              users.data.users.count
                           }
                         >
                           Next

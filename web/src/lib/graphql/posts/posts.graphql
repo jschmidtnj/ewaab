@@ -9,9 +9,9 @@ query posts($query: String, $type: PostType, $page: Int, $perpage: Int, $ascendi
       avatar
     }
     count
-    countStudentNews
-    countMentorNews
-    countEncourageHer
-    countStudentCommunity
+    postCounts {
+      type
+      count
+    }
   }
 }

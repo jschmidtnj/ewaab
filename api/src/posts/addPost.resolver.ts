@@ -50,7 +50,7 @@ class AddPostArgs {
 
 const userAccessMap: Record<UserType, PostType[]> = {
   [UserType.admin]: Object.values(PostType),
-  [UserType.user]: [PostType.studentCommunity],
+  [UserType.user]: [PostType.community],
   [UserType.mentor]: [PostType.mentorNews],
   [UserType.visitor]: [],
 };

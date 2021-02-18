@@ -8,6 +8,7 @@ module.exports = {
   variants: {
     extend: {
       backgroundColor: ['disabled'],
+      borderRadius: ['first', 'last'],
     },
   },
   plugins: [require('@tailwindcss/forms')],

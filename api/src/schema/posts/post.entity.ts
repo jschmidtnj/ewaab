@@ -7,7 +7,7 @@ export enum PostType {
   studentNews = 'studentNews',
   mentorNews = 'mentorNews',
   encourageHer = 'encourageHer',
-  studentCommunity = 'studentCommunity',
+  community = 'community',
 }
 
 registerEnumType(PostType, {
@@ -65,6 +65,15 @@ registerEnumType(PostSortOption, {
   description: 'post sort options',
 });
 
+@ObjectType({ description: 'post count data' })
+export class PostCount {
+  @Field(_type => PostType, { description: 'post type for count' })
+  type: PostType;
+
+  @Field(_type => Int, { description: 'posts count' })
+  count: number;
+}
+
 @ObjectType({ description: 'post data search results' })
 export class SearchPostsResult {
   @Field(_type => [SearchPost], { description: 'results' })
@@ -73,14 +82,8 @@ export class SearchPostsResult {
   @Field(_type => Int, { description: 'total posts count' })
   count: number;
 
-  @Field(_type => Int, { description: 'student news count' })
-  countStudentNews: number;
-  @Field(_type => Int, { description: 'mentor news count' })
-  countMentorNews: number;
-  @Field(_type => Int, { description: 'encourage her news count' })
-  countEncourageHer: number;
-  @Field(_type => Int, { description: 'student community count' })
-  countStudentCommunity: number;
+  @Field(_type => [PostCount], { description: 'aggregate counts of posts' })
+  postCounts: PostCount[];
 }
 
 @ObjectType({ description: 'post data' })

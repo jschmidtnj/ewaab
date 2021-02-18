@@ -174,6 +174,15 @@ export type Post = {
   updated: Scalars['Float'];
 };
 
+/** post count data */
+export type PostCount = {
+  __typename?: 'PostCount';
+  /** posts count */
+  count: Scalars['Int'];
+  /** post type for count */
+  type: PostType;
+};
+
 /** post sort options */
 export enum PostSortOption {
   Created = 'created',
@@ -184,9 +193,9 @@ export enum PostSortOption {
 
 /** post type */
 export enum PostType {
+  Community = 'community',
   EncourageHer = 'encourageHer',
   MentorNews = 'mentorNews',
-  StudentCommunity = 'studentCommunity',
   StudentNews = 'studentNews',
 }
 
@@ -256,6 +265,7 @@ export type QueryPostsArgs = {
   created?: Maybe<Scalars['Int']>;
   page?: Maybe<Scalars['Int']>;
   perpage?: Maybe<Scalars['Int']>;
+  postCounts?: Maybe<Array<PostType>>;
   query?: Maybe<Scalars['String']>;
   sortBy?: Maybe<PostSortOption>;
   type?: Maybe<PostType>;
@@ -308,14 +318,8 @@ export type SearchPostsResult = {
   __typename?: 'SearchPostsResult';
   /** total posts count */
   count: Scalars['Int'];
-  /** encourage her news count */
-  countEncourageHer: Scalars['Int'];
-  /** mentor news count */
-  countMentorNews: Scalars['Int'];
-  /** student community count */
-  countStudentCommunity: Scalars['Int'];
-  /** student news count */
-  countStudentNews: Scalars['Int'];
+  /** aggregate counts of posts */
+  postCounts: Array<PostCount>;
   /** results */
   results: Array<SearchPost>;
 };
@@ -437,17 +441,16 @@ export type PostsQueryVariables = Exact<{
 export type PostsQuery = { __typename?: 'Query' } & {
   posts: { __typename?: 'SearchPostsResult' } & Pick<
     SearchPostsResult,
-    | 'count'
-    | 'countStudentNews'
-    | 'countMentorNews'
-    | 'countEncourageHer'
-    | 'countStudentCommunity'
+    'count'
   > & {
       results: Array<
         { __typename?: 'SearchPost' } & Pick<
           SearchPost,
           'title' | 'content' | 'publisher' | 'created' | 'updated' | 'avatar'
         >
+      >;
+      postCounts: Array<
+        { __typename?: 'PostCount' } & Pick<PostCount, 'type' | 'count'>
       >;
     };
 };
@@ -710,10 +713,10 @@ export const Posts = gql`
         avatar
       }
       count
-      countStudentNews
-      countMentorNews
-      countEncourageHer
-      countStudentCommunity
+      postCounts {
+        type
+        count
+      }
     }
   }
 `;

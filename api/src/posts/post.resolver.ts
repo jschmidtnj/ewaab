@@ -8,7 +8,7 @@ import { UserType } from '../schema/users/user.entity';
 export const postViewMap: Record<UserType, PostType[]> = {
   [UserType.admin]: Object.values(PostType),
   [UserType.user]: Object.values(PostType),
-  [UserType.mentor]: [PostType.mentorNews],
+  [UserType.mentor]: [PostType.mentorNews, PostType.community],
   [UserType.visitor]: [],
 };
 

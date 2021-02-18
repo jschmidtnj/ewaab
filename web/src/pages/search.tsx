@@ -23,14 +23,14 @@ import isDebug from 'utils/mode';
 import { AiOutlinePlus } from 'react-icons/ai';
 import NewPostModal from 'components/modals/NewPost';
 
-const SearchPage = (): JSX.Element => {
-  // const mediaAuth = isSSR
-  //   ? undefined
-  //   : useSelector<RootState, string>((state) => {
-  //       const mediaAuth = state.authReducer.user?.mediaAuth;
-  //       return mediaAuth ? mediaAuth : '';
-  //     });
+const typeLabelMap: Record<PostType, string> = {
+  [PostType.Community]: 'Community',
+  [PostType.EncourageHer]: 'Encourage Her',
+  [PostType.MentorNews]: 'Mentor News',
+  [PostType.StudentNews]: 'Student News',
+};
 
+const SearchPage = (): JSX.Element => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
     undefined
   );
@@ -57,7 +57,7 @@ const SearchPage = (): JSX.Element => {
     ascending: false,
     page: 0,
     perpage: defaultPerPage,
-    type: PostType.StudentCommunity,
+    type: PostType.Community,
   };
 
   const formRef = useRef<
@@ -87,8 +87,6 @@ const SearchPage = (): JSX.Element => {
     })();
   }, []);
 
-  // const apiURL = getAPIURL();
-
   return (
     <PrivateRoute>
       <Layout>
@@ -103,6 +101,7 @@ const SearchPage = (): JSX.Element => {
               ascending: yup.bool(),
               page: yup.number().integer(),
               perpage: yup.number().integer(),
+              type: yup.string(),
             })}
             onSubmit={async (formData, { setSubmitting, setStatus }) => {
               const onError = () => {
@@ -235,100 +234,132 @@ const SearchPage = (): JSX.Element => {
               defaultPostType={formRef.current.values.type}
             />
           )}
-          {!posts ||
-          posts.loading ||
-          !posts.data ||
-          posts.data.posts.results.length === 0 ? (
-            <p className="text-md pt-4">No posts found</p>
-          ) : (
-            <div className="flex flex-col mt-4">
-              <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                  <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                    <div className="max-w-sm bg-white border-2 border-gray-300 p-6 rounded-md tracking-wide shadow-lg">
-                      <div id="header" className="flex items-center mb-4">
-                        <img
-                          alt="avatar"
-                          className="w-20 rounded-full border-2 border-gray-300"
-                          src="https://picsum.photos/seed/picsum/200"
-                        />
-                        <div id="header-text" className="leading-5 ml-6 sm">
-                          <h4 id="name" className="text-xl font-semibold">
-                            John Doe
-                          </h4>
-                          <h5 id="job" className="font-semibold text-blue-600">
-                            Designer
-                          </h5>
+
+          <div className="flex flex-col mt-4">
+            <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 lg:grid-cols-4">
+                  <div className="col-start-1 col-auto mb-4 rounded-lg">
+                    <ul className="flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md max-w-xs">
+                      {!posts || posts.loading || !posts.data
+                        ? null
+                        : posts.data.posts.postCounts.map((countData, i) => (
+                            <li
+                              key={`post-type-${i}-${countData.type}`}
+                              className={
+                                countData.type === formRef.current.values.type
+                                  ? 'bg-gray-200'
+                                  : 'bg-white'
+                              }
+                            >
+                              <button
+                                className="w-full flex flex-row p-3 border-b first:rounded-md last:rounded-md"
+                                onClick={(evt) => {
+                                  evt.preventDefault();
+                                  let newType: PostType | undefined;
+                                  if (
+                                    formRef.current.values.type ===
+                                    countData.type
+                                  ) {
+                                    newType = undefined;
+                                  } else {
+                                    newType = countData.type;
+                                  }
+                                  formRef.current.setFieldValue(
+                                    'type',
+                                    newType
+                                  );
+                                  formRef.current.handleSubmit();
+                                }}
+                              >
+                                <span className="inline-block text-left text-base w-full">
+                                  {typeLabelMap[countData.type]}
+                                </span>
+                                <span className="inline-block w-full pr-2">
+                                  <div className="float-right flex items-center justify-center rounded-full h-0.5 w-0.5 bg-purple-500 text-white p-3 text-sm">
+                                    {countData.count}
+                                  </div>
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                    </ul>
+                  </div>
+
+                  <div className="col-span-3 lg:mx-4">
+                    {!posts ||
+                    posts.loading ||
+                    !posts.data ||
+                    posts.data.posts.results.length === 0 ? (
+                      <p className="text-md pt-4">No posts found</p>
+                    ) : (
+                      <>
+                        <table className="min-w-full">
+                          <tbody className="bg-white">
+                            {posts.data.posts.results.map((post, i) => (
+                              <tr key={`post-${i}-${post.title}`}>
+                                <td className="w-16 pl-4 py-4 whitespace-nowrap">
+                                  {post.title}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+
+                        <div className="overflow-hidden border-b border-gray-200">
+                          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                            <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                              <span className="text-sm text-gray-700 mr-4">
+                                Showing {posts.data.posts.results.length} /{' '}
+                                {posts.data.posts.count}
+                              </span>
+                              <div
+                                className="relative inline-flex -space-x-px"
+                                aria-label="Pagination"
+                              >
+                                <button
+                                  className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l"
+                                  onClick={(evt) => {
+                                    evt.preventDefault();
+                                    formRef.current.setFieldValue(
+                                      'page',
+                                      formRef.current.values.page - 1
+                                    );
+                                  }}
+                                  disabled={formRef?.current.values.page === 0}
+                                >
+                                  Prev
+                                </button>
+                                <button
+                                  className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r"
+                                  onClick={(evt) => {
+                                    evt.preventDefault();
+                                    formRef.current.setFieldValue(
+                                      'page',
+                                      formRef.current.values.page + 1
+                                    );
+                                  }}
+                                  disabled={
+                                    formRef?.current &&
+                                    formRef.current.values.page *
+                                      formRef.current.values.perpage +
+                                      posts.data.posts.results.length ===
+                                      posts.data.posts.count
+                                  }
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div id="quote">
-                        <q className="italic text-gray-600">
-                          Lorem ipsum dolor sit amet, consectetur adipiscing
-                          elit, sed do eiusmod tempor incididunt ut labore et
-                          dolore magna aliqua.
-                        </q>
-                      </div>
-                    </div>
-                    <table className="min-w-full">
-                      <tbody className="bg-white">
-                        {posts.data.posts.results.map((post, i) => (
-                          <tr key={`post-${i}-${post.title}`}>
-                            <td className="w-16 pl-4 py-4 whitespace-nowrap">
-                              {post.title}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                      <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <span className="text-sm text-gray-700 mr-4">
-                          Showing {posts.data.posts.results.length} /{' '}
-                          {posts.data.posts.count}
-                        </span>
-                        <div
-                          className="relative inline-flex shadow-sm -space-x-px"
-                          aria-label="Pagination"
-                        >
-                          <button
-                            className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l"
-                            onClick={(evt) => {
-                              evt.preventDefault();
-                              formRef.current.setFieldValue(
-                                'page',
-                                formRef.current.values.page - 1
-                              );
-                            }}
-                            disabled={formRef.current.values.page === 0}
-                          >
-                            Prev
-                          </button>
-                          <button
-                            className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r"
-                            onClick={(evt) => {
-                              evt.preventDefault();
-                              formRef.current.setFieldValue(
-                                'page',
-                                formRef.current.values.page + 1
-                              );
-                            }}
-                            disabled={
-                              formRef.current.values.page *
-                                formRef.current.values.perpage +
-                                posts.data.posts.results.length ===
-                              posts.data.posts.count
-                            }
-                          >
-                            Next
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </Layout>
     </PrivateRoute>
