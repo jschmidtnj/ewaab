@@ -8,7 +8,8 @@ export const initializeElastic = async (): Promise<string> => {
     throw new Error('cannot find elasticsearch uri');
   }
   elasticClient = new Client({
-    node: configData.ELASTICSEARCH_URI
+    node: configData.ELASTICSEARCH_URI,
+    requestTimeout: 5000
   });
   try {
     const res = await elasticClient.ping();

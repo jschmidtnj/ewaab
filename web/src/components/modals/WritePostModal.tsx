@@ -3,10 +3,14 @@ import {
   AddPost,
   AddPostMutation,
   AddPostMutationVariables,
+  CurrentPostUpdateFieldsFragment,
   PostType,
   PostUpdateData,
   PostUpdateDataQuery,
   PostUpdateDataQueryVariables,
+  UpdatePost,
+  UpdatePostMutation,
+  UpdatePostMutationVariables,
   UserFieldsFragment,
 } from 'lib/generated/datamodel';
 import { useEffect, useRef, useState } from 'react';
@@ -62,6 +66,10 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
   >(undefined);
   const [fileName, setFileName] = useState<string>('');
   const [previewFile, setPreviewFile] = useState<string>('');
+
+  const [currentPostData, setCurrentPostData] = useState<
+    CurrentPostUpdateFieldsFragment | undefined
+  >(undefined);
 
   useEffect(() => {
     const imageElem = document.createElement('input');
@@ -124,12 +132,25 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
             PostUpdateDataQueryVariables
           >({
             query: PostUpdateData,
+            variables: {
+              id: args.updateID,
+            },
             fetchPolicy: isDebug() ? 'no-cache' : 'cache-first', // disable cache if in debug
           });
           if (updateDataRes.errors) {
             throw new Error(updateDataRes.errors.join(', '));
           }
+          formRef.current.setValues({
+            title: updateDataRes.data.post.title,
+            content: updateDataRes.data.post.content,
+            type: updateDataRes.data.post.type as PostType,
+            link: updateDataRes.data.post.link
+              ? updateDataRes.data.post.link
+              : '',
+          });
+          setCurrentPostData(updateDataRes.data.post);
           // TODO - set update data, set preview image / file download. height of image?
+          // no height of image needed because we're using lazy load
         } catch (err) {
           toast(err.message, {
             type: 'error',
@@ -191,28 +212,84 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                         setSubmitting(false);
                       };
                       try {
-                        const variables = {
-                          ...formData,
-                          link:
-                            formData.link.length === 0
-                              ? undefined
-                              : formData.link,
-                        };
-                        const addPostRes = await client.mutate<
-                          AddPostMutation,
-                          AddPostMutationVariables
-                        >({
-                          mutation: AddPost,
-                          variables,
-                        });
-                        if (addPostRes.errors) {
-                          throw new Error(addPostRes.errors.join(', '));
+                        if (args.updateID) {
+                          if (!currentPostData) {
+                            throw new Error(
+                              `no current post data found for ${args.updateID}`
+                            );
+                          }
+                          let foundUpdate = false;
+                          const updates: UpdatePostMutationVariables = {
+                            id: args.updateID,
+                          };
+                          if (formData.title !== currentPostData.title) {
+                            updates.title = currentPostData.title;
+                            foundUpdate = true;
+                          }
+                          if (formData.content !== currentPostData.title) {
+                            updates.content = currentPostData.content;
+                            foundUpdate = true;
+                          }
+                          if (formData.link !== currentPostData.link) {
+                            updates.link = currentPostData.link;
+                            foundUpdate = true;
+                          }
+                          if (formData.link !== currentPostData.link) {
+                            updates.link = currentPostData.link;
+                            foundUpdate = true;
+                          }
+                          if (imageInputElem.files.length > 0) {
+                            updates.media = imageInputElem.files[0];
+                            foundUpdate = true;
+                          } else if (fileInputElem.files.length > 0) {
+                            updates.media = fileInputElem.files[0];
+                            foundUpdate = true;
+                          }
+                          if (!foundUpdate) {
+                            throw new Error('no updates found');
+                          }
+                          const updatePostRes = await client.mutate<
+                            UpdatePostMutation,
+                            UpdatePostMutationVariables
+                          >({
+                            mutation: UpdatePost,
+                            variables: updates,
+                          });
+                          if (updatePostRes.errors) {
+                            throw new Error(updatePostRes.errors.join(', '));
+                          }
+                        } else {
+                          const variables: AddPostMutationVariables = {
+                            ...formData,
+                            link:
+                              formData.link.length === 0
+                                ? undefined
+                                : formData.link,
+                          };
+                          if (imageInputElem.files.length > 0) {
+                            variables.media = imageInputElem.files[0];
+                          } else if (fileInputElem.files.length > 0) {
+                            variables.media = fileInputElem.files[0];
+                          }
+                          const addPostRes = await client.mutate<
+                            AddPostMutation,
+                            AddPostMutationVariables
+                          >({
+                            mutation: AddPost,
+                            variables,
+                          });
+                          if (addPostRes.errors) {
+                            throw new Error(addPostRes.errors.join(', '));
+                          }
                         }
                         setStatus({ success: true });
                         setSubmitting(false);
-                        toast('Added Post', {
-                          type: 'success',
-                        });
+                        toast(
+                          (!args.updateID ? 'Added' : 'Updated') + ' Post',
+                          {
+                            type: 'success',
+                          }
+                        );
                         args.onSubmit();
                         args.toggleModal();
                       } catch (err) {

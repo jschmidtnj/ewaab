@@ -22,7 +22,7 @@ import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 import isDebug from 'utils/mode';
 import { AiOutlinePlus } from 'react-icons/ai';
-import WritePost from 'components/modals/WritePostModal';
+import WritePostModal from 'components/modals/WritePostModal';
 import PostView from 'components/PostView';
 import DeletePostModal from 'components/modals/DeletePostModal';
 import sleep from 'shared/sleep';
@@ -71,7 +71,15 @@ const SearchPage = (): JSX.Element => {
   >();
 
   const [newPostModalIsOpen, setWritePostIsOpen] = useState<boolean>(false);
-  const toggleWritePost = () => setWritePostIsOpen(!newPostModalIsOpen);
+  const [updatePostID, setUpdatePostID] = useState<string | undefined>(
+    undefined
+  );
+  const toggleWritePost = () => {
+    if (newPostModalIsOpen) {
+      setUpdatePostID(undefined);
+    }
+    setWritePostIsOpen(!newPostModalIsOpen);
+  };
 
   const [deletePostModalIsOpen, setDeletePostModalIsOpen] = useState<boolean>(
     false
@@ -242,14 +250,15 @@ const SearchPage = (): JSX.Element => {
             )}
           </Formik>
           {!newPostModalIsOpen ? null : (
-            <WritePost
+            <WritePostModal
               toggleModal={toggleWritePost}
               defaultPostType={formRef.current.values.type}
               onSubmit={async () => {
                 // wait for elasticsearch to update
-                await sleep(500);
+                await sleep(1000);
                 formRef.current.handleSubmit();
               }}
+              updateID={updatePostID}
             />
           )}
 
@@ -312,7 +321,7 @@ const SearchPage = (): JSX.Element => {
                       toggleModal={toggleDeletePostModal}
                       onSubmit={async () => {
                         // wait for elasticsearch to update
-                        await sleep(500);
+                        await sleep(1000);
                         formRef.current.handleSubmit();
                       }}
                       variables={deletePostVariables}
@@ -337,6 +346,10 @@ const SearchPage = (): JSX.Element => {
                                     onDeletePost={(vars) => {
                                       setDeletePostVariables(vars);
                                       toggleDeletePostModal();
+                                    }}
+                                    onUpdatePost={(postID) => {
+                                      setUpdatePostID(postID);
+                                      toggleWritePost();
                                     }}
                                   />
                                 </td>

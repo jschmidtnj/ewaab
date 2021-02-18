@@ -11,7 +11,7 @@ import { GraphQLContext } from '../utils/context';
 import User, { UserType } from '../schema/users/user.entity';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { blurredWidth, maxFileUploadSize } from '../utils/variables';
-import Media, { MediaParentType } from '../schema/media/media.entity';
+import Media, { MediaParentType, MediaType } from '../schema/media/media.entity';
 import sharp from 'sharp';
 import { s3Client, fileBucket, getMediaKey } from '../utils/aws';
 import { imageMime } from '../utils/misc';
@@ -55,6 +55,77 @@ const userAccessMap: Record<UserType, PostType[]> = {
   [UserType.visitor]: [],
 };
 
+export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Promise<string | undefined> => {
+  let numReading = 0;
+  return new Promise<string | undefined>(async (resolve, reject) => {
+    if (media) {
+      const mediaFile = await media;
+      const mediaReadStream = mediaFile.createReadStream();
+      if (mediaReadStream.readableLength > maxFileUploadSize) {
+        reject(new Error(`media file ${mediaFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
+        return;
+      }
+      const data: Uint8Array[] = [];
+      mediaReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
+      mediaReadStream.on('error', reject);
+      mediaReadStream.on('end', () => {
+        let buffer = Buffer.concat(data);
+        const MediaModel = getRepository(Media);
+        (async () => {
+          const mediaID = uuidv4();
+          let mediaType: MediaType;
+
+          if (mediaFile.mimetype.startsWith(imageMime)) {
+            mediaType = MediaType.image;
+
+            const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
+            // upload blurred
+            await s3Client.upload({
+              Bucket: fileBucket,
+              Key: getMediaKey(mediaID, true),
+              Body: blurred,
+              ContentType: mediaFile.mimetype,
+              ContentEncoding: mediaFile.encoding,
+            }).promise();
+
+            const original = await sharp(buffer).resize(postMediaWidth).toBuffer();
+            buffer = original;
+          } else {
+            mediaType = MediaType.file;
+          }
+
+          // upload original / buffer
+          await s3Client.upload({
+            Bucket: fileBucket,
+            Key: getMediaKey(mediaID),
+            Body: buffer,
+            ContentType: mediaFile.mimetype,
+            ContentEncoding: mediaFile.encoding,
+          }).promise();
+
+          const newMedia = await MediaModel.save({
+            id: mediaID,
+            fileSize: mediaReadStream.readableLength,
+            mime: mediaFile.mimetype,
+            name: mediaFile.filename,
+            parent: postID,
+            parentType: MediaParentType.post,
+            type: mediaType,
+          });
+
+          numReading--;
+          if (numReading === 0) {
+            resolve(newMedia.id);
+          }
+        })();
+      });
+      mediaReadStream.read();
+    } else {
+      resolve(undefined);
+    }
+  });
+};
+
 @Resolver()
 class AddPostResolver {
   @Mutation(_returns => String)
@@ -75,98 +146,31 @@ class AddPostResolver {
     }
 
     const id = uuidv4();
+    const mediaID = await handlePostMedia(id, args.media);
 
-    return new Promise<string>(async (resolve, reject) => {
-      const callback = async (mediaID: string | undefined) => {
-        const PostModel = getRepository(Post);
-        const now = getTime();
-        const searchPost: SearchPost = {
-          title: args.title,
-          content: args.content,
-          type: args.type,
-          created: now,
-          updated: now,
-          publisher: ctx.auth!.id,
-          media: mediaID
-        };
+    const PostModel = getRepository(Post);
+    const now = getTime();
+    const searchPost: SearchPost = {
+      title: args.title,
+      content: args.content,
+      type: args.type,
+      created: now,
+      updated: now,
+      publisher: ctx.auth!.id,
+      media: mediaID,
+    };
 
-        await elasticClient.index({
-          id,
-          index: postIndexName,
-          body: searchPost
-        });
-        const newPost = await PostModel.save({
-          ...searchPost,
-          id,
-        });
-
-        return `created post ${newPost.id}`;
-      };
-
-      let numReading = 0;
-
-      if (args.media) {
-        numReading++;
-
-        const mediaFile = await args.media;
-        const mediaReadStream = mediaFile.createReadStream();
-        if (mediaReadStream.readableLength > maxFileUploadSize) {
-          reject(new Error(`media file ${mediaFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
-          return;
-        }
-        const data: Uint8Array[] = [];
-        mediaReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
-        mediaReadStream.on('error', reject);
-        mediaReadStream.on('end', () => {
-          let buffer = Buffer.concat(data);
-          const MediaModel = getRepository(Media);
-          (async () => {
-            const newMedia = await MediaModel.save({
-              id: uuidv4(),
-              fileSize: mediaReadStream.readableLength,
-              mime: mediaFile.mimetype,
-              name: mediaFile.filename,
-              parent: id,
-              parentType: MediaParentType.post,
-            });
-
-            if (mediaFile.mimetype.startsWith(imageMime)) {
-              const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
-              // upload blurred
-              await s3Client.upload({
-                Bucket: fileBucket,
-                Key: getMediaKey(newMedia.id, true),
-                Body: blurred,
-                ContentType: mediaFile.mimetype,
-                ContentEncoding: mediaFile.encoding,
-              }).promise();
-
-              const original = await sharp(buffer).resize(postMediaWidth).toBuffer();
-              buffer = original;
-            }
-
-            // upload original / buffer
-            await s3Client.upload({
-              Bucket: fileBucket,
-              Key: getMediaKey(newMedia.id),
-              Body: buffer,
-              ContentType: mediaFile.mimetype,
-              ContentEncoding: mediaFile.encoding,
-            }).promise();
-
-            numReading--;
-            if (numReading === 0) {
-              resolve(await callback(newMedia.id));
-            }
-          })();
-        });
-        mediaReadStream.read();
-      }
-
-      if (numReading === 0) {
-        resolve(await callback(undefined));
-      }
+    await elasticClient.index({
+      id,
+      index: postIndexName,
+      body: searchPost
     });
+    const newPost = await PostModel.save({
+      ...searchPost,
+      id,
+    });
+
+    return `created post ${newPost.id}`;
   }
 }
 

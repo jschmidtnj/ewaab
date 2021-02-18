@@ -1,11 +1,16 @@
+fragment currentPostUpdateFields on Post {
+  title
+  content
+  link
+}
+
 query postUpdateData($id: String!) {
   post(id: $id) {
-    title
-    content
-    link
+    ...currentPostUpdateFields
+    type
     mediaData {
       id
-      mime
+      type
     }
   }
 }

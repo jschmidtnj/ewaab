@@ -29,7 +29,7 @@ class SearchResultsResolver implements ResolverInterface<SearchPost> {
       return undefined;
     }
     const mediaData = await MediaModel.findOne(searchResult.media, {
-      select: ['id', 'mime', 'name', 'fileSize']
+      select: ['id', 'mime', 'name', 'fileSize', 'type']
     });
     if (!mediaData) {
       throw new Error(`cannot find media for ${searchResult.media}`);

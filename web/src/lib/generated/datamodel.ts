@@ -30,6 +30,8 @@ export type Media = {
   name: Scalars['String'];
   /** parent */
   parent: Scalars['String'];
+  /** media type */
+  type: MediaType;
 };
 
 /** media data */
@@ -42,7 +44,15 @@ export type MediaData = {
   mime: Scalars['String'];
   /** file name */
   name: Scalars['String'];
+  /** media type */
+  type: MediaType;
 };
+
+/** media type, used for determining preview type */
+export enum MediaType {
+  File = 'file',
+  Image = 'image',
+}
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -489,16 +499,21 @@ export type DeletePostMutation = { __typename?: 'Mutation' } & Pick<
   'deletePost'
 >;
 
+export type CurrentPostUpdateFieldsFragment = { __typename?: 'Post' } & Pick<
+  Post,
+  'title' | 'content' | 'link'
+>;
+
 export type PostUpdateDataQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
 export type PostUpdateDataQuery = { __typename?: 'Query' } & {
-  post: { __typename?: 'Post' } & Pick<Post, 'title' | 'content' | 'link'> & {
+  post: { __typename?: 'Post' } & Pick<Post, 'type'> & {
       mediaData?: Maybe<
-        { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'mime'>
+        { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'type'>
       >;
-    };
+    } & CurrentPostUpdateFieldsFragment;
 };
 
 export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
@@ -510,6 +525,9 @@ export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
         PostPublisherData,
         'name' | 'username' | 'avatar' | 'description'
       >
+    >;
+    mediaData?: Maybe<
+      { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'type'>
     >;
   };
 
@@ -724,6 +742,13 @@ export type VerifyEmailMutation = { __typename?: 'Mutation' } & Pick<
   'verifyEmail'
 >;
 
+export const CurrentPostUpdateFields = gql`
+  fragment currentPostUpdateFields on Post {
+    title
+    content
+    link
+  }
+`;
 export const PostSearchFields = gql`
   fragment postSearchFields on SearchPost {
     id
@@ -737,6 +762,10 @@ export const PostSearchFields = gql`
       username
       avatar
       description
+    }
+    mediaData {
+      id
+      type
     }
   }
 `;
@@ -805,15 +834,15 @@ export const DeletePost = gql`
 export const PostUpdateData = gql`
   query postUpdateData($id: String!) {
     post(id: $id) {
-      title
-      content
-      link
+      ...currentPostUpdateFields
+      type
       mediaData {
         id
-        mime
+        type
       }
     }
   }
+  ${CurrentPostUpdateFields}
 `;
 export const Posts = gql`
   query posts(

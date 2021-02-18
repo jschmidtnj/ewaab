@@ -1,7 +1,7 @@
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { MinLength, IsOptional, IsUrl } from 'class-validator';
-import { postMediaWidth, strMinLen } from '../shared/variables';
+import { strMinLen } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -11,15 +11,10 @@ import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import Post from '../schema/posts/post.entity';
 import { UserType } from '../schema/users/user.entity';
-import sharp from 'sharp';
-import Media, { MediaParentType } from '../schema/media/media.entity';
-import { s3Client, fileBucket, getMediaKey } from '../utils/aws';
-import { imageMime } from '../utils/misc';
-import { maxFileUploadSize, blurredWidth } from '../utils/variables';
 import { ApolloError } from 'apollo-server-express';
 import { deleteMedia } from '../users/media.resolver';
-import { v4 as uuidv4 } from 'uuid';
 import { getTime } from '../shared/time';
+import { handlePostMedia } from './addPost.resolver';
 
 @ArgsType()
 class UpdatePostArgs {
@@ -93,88 +88,25 @@ class UpdatePostResolver {
     const now = getTime();
     postUpdateData.updated = now;
 
-    return new Promise<string>(async (resolve, reject) => {
-      const callback = async () => {
-        await PostModel.update(args.id, postUpdateData);
-        await elasticClient.update({
-          id: args.id,
-          index: postIndexName,
-          body: {
-            doc: postUpdateData
-          }
-        });
+    const mediaID = await handlePostMedia(args.id, args.media);
+    if (mediaID) {
+      postUpdateData.media = mediaID;
+    }
 
-        if (postData.media) {
-          await deleteMedia(postData.media);
-        }
-
-        return `updated post ${args.id}`;
-      };
-
-      let numReading = 0;
-
-      if (args.media) {
-        numReading++;
-
-        const mediaFile = await args.media;
-        const mediaReadStream = mediaFile.createReadStream();
-        if (mediaReadStream.readableLength > maxFileUploadSize) {
-          reject(new Error(`media file ${mediaFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
-          return;
-        }
-        const data: Uint8Array[] = [];
-        mediaReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
-        mediaReadStream.on('error', reject);
-        mediaReadStream.on('end', () => {
-          let buffer = Buffer.concat(data);
-          const MediaModel = getRepository(Media);
-          (async () => {
-            const newMedia = await MediaModel.save({
-              id: uuidv4(),
-              fileSize: mediaReadStream.readableLength,
-              mime: mediaFile.mimetype,
-              name: mediaFile.filename,
-              parent: args.id,
-              parentType: MediaParentType.post,
-            });
-
-            if (mediaFile.mimetype.startsWith(imageMime)) {
-              const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
-              // upload blurred
-              await s3Client.upload({
-                Bucket: fileBucket,
-                Key: getMediaKey(newMedia.id, true),
-                Body: blurred,
-                ContentType: mediaFile.mimetype,
-                ContentEncoding: mediaFile.encoding,
-              }).promise();
-
-              const original = await sharp(buffer).resize(postMediaWidth).toBuffer();
-              buffer = original;
-            }
-
-            // upload original / buffer
-            await s3Client.upload({
-              Bucket: fileBucket,
-              Key: getMediaKey(newMedia.id),
-              Body: buffer,
-              ContentType: mediaFile.mimetype,
-              ContentEncoding: mediaFile.encoding,
-            }).promise();
-
-            numReading--;
-            if (numReading === 0) {
-              resolve(await callback());
-            }
-          })();
-        });
-        mediaReadStream.read();
-      }
-
-      if (numReading === 0) {
-        resolve(await callback());
+    await PostModel.update(args.id, postUpdateData);
+    await elasticClient.update({
+      id: args.id,
+      index: postIndexName,
+      body: {
+        doc: postUpdateData
       }
     });
+
+    if (postData.media) {
+      await deleteMedia(postData.media);
+    }
+
+    return `updated post ${args.id}`;
   }
 }
 

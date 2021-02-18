@@ -1,5 +1,6 @@
 import {
   DeletePostMutationVariables,
+  MediaType,
   PostSearchFieldsFragment,
 } from 'lib/generated/datamodel';
 import Avatar from 'components/Avatar';
@@ -13,9 +14,25 @@ import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 
+interface MediaViewArgs {
+  type: MediaType;
+}
+
+const MediaView = ({ type }: MediaViewArgs): JSX.Element => {
+  // TODO - add tags here
+  if (type === MediaType.Image) {
+    return <></>;
+  } else if (type === MediaType.File) {
+    return <></>;
+  } else {
+    throw new Error(`unsupported media type ${type} provided`);
+  }
+};
+
 interface PostViewArgs {
   data: PostSearchFieldsFragment;
   onDeletePost: (variables: DeletePostMutationVariables) => void;
+  onUpdatePost: (id: string) => void;
 }
 
 const PostView = (args: PostViewArgs): JSX.Element => {
@@ -33,6 +50,7 @@ const PostView = (args: PostViewArgs): JSX.Element => {
             className="mr-10 absolute z-10 hover:text-gray-600"
             onClick={(evt) => {
               evt.preventDefault();
+              args.onUpdatePost(args.data.id);
             }}
           >
             <BsPencil />
@@ -98,7 +116,9 @@ const PostView = (args: PostViewArgs): JSX.Element => {
           </ReactMarkdown>
         </div>
       </div>
-      {/* TODO - add media here */}
+      {!args.data.mediaData ? null : (
+        <MediaView type={args.data.mediaData.type} />
+      )}
     </div>
   );
 };

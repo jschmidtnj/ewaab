@@ -1,11 +1,21 @@
 import { Entity, Column, PrimaryColumn } from 'typeorm';
-import { ObjectType, Field } from 'type-graphql';
+import { ObjectType, Field, registerEnumType } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 
 export enum MediaParentType {
   user = 'user',
   post = 'post',
 }
+
+export enum MediaType {
+  image = 'image',
+  file = 'file',
+}
+
+registerEnumType(MediaType, {
+  name: 'MediaType',
+  description: 'media type, used for determining preview type',
+});
 
 @ObjectType({ description: 'media data', isAbstract: true })
 export class MediaData {
@@ -27,6 +37,11 @@ export class MediaData {
   @Column({ type: 'text' })
   @IsDefined()
   name: string;
+
+  @Field(_type => MediaType, { description: 'media type' })
+  @Column({ type: 'enum', enum: MediaType })
+  @IsDefined()
+  type: MediaType;
 }
 
 @ObjectType({ description: 'media object' })

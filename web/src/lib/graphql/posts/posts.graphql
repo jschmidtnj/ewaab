@@ -11,6 +11,10 @@ fragment postSearchFields on SearchPost {
     avatar
     description
   }
+  mediaData {
+    id
+    type
+  }
 }
 
 query posts($query: String, $type: PostType, $page: Int, $perpage: Int,

@@ -17,6 +17,9 @@ type Media {
 
   """parent"""
   parent: String!
+
+  """media type"""
+  type: MediaType!
 }
 
 """media data"""
@@ -30,6 +33,15 @@ type MediaData {
 
   """file name"""
   name: String!
+
+  """media type"""
+  type: MediaType!
+}
+
+"""media type, used for determining preview type"""
+enum MediaType {
+  file
+  image
 }
 
 type Mutation {

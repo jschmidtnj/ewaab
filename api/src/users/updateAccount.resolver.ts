@@ -18,7 +18,7 @@ import { GraphQLUpload } from 'graphql-upload';
 import { FileUpload } from 'graphql-upload';
 import { blurredWidth, maxFileUploadSize } from '../utils/variables';
 import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
-import Media, { MediaParentType } from '../schema/media/media.entity';
+import Media, { MediaParentType, MediaType } from '../schema/media/media.entity';
 import sharp from 'sharp';
 import { checkTextFile, imageMime } from '../utils/misc';
 import { deleteMedia } from './media.resolver';
@@ -282,6 +282,7 @@ class UpdateAccountResolver {
               name: resumeFile.filename,
               parent: id,
               parentType: MediaParentType.user,
+              type: MediaType.file,
             });
 
             // upload original
@@ -330,6 +331,7 @@ class UpdateAccountResolver {
               name: avatarFile.filename,
               parent: id,
               parentType: MediaParentType.user,
+              type: MediaType.image,
             });
             const original = await sharp(buffer).resize(avatarWidth).toBuffer();
 

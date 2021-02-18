@@ -14,7 +14,6 @@ const Avatar = (args: AvatarArgs): JSX.Element => {
     <LazyLoadImage
       className="h-5 w-5 rounded-full"
       alt={`${apiURL}/media/${args.avatar}/blur`}
-      height={args.avatarWidth}
       src={`${apiURL}/media/${args.avatar}`}
       width={args.avatarWidth}
     />
