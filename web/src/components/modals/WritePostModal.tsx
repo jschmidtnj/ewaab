@@ -4,13 +4,16 @@ import {
   AddPostMutation,
   AddPostMutationVariables,
   PostType,
+  PostUpdateData,
+  PostUpdateDataQuery,
+  PostUpdateDataQueryVariables,
   UserFieldsFragment,
 } from 'lib/generated/datamodel';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 import * as yup from 'yup';
-import Avatar from 'components/avatar';
+import Avatar from 'components/Avatar';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 import NextImage from 'next/image';
@@ -18,10 +21,13 @@ import { BsFillImageFill, BsPencil } from 'react-icons/bs';
 import { FaTimes } from 'react-icons/fa';
 import { FiFileText } from 'react-icons/fi';
 import { postMediaWidth } from 'shared/variables';
+import isDebug from 'utils/mode';
 
 interface ModalArgs {
   defaultPostType: PostType;
   toggleModal: () => void;
+  onSubmit: () => Promise<void>;
+  updateID?: string;
 }
 
 interface PreviewImageData {
@@ -30,7 +36,7 @@ interface PreviewImageData {
   height: number;
 }
 
-const NewPost = (args: ModalArgs): JSX.Element => {
+const WritePostModal = (args: ModalArgs): JSX.Element => {
   const user = useSelector<RootState, UserFieldsFragment | undefined>(
     (state) => state.authReducer.user
   );
@@ -108,6 +114,29 @@ const NewPost = (args: ModalArgs): JSX.Element => {
       reader.readAsDataURL(fileElem.files[0]);
     };
     setFileInputElem(fileElem);
+
+    // handle update data
+    if (args.updateID) {
+      (async () => {
+        try {
+          const updateDataRes = await client.query<
+            PostUpdateDataQuery,
+            PostUpdateDataQueryVariables
+          >({
+            query: PostUpdateData,
+            fetchPolicy: isDebug() ? 'no-cache' : 'cache-first', // disable cache if in debug
+          });
+          if (updateDataRes.errors) {
+            throw new Error(updateDataRes.errors.join(', '));
+          }
+          // TODO - set update data, set preview image / file download. height of image?
+        } catch (err) {
+          toast(err.message, {
+            type: 'error',
+          });
+        }
+      })();
+    }
   }, []);
 
   return (
@@ -184,6 +213,7 @@ const NewPost = (args: ModalArgs): JSX.Element => {
                         toast('Added Post', {
                           type: 'success',
                         });
+                        args.onSubmit();
                         args.toggleModal();
                       } catch (err) {
                         console.log(JSON.stringify(err, null, 2));
@@ -422,4 +452,4 @@ const NewPost = (args: ModalArgs): JSX.Element => {
   );
 };
 
-export default NewPost;
+export default WritePostModal;

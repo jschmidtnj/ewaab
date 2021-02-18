@@ -25,7 +25,7 @@ import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import majors from '../shared/majors';
-import Post from '../schema/posts/post.entity';
+import { getTime } from '../shared/time';
 
 @ArgsType()
 class UpdateArgs {
@@ -205,6 +205,9 @@ class UpdateAccountResolver {
       userUpdateData.locationName = args.locationName;
     }
 
+    const now = getTime();
+    userUpdateData.updated = now;
+
     // other fields
     if (args.major !== undefined) {
       userUpdateData.major = args.major;
@@ -348,14 +351,6 @@ class UpdateAccountResolver {
               ContentType: avatarFile.mimetype,
               ContentEncoding: avatarFile.encoding,
             }).promise();
-
-            // update avatars in posts
-            const PostModel = getRepository(Post);
-            await PostModel.update({
-              publisher: id,
-            }, {
-              avatar: newMedia.id
-            });
 
             userUpdateData.avatar = newMedia.id;
 

@@ -22,9 +22,6 @@ const postMappings = {
   link: {
     type: 'keyword'
   },
-  avatar: {
-    type: 'keyword'
-  },
   media: {
     type: 'keyword'
   }

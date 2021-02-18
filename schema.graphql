@@ -19,6 +19,19 @@ type Media {
   parent: String!
 }
 
+"""media data"""
+type MediaData {
+  """file size"""
+  fileSize: Float!
+  id: String!
+
+  """mime type of file"""
+  mime: String!
+
+  """file name"""
+  name: String!
+}
+
 type Mutation {
   addPost(
     """post content"""
@@ -205,9 +218,6 @@ type Mutation {
 
 """post data"""
 type Post {
-  """avatar for publisher"""
-  avatar: String
-
   """post content"""
   content: String!
 
@@ -223,8 +233,14 @@ type Post {
   """media for post"""
   media: String
 
+  """media data"""
+  mediaData: MediaData
+
   """post publisher"""
   publisher: String!
+
+  """publisher user data"""
+  publisherData: PostPublisherData
 
   """title"""
   title: String!
@@ -243,6 +259,30 @@ type PostCount {
 
   """post type for count"""
   type: PostType!
+}
+
+"""user data that you can get from post search"""
+type PostPublisherData {
+  """avatar id"""
+  avatar: String
+
+  """date created"""
+  created: Float!
+
+  """short user description"""
+  description: String!
+
+  """user id"""
+  id: String!
+
+  """name"""
+  name: String!
+
+  """date updated"""
+  updated: Float!
+
+  """username"""
+  username: String!
 }
 
 """post sort options"""
@@ -268,6 +308,9 @@ type PublicUser {
 
   """longer user bio"""
   bio: String!
+
+  """date created"""
+  created: Float!
 
   """short user description"""
   description: String!
@@ -308,6 +351,9 @@ type PublicUser {
   """user type"""
   type: String!
 
+  """date updated"""
+  updated: Float!
+
   """personal url"""
   url: String!
 
@@ -342,6 +388,9 @@ type Query {
 
     """post counts"""
     postCounts: [PostType!]
+
+    """user who published the post"""
+    publisher: String
 
     """search query"""
     query: String
@@ -396,9 +445,6 @@ type Query {
 
 """post data, indexed in elasticsearch"""
 type SearchPost {
-  """avatar for publisher"""
-  avatar: String
-
   """post content"""
   content: String!
 
@@ -414,8 +460,14 @@ type SearchPost {
   """media for post"""
   media: String
 
+  """media data"""
+  mediaData: MediaData
+
   """post publisher"""
   publisher: String!
+
+  """publisher user data"""
+  publisherData: PostPublisherData
 
   """title"""
   title: String!
@@ -444,6 +496,12 @@ type SearchUser {
   """avatar id"""
   avatar: String
 
+  """date created"""
+  created: Float!
+
+  """short user description"""
+  description: String!
+
   """email"""
   email: String!
 
@@ -464,6 +522,9 @@ type SearchUser {
 
   """user type"""
   type: String!
+
+  """date updated"""
+  updated: Float!
 
   """username"""
   username: String!
@@ -488,6 +549,9 @@ type User {
 
   """longer user bio"""
   bio: String!
+
+  """date created"""
+  created: Float!
 
   """short user description"""
   description: String!
@@ -536,6 +600,9 @@ type User {
 
   """user type"""
   type: String!
+
+  """date updated"""
+  updated: Float!
 
   """personal url"""
   url: String!

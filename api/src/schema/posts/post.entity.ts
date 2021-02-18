@@ -2,6 +2,8 @@ import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { BaseTimestamp } from '../utils/baseTimestamp';
+import { PostPublisherData } from '../users/user.entity';
+import { MediaData } from '../media/media.entity';
 
 export enum PostType {
   studentNews = 'studentNews',
@@ -35,22 +37,24 @@ export class SearchPost extends BaseTimestamp {
   @IsDefined()
   type: PostType;
 
+  @Field({ description: 'post link', nullable: true })
+  @Column({ type: 'text', nullable: true })
+  link?: string;
+
   @Field({ description: 'post publisher' })
   @Column({ type: 'uuid' })
   @IsDefined()
   publisher: string;
 
-  @Field({ description: 'post link', nullable: true })
-  @Column({ type: 'text', nullable: true })
-  link?: string;
-
-  @Field({ description: 'avatar for publisher', nullable: true })
-  @Column({ type: 'uuid', nullable: true })
-  avatar?: string;
+  @Field(_type => PostPublisherData, { description: 'publisher user data', nullable: true })
+  publisherData?: PostPublisherData;
 
   @Field({ description: 'media for post', nullable: true })
   @Column({ type: 'uuid', nullable: true })
   media?: string;
+
+  @Field(_type => MediaData, { description: 'media data', nullable: true })
+  mediaData?: MediaData;
 }
 
 export enum PostSortOption {

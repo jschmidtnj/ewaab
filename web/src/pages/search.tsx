@@ -2,6 +2,7 @@ import PrivateRoute from 'components/PrivateRoute';
 import Layout from 'layouts/main';
 import SEO from 'components/SEO';
 import {
+  DeletePostMutationVariables,
   Posts,
   PostsQuery,
   PostsQueryVariables,
@@ -21,7 +22,10 @@ import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 import isDebug from 'utils/mode';
 import { AiOutlinePlus } from 'react-icons/ai';
-import NewPostModal from 'components/modals/NewPost';
+import WritePost from 'components/modals/WritePostModal';
+import PostView from 'components/PostView';
+import DeletePostModal from 'components/modals/DeletePostModal';
+import sleep from 'shared/sleep';
 
 const typeLabelMap: Record<PostType, string> = {
   [PostType.Community]: 'Community',
@@ -66,8 +70,17 @@ const SearchPage = (): JSX.Element => {
       FormikHandlers
   >();
 
-  const [newPostModalIsOpen, setNewPostModalIsOpen] = useState<boolean>(false);
-  const toggleNewPostModal = () => setNewPostModalIsOpen(!newPostModalIsOpen);
+  const [newPostModalIsOpen, setWritePostIsOpen] = useState<boolean>(false);
+  const toggleWritePost = () => setWritePostIsOpen(!newPostModalIsOpen);
+
+  const [deletePostModalIsOpen, setDeletePostModalIsOpen] = useState<boolean>(
+    false
+  );
+  const toggleDeletePostModal = () =>
+    setDeletePostModalIsOpen(!deletePostModalIsOpen);
+  const [deletePostVariables, setDeletePostVariables] = useState<
+    DeletePostMutationVariables | undefined
+  >(undefined);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -90,7 +103,7 @@ const SearchPage = (): JSX.Element => {
   return (
     <PrivateRoute>
       <Layout>
-        <SEO page="user page" />
+        <SEO page="search" />
         <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
           <Formik
             innerRef={(formRef as unknown) as (instance: any) => void}
@@ -217,7 +230,7 @@ const SearchPage = (): JSX.Element => {
                       className="mt-1 text-sm bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none sm:rounded-r w-20"
                       onClick={(evt) => {
                         evt.preventDefault();
-                        toggleNewPostModal();
+                        toggleWritePost();
                       }}
                     >
                       <span>New</span>
@@ -229,9 +242,14 @@ const SearchPage = (): JSX.Element => {
             )}
           </Formik>
           {!newPostModalIsOpen ? null : (
-            <NewPostModal
-              toggleModal={toggleNewPostModal}
+            <WritePost
+              toggleModal={toggleWritePost}
               defaultPostType={formRef.current.values.type}
+              onSubmit={async () => {
+                // wait for elasticsearch to update
+                await sleep(500);
+                formRef.current.handleSubmit();
+              }}
             />
           )}
 
@@ -241,7 +259,10 @@ const SearchPage = (): JSX.Element => {
                 <div className="grid grid-cols-1 lg:grid-cols-4">
                   <div className="col-start-1 col-auto mb-4 rounded-lg">
                     <ul className="flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md max-w-xs">
-                      {!posts || posts.loading || !posts.data
+                      {!posts ||
+                      posts.loading ||
+                      !posts.data ||
+                      !formRef.current
                         ? null
                         : posts.data.posts.postCounts.map((countData, i) => (
                             <li
@@ -286,6 +307,18 @@ const SearchPage = (): JSX.Element => {
                     </ul>
                   </div>
 
+                  {!deletePostModalIsOpen || !deletePostVariables ? null : (
+                    <DeletePostModal
+                      toggleModal={toggleDeletePostModal}
+                      onSubmit={async () => {
+                        // wait for elasticsearch to update
+                        await sleep(500);
+                        formRef.current.handleSubmit();
+                      }}
+                      variables={deletePostVariables}
+                    />
+                  )}
+
                   <div className="col-span-3 lg:mx-4">
                     {!posts ||
                     posts.loading ||
@@ -295,18 +328,24 @@ const SearchPage = (): JSX.Element => {
                     ) : (
                       <>
                         <table className="min-w-full">
-                          <tbody className="bg-white">
+                          <tbody>
                             {posts.data.posts.results.map((post, i) => (
                               <tr key={`post-${i}-${post.title}`}>
-                                <td className="w-16 pl-4 py-4 whitespace-nowrap">
-                                  {post.title}
+                                <td>
+                                  <PostView
+                                    data={post}
+                                    onDeletePost={(vars) => {
+                                      setDeletePostVariables(vars);
+                                      toggleDeletePostModal();
+                                    }}
+                                  />
                                 </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
 
-                        <div className="overflow-hidden border-b border-gray-200">
+                        <div className="overflow-hidden border-b border-gray-200 rounded-lg mt-4">
                           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                             <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
                               <span className="text-sm text-gray-700 mr-4">
@@ -326,7 +365,7 @@ const SearchPage = (): JSX.Element => {
                                       formRef.current.values.page - 1
                                     );
                                   }}
-                                  disabled={formRef?.current.values.page === 0}
+                                  disabled={formRef.current?.values.page === 0}
                                 >
                                   Prev
                                 </button>
@@ -340,7 +379,7 @@ const SearchPage = (): JSX.Element => {
                                     );
                                   }}
                                   disabled={
-                                    formRef?.current &&
+                                    formRef.current &&
                                     formRef.current.values.page *
                                       formRef.current.values.perpage +
                                       posts.data.posts.results.length ===

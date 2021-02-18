@@ -25,7 +25,7 @@ import { client } from 'utils/apollo';
 import isDebug from 'utils/mode';
 import majors from 'shared/majors';
 import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
-import Avatar from 'components/avatar';
+import Avatar from 'components/Avatar';
 
 const avatarWidth = 40;
 
@@ -135,7 +135,7 @@ const UsersPage = (): JSX.Element => {
 
   return (
     <Layout>
-      <SEO page="user page" />
+      <SEO page="users" />
       <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
         <Formik
           innerRef={(formRef as unknown) as (instance: any) => void}

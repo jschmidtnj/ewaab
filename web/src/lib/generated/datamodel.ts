@@ -32,6 +32,18 @@ export type Media = {
   parent: Scalars['String'];
 };
 
+/** media data */
+export type MediaData = {
+  __typename?: 'MediaData';
+  /** file size */
+  fileSize: Scalars['Float'];
+  id: Scalars['String'];
+  /** mime type of file */
+  mime: Scalars['String'];
+  /** file name */
+  name: Scalars['String'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addPost: Scalars['String'];
@@ -152,8 +164,6 @@ export type MutationVerifyEmailArgs = {
 /** post data */
 export type Post = {
   __typename?: 'Post';
-  /** avatar for publisher */
-  avatar?: Maybe<Scalars['String']>;
   /** post content */
   content: Scalars['String'];
   /** date created */
@@ -164,8 +174,12 @@ export type Post = {
   link?: Maybe<Scalars['String']>;
   /** media for post */
   media?: Maybe<Scalars['String']>;
+  /** media data */
+  mediaData?: Maybe<MediaData>;
   /** post publisher */
   publisher: Scalars['String'];
+  /** publisher user data */
+  publisherData?: Maybe<PostPublisherData>;
   /** title */
   title: Scalars['String'];
   /** post type */
@@ -181,6 +195,25 @@ export type PostCount = {
   count: Scalars['Int'];
   /** post type for count */
   type: PostType;
+};
+
+/** user data that you can get from post search */
+export type PostPublisherData = {
+  __typename?: 'PostPublisherData';
+  /** avatar id */
+  avatar?: Maybe<Scalars['String']>;
+  /** date created */
+  created: Scalars['Float'];
+  /** short user description */
+  description: Scalars['String'];
+  /** user id */
+  id: Scalars['String'];
+  /** name */
+  name: Scalars['String'];
+  /** date updated */
+  updated: Scalars['Float'];
+  /** username */
+  username: Scalars['String'];
 };
 
 /** post sort options */
@@ -206,6 +239,8 @@ export type PublicUser = {
   avatar?: Maybe<Scalars['String']>;
   /** longer user bio */
   bio: Scalars['String'];
+  /** date created */
+  created: Scalars['Float'];
   /** short user description */
   description: Scalars['String'];
   /** email */
@@ -232,6 +267,8 @@ export type PublicUser = {
   twitter: Scalars['String'];
   /** user type */
   type: Scalars['String'];
+  /** date updated */
+  updated: Scalars['Float'];
   /** personal url */
   url: Scalars['String'];
   /** username */
@@ -266,6 +303,7 @@ export type QueryPostsArgs = {
   page?: Maybe<Scalars['Int']>;
   perpage?: Maybe<Scalars['Int']>;
   postCounts?: Maybe<Array<PostType>>;
+  publisher?: Maybe<Scalars['String']>;
   query?: Maybe<Scalars['String']>;
   sortBy?: Maybe<PostSortOption>;
   type?: Maybe<PostType>;
@@ -291,8 +329,6 @@ export type QueryUsersArgs = {
 /** post data, indexed in elasticsearch */
 export type SearchPost = {
   __typename?: 'SearchPost';
-  /** avatar for publisher */
-  avatar?: Maybe<Scalars['String']>;
   /** post content */
   content: Scalars['String'];
   /** date created */
@@ -303,8 +339,12 @@ export type SearchPost = {
   link?: Maybe<Scalars['String']>;
   /** media for post */
   media?: Maybe<Scalars['String']>;
+  /** media data */
+  mediaData?: Maybe<MediaData>;
   /** post publisher */
   publisher: Scalars['String'];
+  /** publisher user data */
+  publisherData?: Maybe<PostPublisherData>;
   /** title */
   title: Scalars['String'];
   /** post type */
@@ -329,6 +369,10 @@ export type SearchUser = {
   __typename?: 'SearchUser';
   /** avatar id */
   avatar?: Maybe<Scalars['String']>;
+  /** date created */
+  created: Scalars['Float'];
+  /** short user description */
+  description: Scalars['String'];
   /** email */
   email: Scalars['String'];
   /** user id */
@@ -343,6 +387,8 @@ export type SearchUser = {
   name: Scalars['String'];
   /** user type */
   type: Scalars['String'];
+  /** date updated */
+  updated: Scalars['Float'];
   /** username */
   username: Scalars['String'];
 };
@@ -363,6 +409,8 @@ export type User = {
   avatar?: Maybe<Scalars['String']>;
   /** longer user bio */
   bio: Scalars['String'];
+  /** date created */
+  created: Scalars['Float'];
   /** short user description */
   description: Scalars['String'];
   /** email */
@@ -395,6 +443,8 @@ export type User = {
   twitter: Scalars['String'];
   /** user type */
   type: Scalars['String'];
+  /** date updated */
+  updated: Scalars['Float'];
   /** personal url */
   url: Scalars['String'];
   /** username */
@@ -430,12 +480,46 @@ export type AddPostMutation = { __typename?: 'Mutation' } & Pick<
   'addPost'
 >;
 
+export type DeletePostMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+export type DeletePostMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'deletePost'
+>;
+
+export type PostUpdateDataQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+export type PostUpdateDataQuery = { __typename?: 'Query' } & {
+  post: { __typename?: 'Post' } & Pick<Post, 'title' | 'content' | 'link'> & {
+      mediaData?: Maybe<
+        { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'mime'>
+      >;
+    };
+};
+
+export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
+  SearchPost,
+  'id' | 'title' | 'content' | 'publisher' | 'created' | 'updated'
+> & {
+    publisherData?: Maybe<
+      { __typename?: 'PostPublisherData' } & Pick<
+        PostPublisherData,
+        'name' | 'username' | 'avatar' | 'description'
+      >
+    >;
+  };
+
 export type PostsQueryVariables = Exact<{
   query?: Maybe<Scalars['String']>;
   type?: Maybe<PostType>;
   page?: Maybe<Scalars['Int']>;
   perpage?: Maybe<Scalars['Int']>;
   ascending?: Maybe<Scalars['Boolean']>;
+  publisher?: Maybe<Scalars['String']>;
 }>;
 
 export type PostsQuery = { __typename?: 'Query' } & {
@@ -443,17 +527,25 @@ export type PostsQuery = { __typename?: 'Query' } & {
     SearchPostsResult,
     'count'
   > & {
-      results: Array<
-        { __typename?: 'SearchPost' } & Pick<
-          SearchPost,
-          'title' | 'content' | 'publisher' | 'created' | 'updated' | 'avatar'
-        >
-      >;
+      results: Array<{ __typename?: 'SearchPost' } & PostSearchFieldsFragment>;
       postCounts: Array<
         { __typename?: 'PostCount' } & Pick<PostCount, 'type' | 'count'>
       >;
     };
 };
+
+export type UpdatePostMutationVariables = Exact<{
+  id: Scalars['String'];
+  title?: Maybe<Scalars['String']>;
+  content?: Maybe<Scalars['String']>;
+  link?: Maybe<Scalars['String']>;
+  media?: Maybe<Scalars['Upload']>;
+}>;
+
+export type UpdatePostMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'updatePost'
+>;
 
 export type DeleteAccountMutationVariables = Exact<{ [key: string]: never }>;
 
@@ -632,6 +724,22 @@ export type VerifyEmailMutation = { __typename?: 'Mutation' } & Pick<
   'verifyEmail'
 >;
 
+export const PostSearchFields = gql`
+  fragment postSearchFields on SearchPost {
+    id
+    title
+    content
+    publisher
+    created
+    updated
+    publisherData {
+      name
+      username
+      avatar
+      description
+    }
+  }
+`;
 export const PublicUserFields = gql`
   fragment publicUserFields on PublicUser {
     name
@@ -689,6 +797,24 @@ export const AddPost = gql`
     )
   }
 `;
+export const DeletePost = gql`
+  mutation deletePost($id: String!) {
+    deletePost(id: $id)
+  }
+`;
+export const PostUpdateData = gql`
+  query postUpdateData($id: String!) {
+    post(id: $id) {
+      title
+      content
+      link
+      mediaData {
+        id
+        mime
+      }
+    }
+  }
+`;
 export const Posts = gql`
   query posts(
     $query: String
@@ -696,6 +822,7 @@ export const Posts = gql`
     $page: Int
     $perpage: Int
     $ascending: Boolean
+    $publisher: String
   ) {
     posts(
       query: $query
@@ -703,14 +830,10 @@ export const Posts = gql`
       page: $page
       perpage: $perpage
       ascending: $ascending
+      publisher: $publisher
     ) {
       results {
-        title
-        content
-        publisher
-        created
-        updated
-        avatar
+        ...postSearchFields
       }
       count
       postCounts {
@@ -718,6 +841,24 @@ export const Posts = gql`
         count
       }
     }
+  }
+  ${PostSearchFields}
+`;
+export const UpdatePost = gql`
+  mutation updatePost(
+    $id: String!
+    $title: String
+    $content: String
+    $link: String
+    $media: Upload
+  ) {
+    updatePost(
+      id: $id
+      title: $title
+      content: $content
+      link: $link
+      media: $media
+    )
   }
 `;
 export const DeleteAccount = gql`

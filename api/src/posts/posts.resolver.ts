@@ -4,10 +4,11 @@ import { postIndexName } from '../elastic/settings';
 import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
-import { Min, Max, IsOptional } from 'class-validator';
+import { Min, Max, IsOptional, Matches, ValidateIf } from 'class-validator';
 import { PostCount, PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import { postViewMap } from './post.resolver';
 import esb from 'elastic-builder';
+import { uuidRegex } from '../shared/variables';
 
 const maxPerPage = 20;
 
@@ -33,6 +34,14 @@ export class PostsArgs {
 
   @Field(_type => [PostType], { description: 'post counts', nullable: true })
   postCounts?: PostType[];
+
+  @Field(_type => String, { description: 'user who published the post', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
+  @Matches(uuidRegex, {
+    message: 'invalid user id provided, must be uuid v4'
+  })
+  publisher?: string;
 
   @Min(0, {
     message: 'page number must be greater than or equal to 0'
@@ -83,6 +92,10 @@ class PostsResolver {
       mustShouldParams.push(esb.termQuery('content', args.query));
     }
 
+    if (args.publisher !== undefined) {
+      filterParams.push(esb.termQuery('publisher', args.publisher));
+    }
+
     if (args.created !== undefined) {
       filterParams.push(esb.rangeQuery('created').gte(args.created));
     }
@@ -131,7 +144,7 @@ class PostsResolver {
       results.push(currentPost);
     }
     const totalCount = elasticPostData.body.hits.total.value;
-    const counts: PostCount[] = [];
+    let counts: PostCount[] = [];
 
     for (const postType of args.postCounts) {
       const count: number = elasticPostData.body.aggregations[postType].buckets[postType].doc_count;
@@ -140,6 +153,7 @@ class PostsResolver {
         type: postType
       });
     }
+    counts = counts.reverse();
 
     return {
       results,

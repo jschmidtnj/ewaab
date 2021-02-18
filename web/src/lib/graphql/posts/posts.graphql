@@ -1,12 +1,24 @@
-query posts($query: String, $type: PostType, $page: Int, $perpage: Int, $ascending: Boolean) {
-  posts(query: $query, type: $type, page: $page, perpage: $perpage, ascending: $ascending) {
+fragment postSearchFields on SearchPost {
+  id
+  title
+  content
+  publisher
+  created
+  updated
+  publisherData {
+    name
+    username
+    avatar
+    description
+  }
+}
+
+query posts($query: String, $type: PostType, $page: Int, $perpage: Int,
+            $ascending: Boolean, $publisher: String) {
+  posts(query: $query, type: $type, page: $page, perpage: $perpage,
+        ascending: $ascending, publisher: $publisher) {
     results {
-      title
-      content
-      publisher
-      created
-      updated
-      avatar
+      ...postSearchFields
     }
     count
     postCounts {

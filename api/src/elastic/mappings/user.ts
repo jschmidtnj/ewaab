@@ -1,4 +1,7 @@
+import timestampMappings from './timestamp';
+
 const userMappings = {
+  ...timestampMappings,
   name: {
     type: 'keyword',
     fields: {
@@ -39,6 +42,9 @@ const userMappings = {
         type: 'text'
       }
     }
+  },
+  description: {
+    type: 'text'
   },
   avatar: {
     type: 'keyword'

@@ -6,7 +6,6 @@ import { getRepository } from 'typeorm';
 import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
 import { MediaAccessTokenData } from './user.resolver';
 import { loginType } from '../auth/shared';
-import Post from '../schema/posts/post.entity';
 
 @ArgsType()
 class MediaArgs {
@@ -14,16 +13,7 @@ class MediaArgs {
   id: string;
 }
 
-export const deleteMedia = async (id: string, checkPostUsage = false): Promise<boolean> => {
-  if (checkPostUsage) {
-    const PostsModel = getRepository(Post);
-    const postCount = await PostsModel.count({
-      avatar: id
-    });
-    if (postCount > 0) {
-      return false;
-    }
-  }
+export const deleteMedia = async (id: string): Promise<boolean> => {
   const MediaModel = getRepository(Media);
   await MediaModel.delete(id);
   await s3Client.deleteObject({

@@ -1,6 +1,7 @@
 import { Entity, Column, Index, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
+import { BaseTimestamp } from '../utils/baseTimestamp';
 
 export enum UserType {
   user = 'user',
@@ -14,16 +15,10 @@ registerEnumType(UserType, {
   description: 'user type',
 });
 
-@ObjectType({ description: 'user data, indexed for search', isAbstract: true })
-export class SearchUser {
+@ObjectType({ description: 'user data that you can get from post search', isAbstract: true })
+export class PostPublisherData extends BaseTimestamp {
   @Field({ description: 'user id' })
   id?: string;
-
-  @Field({ description: 'email' })
-  @Column({ type: 'text' })
-  @Index({ unique: true })
-  @IsDefined()
-  email: string;
 
   @Field({ description: 'name' })
   @Column({ type: 'text' })
@@ -35,6 +30,24 @@ export class SearchUser {
   @Index({ unique: true })
   @IsDefined()
   username: string;
+
+  @Field({ description: 'short user description' })
+  @Column({ type: 'text' })
+  @IsDefined()
+  description: string;
+
+  @Field({ description: 'avatar id', nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  avatar?: string;
+}
+
+@ObjectType({ description: 'user data, indexed for search', isAbstract: true })
+export class SearchUser extends PostPublisherData {
+  @Field({ description: 'email' })
+  @Column({ type: 'text' })
+  @Index({ unique: true })
+  @IsDefined()
+  email: string;
 
   @Field({ description: 'user type' })
   @Column({ type: 'enum', enum: UserType })
@@ -55,10 +68,6 @@ export class SearchUser {
   @Column({ type: 'text' })
   @IsDefined()
   locationName: string;
-
-  @Field({ description: 'avatar id', nullable: true })
-  @Column({ type: 'uuid', nullable: true })
-  avatar?: string;
 }
 
 export enum UserSortOption {
@@ -116,11 +125,6 @@ export class PublicUser extends SearchUser {
   @Column({ type: 'text' })
   @IsDefined()
   github: string;
-
-  @Field({ description: 'short user description' })
-  @Column({ type: 'text' })
-  @IsDefined()
-  description: string;
 
   @Field({ description: 'longer user bio' })
   @Column({ type: 'text' })

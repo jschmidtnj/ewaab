@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { thunkGetUser, thunkLogout } from 'state/auth/thunks';
 import { AuthActionTypes } from 'state/auth/types';
 import { AppThunkDispatch } from 'state/thunk';
-import Avatar from 'components/avatar';
+import Avatar from 'components/Avatar';
 import { RootState } from 'state';
 import { avatarWidth } from 'shared/variables';
 import { UserFieldsFragment } from 'lib/generated/datamodel';

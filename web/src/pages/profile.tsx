@@ -32,7 +32,7 @@ import { isSSR } from 'utils/checkSSR';
 import React, { useEffect, useState } from 'react';
 import { RootState } from 'state';
 import Image from 'next/image';
-import Avatar from 'components/avatar';
+import Avatar from 'components/Avatar';
 import { getAPIURL } from 'utils/axios';
 import DeleteAccountModal from 'components/modals/DeleteAccount';
 import Link from 'next/link';

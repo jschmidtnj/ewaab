@@ -53,7 +53,7 @@ class DeleteResolver {
     }
     const userData = userFindRes as User;
     if (userData.avatar) {
-      await deleteMedia(userData.avatar, true);
+      await deleteMedia(userData.avatar);
     }
     if (userData.resume) {
       await deleteMedia(userData.resume);

@@ -1,0 +1,11 @@
+query postUpdateData($id: String!) {
+  post(id: $id) {
+    title
+    content
+    link
+    mediaData {
+      id
+      mime
+    }
+  }
+}

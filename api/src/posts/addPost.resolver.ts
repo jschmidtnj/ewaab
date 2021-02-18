@@ -87,7 +87,6 @@ class AddPostResolver {
           created: now,
           updated: now,
           publisher: ctx.auth!.id,
-          avatar: currentUser.avatar,
           media: mediaID
         };
 

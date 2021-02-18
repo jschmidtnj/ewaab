@@ -19,6 +19,7 @@ import { InviteUserTokenData } from '../emails/inviteUser.resolver';
 import { defaultMajor } from '../shared/majors';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
+import { getTime } from '../shared/time';
 
 @ArgsType()
 class RegisterArgs {
@@ -149,13 +150,17 @@ class RegisterResolver {
     }
     const hashedPassword = await argon2.hash(args.password);
     const UserModel = getRepository(User);
+    const now = getTime();
     const searchUser: SearchUser = {
+      created: now,
+      updated: now,
       email: args.email,
       name: args.name,
       type: inviteData.userType,
       username: args.username,
       locationName: '',
-      major: defaultMajor
+      major: defaultMajor,
+      description: ''
     };
 
     const id = uuidv4();
@@ -176,7 +181,6 @@ class RegisterResolver {
       facebook: '',
       github: '',
       twitter: '',
-      description: '',
       bio: ''
     });
 

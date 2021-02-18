@@ -27,7 +27,7 @@ import { GrLocation } from 'react-icons/gr';
 import { BsLink45Deg } from 'react-icons/bs';
 import { baseFacebook, baseGitHub, baseTwitter } from 'shared/variables';
 import { defaultMajor } from 'shared/majors';
-import Avatar from 'components/avatar';
+import Avatar from 'components/Avatar';
 
 const avatarWidth = 40;
 
@@ -78,7 +78,7 @@ const UserPage = (): JSX.Element => {
   }, []);
   return (
     <Layout>
-      <SEO page="user page" />
+      <SEO page={user ? user.username : 'user'} />
       <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
         {!user ? (
           <p className="text-sm">loading...</p>
