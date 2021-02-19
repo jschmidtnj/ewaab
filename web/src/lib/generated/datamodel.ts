@@ -135,6 +135,7 @@ export type MutationSendTestEmailArgs = {
 };
 
 export type MutationUpdateAccountArgs = {
+  alumniYear?: Maybe<Scalars['Int']>;
   avatar?: Maybe<Scalars['Upload']>;
   bio?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
@@ -146,10 +147,12 @@ export type MutationUpdateAccountArgs = {
   location?: Maybe<Scalars['String']>;
   locationName?: Maybe<Scalars['String']>;
   major?: Maybe<Scalars['String']>;
+  mentor?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
   resume?: Maybe<Scalars['Upload']>;
   twitter?: Maybe<Scalars['String']>;
+  university?: Maybe<Scalars['String']>;
   url?: Maybe<Scalars['String']>;
 };
 
@@ -237,14 +240,16 @@ export enum PostSortOption {
 /** post type */
 export enum PostType {
   Community = 'community',
+  EhParticipantNews = 'ehParticipantNews',
   EncourageHer = 'encourageHer',
   MentorNews = 'mentorNews',
-  StudentNews = 'studentNews',
 }
 
 /** public user data (not in search) */
 export type PublicUser = {
   __typename?: 'PublicUser';
+  /** alumni year */
+  alumniYear?: Maybe<Scalars['Int']>;
   /** avatar id */
   avatar?: Maybe<Scalars['String']>;
   /** longer user bio */
@@ -269,6 +274,8 @@ export type PublicUser = {
   locationName: Scalars['String'];
   /** major */
   major: Scalars['String'];
+  /** mentor */
+  mentor?: Maybe<Scalars['String']>;
   /** name */
   name: Scalars['String'];
   /** resume id */
@@ -277,6 +284,8 @@ export type PublicUser = {
   twitter: Scalars['String'];
   /** user type */
   type: Scalars['String'];
+  /** university */
+  university: Scalars['String'];
   /** date updated */
   updated: Scalars['Float'];
   /** personal url */
@@ -333,7 +342,7 @@ export type QueryUsersArgs = {
   perpage?: Maybe<Scalars['Int']>;
   query?: Maybe<Scalars['String']>;
   sortBy?: Maybe<UserSortOption>;
-  type?: Maybe<UserType>;
+  types?: Maybe<Array<UserType>>;
 };
 
 /** post data, indexed in elasticsearch */
@@ -377,6 +386,8 @@ export type SearchPostsResult = {
 /** user data, indexed for search */
 export type SearchUser = {
   __typename?: 'SearchUser';
+  /** alumni year */
+  alumniYear?: Maybe<Scalars['Int']>;
   /** avatar id */
   avatar?: Maybe<Scalars['String']>;
   /** date created */
@@ -397,6 +408,8 @@ export type SearchUser = {
   name: Scalars['String'];
   /** user type */
   type: Scalars['String'];
+  /** university */
+  university: Scalars['String'];
   /** date updated */
   updated: Scalars['Float'];
   /** username */
@@ -415,6 +428,8 @@ export type SearchUsersResult = {
 /** user account */
 export type User = {
   __typename?: 'User';
+  /** alumni year */
+  alumniYear?: Maybe<Scalars['Int']>;
   /** avatar id */
   avatar?: Maybe<Scalars['String']>;
   /** longer user bio */
@@ -443,6 +458,8 @@ export type User = {
   major: Scalars['String'];
   /** media auth token */
   mediaAuth: Scalars['String'];
+  /** mentor */
+  mentor?: Maybe<Scalars['String']>;
   /** name */
   name: Scalars['String'];
   /** resume id */
@@ -453,6 +470,8 @@ export type User = {
   twitter: Scalars['String'];
   /** user type */
   type: Scalars['String'];
+  /** university */
+  university: Scalars['String'];
   /** date updated */
   updated: Scalars['Float'];
   /** personal url */
@@ -499,6 +518,11 @@ export type DeletePostMutation = { __typename?: 'Mutation' } & Pick<
   'deletePost'
 >;
 
+export type CurrentPostMediaFragment = { __typename?: 'MediaData' } & Pick<
+  MediaData,
+  'id' | 'type' | 'name'
+>;
+
 export type CurrentPostUpdateFieldsFragment = { __typename?: 'Post' } & Pick<
   Post,
   'title' | 'content' | 'link'
@@ -511,14 +535,14 @@ export type PostUpdateDataQueryVariables = Exact<{
 export type PostUpdateDataQuery = { __typename?: 'Query' } & {
   post: { __typename?: 'Post' } & Pick<Post, 'type'> & {
       mediaData?: Maybe<
-        { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'type'>
+        { __typename?: 'MediaData' } & CurrentPostMediaFragment
       >;
     } & CurrentPostUpdateFieldsFragment;
 };
 
 export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
   SearchPost,
-  'id' | 'title' | 'content' | 'publisher' | 'created' | 'updated'
+  'id' | 'title' | 'content' | 'publisher' | 'created' | 'updated' | 'link'
 > & {
     publisherData?: Maybe<
       { __typename?: 'PostPublisherData' } & Pick<
@@ -527,7 +551,7 @@ export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
       >
     >;
     mediaData?: Maybe<
-      { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'type'>
+      { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'type' | 'name'>
     >;
   };
 
@@ -558,6 +582,7 @@ export type UpdatePostMutationVariables = Exact<{
   content?: Maybe<Scalars['String']>;
   link?: Maybe<Scalars['String']>;
   media?: Maybe<Scalars['Upload']>;
+  deleteMedia?: Maybe<Scalars['Boolean']>;
 }>;
 
 export type UpdatePostMutation = { __typename?: 'Mutation' } & Pick<
@@ -711,7 +736,7 @@ export type UserQuery = { __typename?: 'Query' } & {
 
 export type UsersQueryVariables = Exact<{
   query?: Maybe<Scalars['String']>;
-  type?: Maybe<UserType>;
+  types?: Maybe<Array<UserType> | UserType>;
   majors?: Maybe<Array<Scalars['String']> | Scalars['String']>;
   sortBy?: Maybe<UserSortOption>;
   ascending?: Maybe<Scalars['Boolean']>;
@@ -742,6 +767,13 @@ export type VerifyEmailMutation = { __typename?: 'Mutation' } & Pick<
   'verifyEmail'
 >;
 
+export const CurrentPostMedia = gql`
+  fragment currentPostMedia on MediaData {
+    id
+    type
+    name
+  }
+`;
 export const CurrentPostUpdateFields = gql`
   fragment currentPostUpdateFields on Post {
     title
@@ -757,6 +789,7 @@ export const PostSearchFields = gql`
     publisher
     created
     updated
+    link
     publisherData {
       name
       username
@@ -766,6 +799,7 @@ export const PostSearchFields = gql`
     mediaData {
       id
       type
+      name
     }
   }
 `;
@@ -837,12 +871,12 @@ export const PostUpdateData = gql`
       ...currentPostUpdateFields
       type
       mediaData {
-        id
-        type
+        ...currentPostMedia
       }
     }
   }
   ${CurrentPostUpdateFields}
+  ${CurrentPostMedia}
 `;
 export const Posts = gql`
   query posts(
@@ -880,6 +914,7 @@ export const UpdatePost = gql`
     $content: String
     $link: String
     $media: Upload
+    $deleteMedia: Boolean
   ) {
     updatePost(
       id: $id
@@ -887,6 +922,7 @@ export const UpdatePost = gql`
       content: $content
       link: $link
       media: $media
+      deleteMedia: $deleteMedia
     )
   }
 `;
@@ -1011,7 +1047,7 @@ export const User = gql`
 export const Users = gql`
   query users(
     $query: String
-    $type: UserType
+    $types: [UserType!]
     $majors: [String!]
     $sortBy: UserSortOption
     $ascending: Boolean
@@ -1020,7 +1056,7 @@ export const Users = gql`
   ) {
     users(
       query: $query
-      type: $type
+      types: $types
       majors: $majors
       sortBy: $sortBy
       ascending: $ascending

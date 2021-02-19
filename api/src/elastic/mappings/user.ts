@@ -48,6 +48,12 @@ const userMappings = {
   },
   avatar: {
     type: 'keyword'
+  },
+  university: {
+    type: 'keyword'
+  },
+  alumniYear: {
+    type: 'short'
   }
 };
 

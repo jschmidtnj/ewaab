@@ -14,7 +14,7 @@ export enum VerifyType {
   resetPassword = 'resetPassword'
 }
 
-export const mediaJWTExpiration = '10m';
+export const mediaJWTExpiration = '1h';
 
 export enum MediaAccessType {
   media = 'media'

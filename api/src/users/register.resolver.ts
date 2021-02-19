@@ -17,6 +17,7 @@ import statusCodes from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
 import { InviteUserTokenData } from '../emails/inviteUser.resolver';
 import { defaultMajor } from '../shared/majors';
+import { defaultUniversity } from '../shared/universities';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import { getTime } from '../shared/time';
@@ -160,7 +161,8 @@ class RegisterResolver {
       username: args.username,
       locationName: '',
       major: defaultMajor,
-      description: ''
+      description: '',
+      university: defaultUniversity
     };
 
     const id = uuidv4();
@@ -181,7 +183,8 @@ class RegisterResolver {
       facebook: '',
       github: '',
       twitter: '',
-      bio: ''
+      bio: '',
+      mentor: ''
     });
 
     const emailTemplateData = emailTemplateFiles.verifyEmail;

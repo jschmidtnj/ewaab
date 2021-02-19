@@ -6,7 +6,7 @@ import { PostPublisherData } from '../users/user.entity';
 import { MediaData } from '../media/media.entity';
 
 export enum PostType {
-  studentNews = 'studentNews',
+  ehParticipantNews = 'ehParticipantNews',
   mentorNews = 'mentorNews',
   encourageHer = 'encourageHer',
   community = 'community',
@@ -37,9 +37,9 @@ export class SearchPost extends BaseTimestamp {
   @IsDefined()
   type: PostType;
 
-  @Field({ description: 'post link', nullable: true })
+  @Field(_type => String, { description: 'post link', nullable: true })
   @Column({ type: 'text', nullable: true })
-  link?: string;
+  link?: string | null;
 
   @Field({ description: 'post publisher' })
   @Column({ type: 'uuid' })
@@ -49,9 +49,9 @@ export class SearchPost extends BaseTimestamp {
   @Field(_type => PostPublisherData, { description: 'publisher user data', nullable: true })
   publisherData?: PostPublisherData;
 
-  @Field({ description: 'media for post', nullable: true })
+  @Field(_type => String, { description: 'media for post', nullable: true })
   @Column({ type: 'uuid', nullable: true })
-  media?: string;
+  media?: string | null;
 
   @Field(_type => MediaData, { description: 'media data', nullable: true })
   mediaData?: MediaData;

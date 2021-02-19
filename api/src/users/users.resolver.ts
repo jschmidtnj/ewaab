@@ -15,17 +15,17 @@ export class UsersArgs {
   @IsOptional()
   query?: string;
 
-  @Field(_type => UserType, { description: 'user type', nullable: true })
+  @Field(_type => [UserType], { description: 'user type', nullable: true, defaultValue: [] })
   @IsOptional()
-  type?: UserType;
+  types: UserType[];
 
-  @Field(_type => [String], { description: 'user major', nullable: true })
+  @Field(_type => [String], { description: 'user major', nullable: true, defaultValue: [] })
   @IsOptional()
   @IsIn(majors, {
     message: 'major must be in list of allowed majors',
     each: true
   })
-  majors?: string[];
+  majors: string[];
 
   @Field(_type => String, { description: 'relative location', nullable: true })
   @IsOptional()
@@ -80,7 +80,6 @@ class UsersResolver {
   @Query(_returns => SearchUsersResult)
   async users(@Args() args: UsersArgs): Promise<SearchUsersResult> {
     const mustShouldParams: esb.Query[] = [];
-    const filterShouldParams: esb.Query[] = [];
     const filterMustParams: esb.Query[] = [];
 
     if (args.query) {
@@ -91,13 +90,13 @@ class UsersResolver {
       mustShouldParams.push(esb.termQuery('username', args.query));
       mustShouldParams.push(esb.termQuery('locationName', args.query));
     }
-    if (args.type) {
-      filterMustParams.push(esb.termQuery('type', args.type));
+    const filterTypeParams: esb.Query[] = [];
+    for (const type of args.types) {
+      filterTypeParams.push(esb.termQuery('type', type));
     }
-    if (args.majors) {
-      for (const major of args.majors) {
-        filterShouldParams.push(esb.termQuery('major', major));
-      }
+    const filterMajorParams: esb.Query[] = [];
+    for (const major of args.majors) {
+      filterMajorParams.push(esb.termQuery('major', major));
     }
     if (args.location) {
       filterMustParams.push(esb.geoDistanceQuery('location',
@@ -112,7 +111,8 @@ class UsersResolver {
         )
         .filter(
           esb.boolQuery()
-            .should(filterShouldParams)
+            .should(filterTypeParams)
+            .should(filterMajorParams)
             .must(filterMustParams)
         )
     );

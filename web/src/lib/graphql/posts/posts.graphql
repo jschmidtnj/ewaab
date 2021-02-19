@@ -5,6 +5,7 @@ fragment postSearchFields on SearchPost {
   publisher
   created
   updated
+  link
   publisherData {
     name
     username
@@ -14,6 +15,7 @@ fragment postSearchFields on SearchPost {
   mediaData {
     id
     type
+    name
   }
 }
 

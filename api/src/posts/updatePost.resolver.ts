@@ -1,6 +1,6 @@
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { MinLength, IsOptional, IsUrl } from 'class-validator';
+import { MinLength, IsOptional, IsUrl, ValidateIf } from 'class-validator';
 import { strMinLen } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
@@ -37,6 +37,7 @@ class UpdatePostArgs {
 
   @Field(_type => String, { description: 'link', nullable: true })
   @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
   @IsUrl({}, {
     message: 'invalid link provided'
   })
@@ -85,6 +86,9 @@ class UpdatePostResolver {
     if (args.link !== undefined) {
       postUpdateData.link = args.link;
     }
+    if (args.deleteMedia) {
+      postUpdateData.media = null;
+    }
     const now = getTime();
     postUpdateData.updated = now;
 
@@ -94,6 +98,9 @@ class UpdatePostResolver {
     }
 
     await PostModel.update(args.id, postUpdateData);
+    if (args.deleteMedia) {
+      postUpdateData.media = '';
+    }
     await elasticClient.update({
       id: args.id,
       index: postIndexName,

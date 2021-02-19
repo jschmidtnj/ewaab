@@ -59,6 +59,7 @@ export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Pr
   let numReading = 0;
   return new Promise<string | undefined>(async (resolve, reject) => {
     if (media) {
+      numReading++;
       const mediaFile = await media;
       const mediaReadStream = mediaFile.createReadStream();
       if (mediaReadStream.readableLength > maxFileUploadSize) {
@@ -158,6 +159,7 @@ class AddPostResolver {
       updated: now,
       publisher: ctx.auth!.id,
       media: mediaID,
+      link: args.link,
     };
 
     await elasticClient.index({

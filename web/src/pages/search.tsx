@@ -31,7 +31,7 @@ const typeLabelMap: Record<PostType, string> = {
   [PostType.Community]: 'Community',
   [PostType.EncourageHer]: 'Encourage Her',
   [PostType.MentorNews]: 'Mentor News',
-  [PostType.StudentNews]: 'Student News',
+  [PostType.EhParticipantNews]: 'EH Participant News',
 };
 
 const SearchPage = (): JSX.Element => {
@@ -61,7 +61,7 @@ const SearchPage = (): JSX.Element => {
     ascending: false,
     page: 0,
     perpage: defaultPerPage,
-    type: PostType.Community,
+    type: undefined,
   };
 
   const formRef = useRef<
@@ -151,7 +151,7 @@ const SearchPage = (): JSX.Element => {
               setFieldValue,
               setFieldTouched,
             }) => (
-              <form>
+              <form className="lg:ml-12">
                 <div className="my-2 flex sm:flex-row flex-col">
                   <div className="block relative">
                     <div>
@@ -178,7 +178,7 @@ const SearchPage = (): JSX.Element => {
                           name="query"
                           id="query"
                           placeholder="Search"
-                          className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none sm:rounded-l"
+                          className="lg:w-64 shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none sm:rounded-l"
                         />
                       </div>
                     </div>
@@ -252,7 +252,11 @@ const SearchPage = (): JSX.Element => {
           {!newPostModalIsOpen ? null : (
             <WritePostModal
               toggleModal={toggleWritePost}
-              defaultPostType={formRef.current.values.type}
+              defaultPostType={
+                formRef.current.values.type
+                  ? formRef.current.values.type
+                  : PostType.Community
+              }
               onSubmit={async () => {
                 // wait for elasticsearch to update
                 await sleep(1000);
@@ -265,9 +269,9 @@ const SearchPage = (): JSX.Element => {
           <div className="flex flex-col mt-4">
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-4">
-                  <div className="col-start-1 col-auto mb-4 rounded-lg">
-                    <ul className="flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md max-w-xs">
+                <div className="grid grid-cols-1 lg:grid-cols-6">
+                  <div className="col-start-1 col-span-2 mb-4 rounded-lg">
+                    <ul className="lg:ml-12 lg:w-64 flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md">
                       {!posts ||
                       posts.loading ||
                       !posts.data ||
@@ -301,13 +305,18 @@ const SearchPage = (): JSX.Element => {
                                   );
                                   formRef.current.handleSubmit();
                                 }}
+                                type="button"
                               >
                                 <span className="inline-block text-left text-base w-full">
                                   {typeLabelMap[countData.type]}
                                 </span>
-                                <span className="inline-block w-full pr-2">
-                                  <div className="float-right flex items-center justify-center rounded-full h-0.5 w-0.5 bg-purple-500 text-white p-3 text-sm">
-                                    {countData.count}
+                                <span className="float-right inline-block pr-2">
+                                  <div className="flex items-center justify-center rounded-full h-0.5 w-0.5 bg-purple-500 text-white p-3 text-sm">
+                                    {!formRef.current.values.type ||
+                                    countData.type ===
+                                      formRef.current.values.type
+                                      ? countData.count
+                                      : '-'}
                                   </div>
                                 </span>
                               </button>
@@ -358,7 +367,7 @@ const SearchPage = (): JSX.Element => {
                           </tbody>
                         </table>
 
-                        <div className="overflow-hidden border-b border-gray-200 rounded-lg mt-4">
+                        <div className="overflow-hidden border-b border-gray-200 rounded-lg mt-4 mb-8">
                           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                             <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
                               <span className="text-sm text-gray-700 mr-4">

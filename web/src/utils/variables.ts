@@ -3,6 +3,8 @@ export interface SelectNumberObject {
   value: number;
 }
 
+export const defaultLoggedInPage = '/users';
+
 export const defaultPerPage = 10;
 
 const perPageValues = [5, defaultPerPage, 15];

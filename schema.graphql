@@ -148,6 +148,9 @@ type Mutation {
     subject: String
   ): String!
   updateAccount(
+    """alumni year"""
+    alumniYear: Int
+
     """avatar"""
     avatar: Upload
 
@@ -181,6 +184,9 @@ type Mutation {
     """major"""
     major: String
 
+    """mentor"""
+    mentor: String
+
     """name"""
     name: String
 
@@ -192,6 +198,9 @@ type Mutation {
 
     """twitter"""
     twitter: String
+
+    """university"""
+    university: String
 
     """url"""
     url: String
@@ -308,13 +317,16 @@ enum PostSortOption {
 """post type"""
 enum PostType {
   community
+  ehParticipantNews
   encourageHer
   mentorNews
-  studentNews
 }
 
 """public user data (not in search)"""
 type PublicUser {
+  """alumni year"""
+  alumniYear: Int
+
   """avatar id"""
   avatar: String
 
@@ -351,6 +363,9 @@ type PublicUser {
   """major"""
   major: String!
 
+  """mentor"""
+  mentor: String
+
   """name"""
   name: String!
 
@@ -362,6 +377,9 @@ type PublicUser {
 
   """user type"""
   type: String!
+
+  """university"""
+  university: String!
 
   """date updated"""
   updated: Float!
@@ -436,7 +454,7 @@ type Query {
     location: String
 
     """user major"""
-    majors: [String!]
+    majors: [String!] = []
 
     """page number"""
     page: Int = 0
@@ -451,7 +469,7 @@ type Query {
     sortBy: UserSortOption
 
     """user type"""
-    type: UserType
+    types: [UserType!] = []
   ): SearchUsersResult!
 }
 
@@ -505,6 +523,9 @@ type SearchPostsResult {
 
 """user data, indexed for search"""
 type SearchUser {
+  """alumni year"""
+  alumniYear: Int
+
   """avatar id"""
   avatar: String
 
@@ -535,6 +556,9 @@ type SearchUser {
   """user type"""
   type: String!
 
+  """university"""
+  university: String!
+
   """date updated"""
   updated: Float!
 
@@ -556,6 +580,9 @@ scalar Upload
 
 """user account"""
 type User {
+  """alumni year"""
+  alumniYear: Int
+
   """avatar id"""
   avatar: String
 
@@ -598,6 +625,9 @@ type User {
   """media auth token"""
   mediaAuth: String!
 
+  """mentor"""
+  mentor: String
+
   """name"""
   name: String!
 
@@ -612,6 +642,9 @@ type User {
 
   """user type"""
   type: String!
+
+  """university"""
+  university: String!
 
   """date updated"""
   updated: Float!

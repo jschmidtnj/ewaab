@@ -3,7 +3,9 @@ import {
   AddPost,
   AddPostMutation,
   AddPostMutationVariables,
+  CurrentPostMediaFragment,
   CurrentPostUpdateFieldsFragment,
+  MediaType,
   PostType,
   PostUpdateData,
   PostUpdateDataQuery,
@@ -26,6 +28,8 @@ import { FaTimes } from 'react-icons/fa';
 import { FiFileText } from 'react-icons/fi';
 import { postMediaWidth } from 'shared/variables';
 import isDebug from 'utils/mode';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { getAPIURL } from 'utils/axios';
 
 interface ModalArgs {
   defaultPostType: PostType;
@@ -70,6 +74,10 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
   const [currentPostData, setCurrentPostData] = useState<
     CurrentPostUpdateFieldsFragment | undefined
   >(undefined);
+  const [currentMedia, setCurrentMedia] = useState<
+    CurrentPostMediaFragment | undefined
+  >(undefined);
+  const [deleteMedia, setDeleteMedia] = useState<boolean>(false);
 
   useEffect(() => {
     const imageElem = document.createElement('input');
@@ -149,8 +157,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
               : '',
           });
           setCurrentPostData(updateDataRes.data.post);
-          // TODO - set update data, set preview image / file download. height of image?
-          // no height of image needed because we're using lazy load
+          setCurrentMedia(updateDataRes.data.post.mediaData);
         } catch (err) {
           toast(err.message, {
             type: 'error',
@@ -160,8 +167,10 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
     }
   }, []);
 
+  const apiURL = getAPIURL();
+
   return (
-    <div className="fixed z-10 inset-0 overflow-y-auto">
+    <div className="fixed z-20 inset-0 overflow-y-auto">
       <div className="flex items-end justify-center min-h-screen pt-4 px-2 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
@@ -180,7 +189,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                     className="text-lg leading-6 font-medium text-gray-900 p-4"
                     id="modal-headline"
                   >
-                    Create a Post
+                    {!args.updateID ? 'Create' : 'Update'}
                   </h3>
                   <hr className="mb-2" />
                   <div className="ml-6 flex items-center text-left">
@@ -223,31 +232,37 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                             id: args.updateID,
                           };
                           if (formData.title !== currentPostData.title) {
-                            updates.title = currentPostData.title;
+                            updates.title = formData.title;
                             foundUpdate = true;
                           }
                           if (formData.content !== currentPostData.title) {
-                            updates.content = currentPostData.content;
+                            updates.content = formData.content;
                             foundUpdate = true;
                           }
                           if (formData.link !== currentPostData.link) {
-                            updates.link = currentPostData.link;
+                            updates.link = formData.link;
                             foundUpdate = true;
                           }
                           if (formData.link !== currentPostData.link) {
-                            updates.link = currentPostData.link;
+                            updates.link = formData.link;
                             foundUpdate = true;
                           }
+
                           if (imageInputElem.files.length > 0) {
                             updates.media = imageInputElem.files[0];
                             foundUpdate = true;
                           } else if (fileInputElem.files.length > 0) {
                             updates.media = fileInputElem.files[0];
                             foundUpdate = true;
+                          } else if (deleteMedia) {
+                            updates.deleteMedia = true;
+                            foundUpdate = true;
                           }
+
                           if (!foundUpdate) {
                             throw new Error('no updates found');
                           }
+
                           const updatePostRes = await client.mutate<
                             UpdatePostMutation,
                             UpdatePostMutationVariables
@@ -399,16 +414,21 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                 </div>
               </div>
             </div>
-            {!previewImage ? null : (
+            {!previewImage &&
+            !(currentMedia && currentMedia.type === MediaType.Image) ? null : (
               <>
                 <hr />
                 <div className="my-4">
-                  <div className="flex justify-center text-2xl ml-36 text-gray-300">
+                  <div className="ml-64 flex justify-center text-2xl text-gray-300">
                     <button
                       className="absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
                       onClick={(evt) => {
                         evt.preventDefault();
                         setPreviewImage(undefined);
+                        if (currentMedia) {
+                          setCurrentMedia(undefined);
+                          setDeleteMedia(true);
+                        }
                         imageInputElem.value = '';
                       }}
                     >
@@ -426,17 +446,26 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                   </div>
                   <div className="flex items-center justify-center">
                     <div className="bg-gray-200 p-4 rounded-xl">
-                      <NextImage
-                        src={previewImage.preview}
-                        width={previewImage.width}
-                        height={previewImage.height}
-                      />
+                      {previewImage ? (
+                        <NextImage
+                          src={previewImage.preview}
+                          width={previewImage.width}
+                          height={previewImage.height}
+                        />
+                      ) : (
+                        <LazyLoadImage
+                          alt={`${apiURL}/media/${currentMedia.id}/blur?auth=${user.mediaAuth}`}
+                          src={`${apiURL}/media/${currentMedia.id}?auth=${user.mediaAuth}`}
+                          width={postMediaWidth}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
               </>
             )}
-            {fileName.length === 0 ? null : (
+            {fileName.length === 0 &&
+            !(currentMedia && currentMedia.type === MediaType.File) ? null : (
               <>
                 <hr />
                 <div className="my-4 flex items-center justify-center">
@@ -457,6 +486,10 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                           evt.preventDefault();
                           setFileName('');
                           setPreviewFile('');
+                          if (currentMedia) {
+                            setCurrentMedia(undefined);
+                            setDeleteMedia(true);
+                          }
                           fileInputElem.value = '';
                         }}
                       >
@@ -464,13 +497,19 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                       </button>
                     </div>
                     <a
-                      href={previewFile}
+                      href={
+                        previewFile
+                          ? previewFile
+                          : `${apiURL}/media/${currentMedia.id}?auth=${user.mediaAuth}`
+                      }
                       target="_blank"
                       rel="noreferrer"
                       className="mr-36"
                     >
                       <FiFileText className="inline-block text-4xl mr-1" />
-                      <span className="text-sm">{fileName}</span>
+                      <span className="text-sm">
+                        {fileName ? fileName : currentMedia.name}
+                      </span>
                     </a>
                   </div>
                 </div>
@@ -513,6 +552,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                 <button
                   onClick={(evt) => {
                     evt.preventDefault();
+                    console.log(formRef.current.errors);
                     formRef.current.handleSubmit();
                   }}
                   type="submit"

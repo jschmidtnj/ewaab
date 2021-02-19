@@ -36,9 +36,9 @@ export class PostPublisherData extends BaseTimestamp {
   @IsDefined()
   description: string;
 
-  @Field({ description: 'avatar id', nullable: true })
+  @Field(_type => String, { description: 'avatar id', nullable: true })
   @Column({ type: 'uuid', nullable: true })
-  avatar?: string;
+  avatar?: string | null;
 }
 
 @ObjectType({ description: 'user data, indexed for search', isAbstract: true })
@@ -59,10 +59,18 @@ export class SearchUser extends PostPublisherData {
   @IsDefined()
   major: string;
 
-  @Field({ description: 'location latitude longitude', nullable: true })
-  @Column({ type: 'text', nullable: true })
+  @Field({ description: 'university' })
+  @Column({ type: 'text' })
   @IsDefined()
-  location?: string;
+  university: string;
+
+  @Field(_type => Int, { description: 'alumni year', nullable: true })
+  @Column({ type: 'int' })
+  alumniYear?: number | null;
+
+  @Field(_type => String, { description: 'location latitude longitude', nullable: true })
+  @Column({ type: 'text', nullable: true })
+  location?: string | null;
 
   @Field({ description: 'location name' })
   @Column({ type: 'text' })
@@ -97,9 +105,13 @@ export class PublicUser extends SearchUser {
   @PrimaryColumn('uuid')
   id: string;
 
-  @Field({ description: 'resume id', nullable: true })
+  @Field({ description: 'mentor', nullable: true })
+  @Column({ type: 'text' })
+  mentor?: string;
+
+  @Field(_type => String, { description: 'resume id', nullable: true })
   @Column({ type: 'uuid', nullable: true })
-  resume?: string;
+  resume?: string | null;
 
   @Field({ description: 'job title' })
   @Column({ type: 'text' })

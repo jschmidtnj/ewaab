@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 import { GraphQLContext } from '../utils/context';
-import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn } from 'class-validator';
+import { Resolver, ArgsType, Field, Args, Ctx, Mutation, Int } from 'type-graphql';
+import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn, Min, Max } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
@@ -26,6 +26,7 @@ import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import majors from '../shared/majors';
 import { getTime } from '../shared/time';
+import universities from '../shared/universities';
 
 @ArgsType()
 class UpdateArgs {
@@ -117,6 +118,28 @@ class UpdateArgs {
   @Field(_type => String, { description: 'short bio', nullable: true })
   @IsOptional()
   bio?: string;
+
+  @Field(_type => String, { description: 'university', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
+  @IsIn(universities, {
+    message: 'invalid university provided'
+  })
+  university?: string;
+
+  @Field(_type => Int, { description: 'alumni year', nullable: true })
+  @IsOptional()
+  @Min(2000, {
+    message: 'invalid alumni year provided'
+  })
+  @Max(new Date().getFullYear() + 3, {
+    message: 'year cannot be that far in the future'
+  })
+  alumniYear?: number;
+
+  @Field(_type => String, { description: 'mentor', nullable: true })
+  @IsOptional()
+  mentor?: string;
 
   @Field(_type => String, { description: 'password', nullable: true })
   @IsOptional()
@@ -232,6 +255,15 @@ class UpdateAccountResolver {
     }
     if (args.bio !== undefined) {
       userUpdateData.bio = args.bio;
+    }
+    if (args.university) {
+      userUpdateData.university = args.university;
+    }
+    if (args.alumniYear) {
+      userUpdateData.alumniYear = args.alumniYear;
+    }
+    if (args.mentor) {
+      userUpdateData.mentor = args.mentor;
     }
 
     return new Promise<string>(async (resolve, reject) => {

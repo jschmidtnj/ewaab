@@ -1,5 +1,5 @@
 mutation updatePost($id: String!, $title: String, $content: String,
-                    $link: String, $media: Upload) {
+                    $link: String, $media: Upload, $deleteMedia: Boolean) {
   updatePost(id: $id, title: $title, content: $content,
-             link: $link, media: $media)
+             link: $link, media: $media, deleteMedia: $deleteMedia)
 }

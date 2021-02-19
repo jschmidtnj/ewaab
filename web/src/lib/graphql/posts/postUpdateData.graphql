@@ -1,3 +1,9 @@
+fragment currentPostMedia on MediaData {
+  id
+  type
+  name
+}
+
 fragment currentPostUpdateFields on Post {
   title
   content
@@ -9,8 +15,7 @@ query postUpdateData($id: String!) {
     ...currentPostUpdateFields
     type
     mediaData {
-      id
-      type
+      ...currentPostMedia
     }
   }
 }

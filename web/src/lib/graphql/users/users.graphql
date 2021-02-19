@@ -1,6 +1,6 @@
-query users($query: String, $type: UserType, $majors: [String!], $sortBy: UserSortOption,
+query users($query: String, $types: [UserType!], $majors: [String!], $sortBy: UserSortOption,
             $ascending: Boolean, $page: Int, $perpage: Int) {
-  users(query: $query, type: $type, majors: $majors, sortBy: $sortBy,
+  users(query: $query, types: $types, majors: $majors, sortBy: $sortBy,
         ascending: $ascending, page: $page, perpage: $perpage) {
     count
     results {

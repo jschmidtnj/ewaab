@@ -25,6 +25,7 @@ import {
   minJWTLen,
 } from 'shared/variables';
 import { isSSR } from 'utils/checkSSR';
+import { defaultLoggedInPage } from 'utils/variables';
 
 const RegisterPage = (): JSX.Element => {
   const router = useRouter();
@@ -43,7 +44,7 @@ const RegisterPage = (): JSX.Element => {
       try {
         const loggedIn = await isLoggedIn();
         if (loggedIn) {
-          router.push('/');
+          router.push(defaultLoggedInPage);
         }
       } catch (err) {
         dispatchAuthThunk(thunkLogout());

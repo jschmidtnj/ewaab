@@ -35,10 +35,10 @@ const majorsOptions: SelectStringObject[] = majors.map((major) => ({
 }));
 
 const userTypeLabels: Record<UserType, string> = {
-  [UserType.User]: 'student',
-  [UserType.Mentor]: 'recruiter',
+  [UserType.User]: 'EH Participant',
+  [UserType.Mentor]: 'Recruiter',
   [UserType.Visitor]: '',
-  [UserType.Admin]: 'management',
+  [UserType.Admin]: 'EWAAB Staff',
 };
 
 interface SortableColumnArgs {
@@ -65,12 +65,14 @@ const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
         args.handleSubmit();
       }}
     >
-      <span>{args.text}</span>
-      {args.elemTarget !== args.sortBy ? null : args.ascending ? (
-        <AiFillCaretDown className="inline-block ml-2 text-md" />
-      ) : (
-        <AiFillCaretUp className="inline-block ml-2 text-md" />
-      )}
+      <div className="flex">
+        <span>{args.text}</span>
+        {args.elemTarget !== args.sortBy ? null : args.ascending ? (
+          <AiFillCaretDown className="inline-block ml-2 text-md" />
+        ) : (
+          <AiFillCaretUp className="inline-block ml-2 text-md" />
+        )}
+      </div>
     </th>
   );
 };
@@ -89,6 +91,7 @@ const UsersPage = (): JSX.Element => {
     if (variables.query?.length === 0) {
       variables.query = undefined;
     }
+    variables.types = [UserType.Mentor, UserType.User];
     const res = await client.query<UsersQuery, UsersQueryVariables>({
       query: Users,
       variables,
@@ -364,7 +367,7 @@ const UsersPage = (): JSX.Element => {
                     <tbody className="bg-white divide-gray-200">
                       {users.data.users.results.map((user, i) => (
                         <tr key={`user-${i}-${user.username}`}>
-                          <td className="w-16 pl-4 py-4 whitespace-nowrap">
+                          <td className="flex w-16 pl-4 py-4 whitespace-nowrap">
                             <Avatar
                               avatar={user.avatar}
                               avatarWidth={avatarWidth}
@@ -390,7 +393,7 @@ const UsersPage = (): JSX.Element => {
                       ))}
                     </tbody>
                   </table>
-                  <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                  <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mb-8">
                     <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
                       <span className="text-sm text-gray-700 mr-4">
                         Showing {users.data.users.results.length} /{' '}

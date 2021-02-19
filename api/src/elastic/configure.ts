@@ -18,11 +18,12 @@ const initializeMapping = async (indexName: string, indexSettings: Record<string
     ignore_unavailable: true
   });
   logger.info(`deleted ${indexName} from elasticsearch: ${deleteRes.body.acknowledged as boolean}`);
+  await sleep(500);
   try {
     const createIndexRes = await elasticClient.indices.create({
       index: indexName,
       body: {
-        settings: indexSettings
+        settings: indexSettings,
       }
     });
     logger.info(`created ${indexName} index: ${createIndexRes.statusCode === statusCodes.OK}`);
@@ -34,10 +35,12 @@ const initializeMapping = async (indexName: string, indexSettings: Record<string
     index: indexName,
     type: indexType,
     body: {
-      properties: indexMappings
+      properties: indexMappings,
+      dynamic: false
     },
     include_type_name: true
   };
+  await sleep(500);
   try {
     const setIndexMappingsRes = await elasticClient.indices.putMapping(mappingsConfig);
     logger.info(`set ${indexType} mappings: ${setIndexMappingsRes.statusCode === statusCodes.OK}`);
