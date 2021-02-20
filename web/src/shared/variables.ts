@@ -16,3 +16,5 @@ export const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3
 export const baseFacebook = 'https://facebook.com';
 export const baseTwitter = 'https://twitter.com';
 export const baseGitHub = 'https://github.com';
+
+export const ewaabFounded = 2010;

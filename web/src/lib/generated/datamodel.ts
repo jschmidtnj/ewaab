@@ -91,6 +91,7 @@ export type MutationDeletePostArgs = {
 };
 
 export type MutationInviteUserArgs = {
+  alumniYear: Scalars['Int'];
   email: Scalars['String'];
   executeAdmin?: Maybe<Scalars['Boolean']>;
   name: Scalars['String'];
@@ -113,6 +114,7 @@ export type MutationRegisterArgs = {
   email: Scalars['String'];
   name: Scalars['String'];
   password: Scalars['String'];
+  pronouns: Scalars['String'];
   recaptchaToken: Scalars['String'];
   registrationToken: Scalars['String'];
   username: Scalars['String'];
@@ -150,6 +152,7 @@ export type MutationUpdateAccountArgs = {
   mentor?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
+  pronouns?: Maybe<Scalars['String']>;
   resume?: Maybe<Scalars['Upload']>;
   twitter?: Maybe<Scalars['String']>;
   university?: Maybe<Scalars['String']>;
@@ -278,6 +281,8 @@ export type PublicUser = {
   mentor?: Maybe<Scalars['String']>;
   /** name */
   name: Scalars['String'];
+  /** user pronouns */
+  pronouns: Scalars['String'];
   /** resume id */
   resume?: Maybe<Scalars['String']>;
   /** twitter account */
@@ -462,6 +467,8 @@ export type User = {
   mentor?: Maybe<Scalars['String']>;
   /** name */
   name: Scalars['String'];
+  /** user pronouns */
+  pronouns: Scalars['String'];
   /** resume id */
   resume?: Maybe<Scalars['String']>;
   /** current token version */
@@ -663,6 +670,7 @@ export type RegisterMutationVariables = Exact<{
   registrationToken: Scalars['String'];
   username: Scalars['String'];
   name: Scalars['String'];
+  pronouns: Scalars['String'];
   email: Scalars['String'];
   password: Scalars['String'];
   recaptchaToken: Scalars['String'];
@@ -697,6 +705,9 @@ export type UpdateAccountMutationVariables = Exact<{
   twitter?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   major?: Maybe<Scalars['String']>;
+  university?: Maybe<Scalars['String']>;
+  mentor?: Maybe<Scalars['String']>;
+  pronouns?: Maybe<Scalars['String']>;
   bio?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 }>;
@@ -726,6 +737,9 @@ export type UserFieldsFragment = { __typename?: 'User' } & Pick<
   | 'twitter'
   | 'description'
   | 'bio'
+  | 'pronouns'
+  | 'university'
+  | 'mentor'
 >;
 
 export type UserQueryVariables = Exact<{ [key: string]: never }>;
@@ -841,6 +855,9 @@ export const UserFields = gql`
     twitter
     description
     bio
+    pronouns
+    university
+    mentor
   }
 `;
 export const AddPost = gql`
@@ -980,6 +997,7 @@ export const Register = gql`
     $registrationToken: String!
     $username: String!
     $name: String!
+    $pronouns: String!
     $email: String!
     $password: String!
     $recaptchaToken: String!
@@ -988,6 +1006,7 @@ export const Register = gql`
       registrationToken: $registrationToken
       username: $username
       name: $name
+      pronouns: $pronouns
       email: $email
       password: $password
       recaptchaToken: $recaptchaToken
@@ -1014,6 +1033,9 @@ export const UpdateAccount = gql`
     $twitter: String
     $description: String
     $major: String
+    $university: String
+    $mentor: String
+    $pronouns: String
     $bio: String
     $password: String
   ) {
@@ -1031,6 +1053,9 @@ export const UpdateAccount = gql`
       twitter: $twitter
       description: $description
       major: $major
+      university: $university
+      mentor: $mentor
+      pronouns: $pronouns
       bio: $bio
       password: $password
     )

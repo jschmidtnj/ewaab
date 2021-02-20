@@ -105,6 +105,13 @@ export class PublicUser extends SearchUser {
   @PrimaryColumn('uuid')
   id: string;
 
+  @Field({ description: 'user pronouns' })
+  @Column({ type: 'text' })
+  @IsDefined()
+  pronouns: string;
+
+  // TODO - currently mentor is defined by name. maybe add link to user eventually
+  // then they would be added to the search user object too
   @Field({ description: 'mentor', nullable: true })
   @Column({ type: 'text' })
   mentor?: string;

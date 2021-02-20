@@ -1,7 +1,7 @@
 import argon2 from 'argon2';
 import { Resolver, ArgsType, Field, Args, Mutation } from 'type-graphql';
 import { IsEmail, MinLength, Matches } from 'class-validator';
-import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, validUsername } from '../shared/variables';
+import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, validUsername, strMinLen } from '../shared/variables';
 import { accountExistsEmail, accountExistsUsername } from './shared';
 import User, { SearchUser } from '../schema/users/user.entity';
 import { verifyRecaptcha } from '../utils/recaptcha';
@@ -31,7 +31,13 @@ class RegisterArgs {
   recaptchaToken: string;
 
   @Field(_type => String, { description: 'name' })
+  @MinLength(strMinLen, {
+    message: `name must contain at least ${strMinLen} characters`
+  })
   name: string;
+
+  @Field(_type => String, { description: 'pronouns' })
+  pronouns: string;
 
   @Field(_type => String, { description: 'username' })
   @Matches(validUsername, {
@@ -162,7 +168,8 @@ class RegisterResolver {
       locationName: '',
       major: defaultMajor,
       description: '',
-      university: defaultUniversity
+      university: defaultUniversity,
+      alumniYear: inviteData.alumniYear
     };
 
     const id = uuidv4();
@@ -175,6 +182,7 @@ class RegisterResolver {
     const newUser = await UserModel.save({
       ...searchUser,
       id,
+      pronouns: args.pronouns,
       password: hashedPassword,
       tokenVersion: 0,
       emailVerified: false,

@@ -14,7 +14,9 @@ const Index = (): JSX.Element => {
       />
       <div className="z-10 absolute inset-0 flex justify-center items-center text-white">
         <div className="m-4">
-          <h1 className="mb-4 sm:text-5xl text-3xl">Welcome to ConnectHer</h1>
+          <h1 className="mb-4 sm:text-5xl text-3xl">
+            Welcome to the EWAAB Internal Network
+          </h1>
           <div className="flex sm:justify-center justify-start my-4">
             <hr className="border-red-400 border-2 rounded-sm w-10" />
           </div>

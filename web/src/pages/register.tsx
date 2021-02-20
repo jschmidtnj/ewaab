@@ -95,6 +95,7 @@ const RegisterPage = (): JSX.Element => {
                 email: providedEmail,
                 name: providedName,
                 username: '',
+                pronouns: '',
                 password: '',
                 confirmedPassword: '',
               }}
@@ -105,6 +106,7 @@ const RegisterPage = (): JSX.Element => {
                   .email('invalid email address'),
                 username: yup.string().required('required'),
                 name: yup.string().required('required'),
+                pronouns: yup.string(),
                 password: yup
                   .string()
                   .required('required')
@@ -262,6 +264,30 @@ const RegisterPage = (): JSX.Element => {
                         } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                       >
                         {errors.name}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="name" className="sr-only">
+                        Pronouns
+                      </label>
+                      <input
+                        id="pronouns"
+                        name="pronouns"
+                        type="text"
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        placeholder="Pronouns"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.pronouns}
+                        disabled={isSubmitting}
+                      />
+                      <p
+                        className={`${
+                          touched.pronouns && errors.pronouns ? '' : 'hidden'
+                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                      >
+                        {errors.pronouns}
                       </p>
                     </div>
 

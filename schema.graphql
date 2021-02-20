@@ -70,6 +70,9 @@ type Mutation {
     id: String!
   ): String!
   inviteUser(
+    """alumni year"""
+    alumniYear: Int!
+
     """email"""
     email: String!
 
@@ -113,6 +116,9 @@ type Mutation {
 
     """password"""
     password: String!
+
+    """pronouns"""
+    pronouns: String!
 
     """recaptcha token"""
     recaptchaToken: String!
@@ -192,6 +198,9 @@ type Mutation {
 
     """password"""
     password: String
+
+    """pronouns"""
+    pronouns: String
 
     """resume"""
     resume: Upload
@@ -368,6 +377,9 @@ type PublicUser {
 
   """name"""
   name: String!
+
+  """user pronouns"""
+  pronouns: String!
 
   """resume id"""
   resume: String
@@ -630,6 +642,9 @@ type User {
 
   """name"""
   name: String!
+
+  """user pronouns"""
+  pronouns: String!
 
   """resume id"""
   resume: String

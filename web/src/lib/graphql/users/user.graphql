@@ -17,6 +17,9 @@ fragment userFields on User {
   twitter
   description
   bio
+  pronouns
+  university
+  mentor
 }
 
 query user {

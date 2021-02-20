@@ -1,5 +1,5 @@
-import { Resolver, ArgsType, Field, Args, Mutation, Ctx } from 'type-graphql';
-import { IsEmail } from 'class-validator';
+import { Resolver, ArgsType, Field, Args, Mutation, Ctx, Int } from 'type-graphql';
+import { IsEmail, Max, Min } from 'class-validator';
 import { configData } from '../utils/config';
 import { emailTemplateFiles } from './compileEmailTemplates';
 import { getSecret, VerifyType, getJWTIssuer, verifyJWTExpiration } from '../utils/jwt';
@@ -10,6 +10,7 @@ import { sendEmailUtil } from './sendEmail.resolver';
 import { loginType } from '../auth/shared';
 import { accountExistsEmail } from '../users/shared';
 import { UserType } from '../schema/users/user.entity';
+import { ewaabFounded } from '../shared/variables';
 
 @ArgsType()
 class InviteUserArgs {
@@ -25,6 +26,15 @@ class InviteUserArgs {
   @Field(_type => UserType, { description: 'user type', nullable: true, defaultValue: UserType.user })
   type: UserType;
 
+  @Field(_type => Int, { description: 'alumni year' })
+  @Min(ewaabFounded, {
+    message: 'invalid alumni year provided'
+  })
+  @Max(new Date().getFullYear() + 3, {
+    message: 'year cannot be that far in the future'
+  })
+  alumniYear: number;
+
   @Field({ description: 'execute as pseudo-admin when not in production', nullable: true })
   executeAdmin?: boolean;
 }
@@ -34,9 +44,11 @@ export interface InviteUserTokenData {
   name: string;
   type: VerifyType.invite;
   userType: UserType;
+  alumniYear: number;
 }
 
-export const generateJWTInviteUser = (email: string, name: string, type: UserType): Promise<string> => {
+export const generateJWTInviteUser = (email: string, name: string,
+  type: UserType, alumniYear: number): Promise<string> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -52,6 +64,7 @@ export const generateJWTInviteUser = (email: string, name: string, type: UserTyp
       name,
       type: VerifyType.invite,
       userType: type,
+      alumniYear
     };
     const signOptions: SignOptions = {
       issuer: jwtIssuer,
@@ -82,7 +95,7 @@ class InviteUserResolver {
     if (!template) {
       throw new Error('cannot find register email template');
     }
-    const invite_token = await generateJWTInviteUser(args.email, args.name, args.type);
+    const invite_token = await generateJWTInviteUser(args.email, args.name, args.type, args.alumniYear);
     const emailData = template({
       name: args.name,
       verify_url: `${configData.WEBSITE_URL}/register?token=${invite_token}&email=${encodeURIComponent(args.email)}&name=${encodeURIComponent(args.name)}`,

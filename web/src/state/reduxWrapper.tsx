@@ -29,7 +29,7 @@ const loadDevTools = (): any =>
 // https://gist.github.com/azamatsmith/ab814c869e81dc01b07782be0493ebcd
 const persistedReducer = persistReducer(
   {
-    key: 'ewaab-web',
+    key: 'ewaab-internal-network',
     storage,
     transforms: [
       createWhitelistFilter('authReducer', ['loggedIn', 'username']),

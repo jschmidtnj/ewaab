@@ -11,6 +11,7 @@ import {
   DeleteAccount,
   DeleteAccountMutation,
   DeleteAccountMutationVariables,
+  UserType,
 } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
 import {
@@ -41,11 +42,19 @@ import majors from 'shared/majors';
 import { FiFileText } from 'react-icons/fi';
 import Select, { ValueType } from 'react-select';
 import { capitalizeFirstLetter } from 'utils/misc';
+import universities from 'shared/universities';
 
 interface SelectMajorObject {
   value: string;
   label: string;
 }
+
+const universityOptions = universities.map(
+  (university): SelectMajorObject => ({
+    label: university,
+    value: university,
+  })
+);
 
 const majorOptions = majors.map(
   (major): SelectMajorObject => ({
@@ -195,6 +204,10 @@ const ProfilePage = (): JSX.Element => {
                     description: user.description,
                     bio: user.bio,
                     major: user.major,
+                    university: user.university,
+                    pronouns: user.pronouns,
+                    mentor:
+                      user.type === UserType.User ? user.mentor : undefined,
                     password: '',
                   }}
                   validationSchema={yup.object({
@@ -291,6 +304,21 @@ const ProfilePage = (): JSX.Element => {
                       }
                       if (formData.bio !== user.bio) {
                         updates.bio = formData.bio;
+                        foundUpdate = true;
+                      }
+                      if (formData.university !== user.university) {
+                        updates.university = formData.university;
+                        foundUpdate = true;
+                      }
+                      if (formData.pronouns !== user.pronouns) {
+                        updates.pronouns = formData.pronouns;
+                        foundUpdate = true;
+                      }
+                      if (
+                        formData.mentor !== undefined &&
+                        formData.mentor !== user.mentor
+                      ) {
+                        updates.mentor = formData.mentor;
                         foundUpdate = true;
                       }
                       if (resumeInputElem.files.length > 0) {
@@ -412,6 +440,64 @@ const ProfilePage = (): JSX.Element => {
 
                           <div>
                             <label
+                              htmlFor="pronouns"
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              Pronouns
+                            </label>
+                            <div className="mt-2 flex rounded-md shadow-sm">
+                              <input
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.pronouns}
+                                disabled={isSubmitting}
+                                type="text"
+                                name="pronouns"
+                                id="pronouns"
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                              />
+                            </div>
+                            <p
+                              className={`${
+                                touched.pronouns && errors.pronouns
+                                  ? ''
+                                  : 'hidden'
+                              } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                            >
+                              {errors.pronouns}
+                            </p>
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor="mentor"
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              Mentor
+                            </label>
+                            <div className="mt-2 flex rounded-md shadow-sm">
+                              <input
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.mentor}
+                                disabled={isSubmitting}
+                                type="text"
+                                name="mentor"
+                                id="mentor"
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                              />
+                            </div>
+                            <p
+                              className={`${
+                                touched.mentor && errors.mentor ? '' : 'hidden'
+                              } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                            >
+                              {errors.mentor}
+                            </p>
+                          </div>
+
+                          <div>
+                            <label
                               htmlFor="jobTitle"
                               className="block text-sm font-medium text-gray-700"
                             >
@@ -450,6 +536,69 @@ const ProfilePage = (): JSX.Element => {
                               }
                             }}
                           />
+
+                          <div>
+                            <div className="mt-1 rounded-md shadow-sm -space-y-px">
+                              <label
+                                htmlFor="university"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                              >
+                                University
+                              </label>
+                              <Select
+                                id="university"
+                                name="university"
+                                isMulti={false}
+                                options={universityOptions}
+                                cacheOptions={true}
+                                defaultValue={universityOptions.find(
+                                  (elem) => elem.value === user.university
+                                )}
+                                onChange={(
+                                  selectedOption: ValueType<
+                                    SelectMajorObject,
+                                    false
+                                  >
+                                ) => {
+                                  setFieldValue(
+                                    'university',
+                                    selectedOption.value
+                                  );
+                                }}
+                                onBlur={(evt) => {
+                                  handleBlur(evt);
+                                  setFieldTouched('university', true);
+                                }}
+                                className={
+                                  (touched.university && errors.university
+                                    ? 'is-invalid'
+                                    : '') + ' select-dropdown'
+                                }
+                                styles={{
+                                  control: (styles) => ({
+                                    ...styles,
+                                    borderColor:
+                                      touched.university && errors.university
+                                        ? 'red'
+                                        : styles.borderColor,
+                                  }),
+                                }}
+                                invalid={
+                                  !!(touched.university && errors.university)
+                                }
+                                disabled={isSubmitting}
+                              />
+                            </div>
+                            <p
+                              className={`${
+                                touched.university && errors.university
+                                  ? ''
+                                  : 'hidden'
+                              } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                            >
+                              {errors.university}
+                            </p>
+                          </div>
 
                           <div>
                             <div className="mt-1 rounded-md shadow-sm -space-y-px">

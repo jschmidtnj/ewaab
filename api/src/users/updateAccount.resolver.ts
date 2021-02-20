@@ -2,7 +2,7 @@ import argon2 from 'argon2';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation, Int } from 'type-graphql';
 import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn, Min, Max } from 'class-validator';
-import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen } from '../shared/variables';
+import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen, ewaabFounded } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
 import User from '../schema/users/user.entity';
@@ -58,6 +58,10 @@ class UpdateArgs {
   @Field(_type => String, { description: 'job title', nullable: true })
   @IsOptional()
   jobTitle?: string;
+
+  @Field(_type => String, { description: 'pronouns', nullable: true })
+  @IsOptional()
+  pronouns?: string;
 
   @Field(_type => String, { description: 'location', nullable: true })
   @IsOptional()
@@ -129,7 +133,7 @@ class UpdateArgs {
 
   @Field(_type => Int, { description: 'alumni year', nullable: true })
   @IsOptional()
-  @Min(2000, {
+  @Min(ewaabFounded, {
     message: 'invalid alumni year provided'
   })
   @Max(new Date().getFullYear() + 3, {
@@ -165,9 +169,14 @@ class UpdateArgs {
 class UpdateAccountResolver {
   @Mutation(_returns => String)
   async updateAccount(@Args() args: UpdateArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
+    const isAdmin = verifyAdmin(ctx);
+    if (args.alumniYear !== undefined && !isAdmin) {
+      throw new Error('user must be admin to modify alumni year');
+    }
+
     let id: string;
     if (args.id !== undefined) {
-      if (!verifyAdmin(ctx)) {
+      if (!isAdmin) {
         throw new Error('user not admin');
       }
       id = args.id;
@@ -235,6 +244,9 @@ class UpdateAccountResolver {
     if (args.major !== undefined) {
       userUpdateData.major = args.major;
     }
+    if (args.pronouns !== undefined) {
+      userUpdateData.pronouns = args.pronouns;
+    }
     if (args.jobTitle !== undefined) {
       userUpdateData.jobTitle = args.jobTitle;
     }
@@ -256,13 +268,13 @@ class UpdateAccountResolver {
     if (args.bio !== undefined) {
       userUpdateData.bio = args.bio;
     }
-    if (args.university) {
+    if (args.university !== undefined) {
       userUpdateData.university = args.university;
     }
-    if (args.alumniYear) {
+    if (args.alumniYear !== undefined) {
       userUpdateData.alumniYear = args.alumniYear;
     }
-    if (args.mentor) {
+    if (args.mentor !== undefined) {
       userUpdateData.mentor = args.mentor;
     }
 
