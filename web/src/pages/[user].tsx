@@ -17,8 +17,6 @@ import { RootState } from 'state';
 import { client } from 'utils/apollo';
 import { isSSR } from 'utils/checkSSR';
 import { useRouter } from 'next/dist/client/router';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
 import { getAPIURL } from 'utils/axios';
 import { FaFacebook, FaTwitter, FaGithub, FaEnvelope } from 'react-icons/fa';
 import { FiFileText } from 'react-icons/fi';
@@ -28,6 +26,8 @@ import { BsLink45Deg } from 'react-icons/bs';
 import { baseFacebook, baseGitHub, baseTwitter } from 'shared/variables';
 import { defaultMajor } from 'shared/majors';
 import Avatar from 'components/Avatar';
+import Markdown from 'components/markdown/Markdown';
+import Editor from 'components/markdown/Editor';
 
 const avatarWidth = 40;
 
@@ -199,11 +199,10 @@ const UserPage = (): JSX.Element => {
             <div className="mt-2 ml-2">
               <p>{user.description}</p>
             </div>
+            <Editor initialContent={user.bio} />
             <div className="mt-1 ml-1">
-              <hr className="mt-2" />
-              <ReactMarkdown plugins={[gfm]} className="mt-4">
-                {user.bio}
-              </ReactMarkdown>
+              <hr className="mt-2 mb-4" />
+              <Markdown content={user.bio} />
             </div>
           </>
         )}

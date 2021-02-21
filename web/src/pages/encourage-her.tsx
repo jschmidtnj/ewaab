@@ -1,9 +1,8 @@
-import Feed from "components/Feed";
-import PrivateRoute from "components/PrivateRoute";
-import SEO from "components/SEO";
-import Layout from "layouts/main";
-import { PostType } from "lib/generated/datamodel";
-
+import Feed from 'components/Feed';
+import PrivateRoute from 'components/PrivateRoute';
+import SEO from 'components/SEO';
+import Layout from 'layouts/main';
+import { PostType } from 'lib/generated/datamodel';
 
 const EncourageHerPage = (): JSX.Element => {
   return (
@@ -13,7 +12,7 @@ const EncourageHerPage = (): JSX.Element => {
         <Feed postType={PostType.EncourageHer} />
       </Layout>
     </PrivateRoute>
-  )
+  );
 };
 
 export default EncourageHerPage;

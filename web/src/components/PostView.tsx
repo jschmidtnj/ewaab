@@ -4,8 +4,6 @@ import {
   PostSearchFieldsFragment,
 } from 'lib/generated/datamodel';
 import Avatar from 'components/Avatar';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
 import { formatDistanceToNow } from 'date-fns';
 import { BsPencil } from 'react-icons/bs';
 import { BiTrash } from 'react-icons/bi';
@@ -18,6 +16,7 @@ import { getAPIURL } from 'utils/axios';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { postMediaWidth } from 'shared/variables';
 import { FiFileText } from 'react-icons/fi';
+import Markdown from './markdown/Markdown';
 
 interface MediaViewArgs {
   id: string;
@@ -72,7 +71,7 @@ const PostView = (args: PostViewArgs): JSX.Element => {
         {args.data.publisher !== userID ? null : (
           <div className="flex justify-end text-2xl text-gray-800">
             <button
-              className="mr-10 absolute z-10 hover:text-gray-600"
+              className="mr-8 p-2 absolute z-10 hover:text-gray-600"
               onClick={(evt) => {
                 evt.preventDefault();
                 args.onUpdatePost(args.data.id);
@@ -81,7 +80,7 @@ const PostView = (args: PostViewArgs): JSX.Element => {
               <BsPencil />
             </button>
             <button
-              className="absolute z-10 hover:text-gray-600"
+              className="p-2 absolute z-10 hover:text-gray-600"
               onClick={(evt) => {
                 evt.preventDefault();
                 args.onDeletePost({
@@ -137,10 +136,8 @@ const PostView = (args: PostViewArgs): JSX.Element => {
           >
             {args.data.title}
           </h2>
-          <div className="mt-1">
-            <ReactMarkdown plugins={[gfm]} className="mt-4">
-              {args.data.content}
-            </ReactMarkdown>
+          <div className="mt-4">
+            <Markdown content={args.data.content} />
           </div>
         </div>
       </div>

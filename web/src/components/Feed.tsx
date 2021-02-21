@@ -15,6 +15,7 @@ import WritePostModal from 'components/modals/WritePostModal';
 import PostView from 'components/PostView';
 import DeletePostModal from 'components/modals/DeletePostModal';
 import sleep from 'shared/sleep';
+import { FiEdit } from 'react-icons/fi';
 
 const numPerPage = 10;
 
@@ -73,7 +74,7 @@ const Feed = (args: FeedArgs): JSX.Element => {
       } catch (err) {
         console.log(JSON.stringify(err));
         toast((err as ApolloError).message, {
-          type: 'error'
+          type: 'error',
         });
       }
     })();
@@ -108,75 +109,92 @@ const Feed = (args: FeedArgs): JSX.Element => {
         )}
 
         <div className="col-span-3 lg:mx-4">
-          {!posts || posts.loading ? (
-            <p className="text-md pt-4">Loading...</p>
-          ) : !posts.data || posts.data.posts.results.length === 0 ? (
-            <p className="text-md pt-4">No posts found</p>
-          ) : (
-                <>
-                  <table className="min-w-full">
-                    <tbody>
-                      {posts.data.posts.results.map((post, i) => (
-                        <tr key={`post-${i}-${post.title}`}>
-                          <td>
-                            <PostView
-                              data={post}
-                              onDeletePost={(vars) => {
-                                setDeletePostVariables(vars);
-                                toggleDeletePostModal();
-                              }}
-                              onUpdatePost={(postID) => {
-                                setUpdatePostID(postID);
-                                toggleWritePost();
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          <div className="bg-white px-4 sm:px-16 py-4 flex items-center justify-center mt-4 mb-8 rounded-md">
+            <button
+              className="flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
+              onClick={(evt) => {
+                evt.preventDefault();
+                toggleWritePost();
+              }}
+            >
+              <FiEdit className="inline-block mr-2 text-md" />
+              <span className="text-sm">Start a post</span>
+            </button>
+          </div>
 
-                  <div className="overflow-hidden border-b border-gray-200 rounded-lg mt-4 mb-8">
-                    <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                      <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <span className="text-sm text-gray-700 mr-4">
-                          Showing {posts.data.posts.results.length} /{' '}
-                          {posts.data.posts.count}
-                        </span>
-                        <div
-                          className="relative inline-flex -space-x-px"
-                          aria-label="Pagination"
-                        >
-                          <button
-                            className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l"
-                            onClick={(evt) => {
-                              evt.preventDefault();
-                              setCurrentPage(currentPage - 1);
-                            }}
-                            disabled={currentPage === 0}
-                          >
-                            Prev
-                          </button>
-                          <button
-                            className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r"
-                            onClick={(evt) => {
-                              evt.preventDefault();
-                              setCurrentPage(currentPage + 1);
-                            }}
-                            disabled={
-                              currentPage * numPerPage +
-                              posts.data.posts.results.length ===
-                              posts.data.posts.count
-                            }
-                          >
-                            Next
-                            </button>
-                        </div>
-                      </div>
-                    </div>
+          <div className="flex items-center justify-center">
+            {!posts || posts.loading ? (
+              <p className="text-md pt-4">Loading...</p>
+            ) : !posts.data || posts.data.posts.results.length === 0 ? (
+              <p className="text-md pt-4">No posts found</p>
+            ) : (
+              <table className="min-w-full">
+                <tbody>
+                  {posts.data.posts.results.map((post, i) => (
+                    <tr key={`post-${i}-${post.title}`}>
+                      <td>
+                        <PostView
+                          data={post}
+                          onDeletePost={(vars) => {
+                            setDeletePostVariables(vars);
+                            toggleDeletePostModal();
+                          }}
+                          onUpdatePost={(postID) => {
+                            setUpdatePostID(postID);
+                            toggleWritePost();
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {!posts ||
+          posts.loading ||
+          posts.data.posts.results.length === 0 ? null : (
+            <div className="rounded-lg mt-4 mb-8">
+              <div className="bg-white px-4 py-3 flex items-center justify-between sm:px-6">
+                <div className="sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <span className="text-sm text-gray-700 mr-4">
+                    Showing {posts.data.posts.results.length} /{' '}
+                    {posts.data.posts.count}
+                  </span>
+                  <div
+                    className="relative inline-flex -space-x-px"
+                    aria-label="Pagination"
+                  >
+                    <button
+                      className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l"
+                      onClick={(evt) => {
+                        evt.preventDefault();
+                        setCurrentPage(currentPage - 1);
+                      }}
+                      disabled={currentPage === 0}
+                    >
+                      Prev
+                    </button>
+                    <button
+                      className="disabled:bg-gray-300 text-sm bg-gray-200 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r"
+                      onClick={(evt) => {
+                        evt.preventDefault();
+                        setCurrentPage(currentPage + 1);
+                      }}
+                      disabled={
+                        currentPage * numPerPage +
+                          posts.data.posts.results.length ===
+                        posts.data.posts.count
+                      }
+                    >
+                      Next
+                    </button>
                   </div>
-                </>
-              )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

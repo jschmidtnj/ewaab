@@ -46,6 +46,8 @@
   @apply bg-red-500;
 }
 
+@import './markdown.scss';
+
 /* utilities */
 
 @tailwind utilities;

@@ -129,9 +129,9 @@ const Header = (): JSX.Element => {
     return (
       <Link href={pathData.href} key={`path-${i}`}>
         <a
-          className={`px-3 py-2 rounded-t-md font-medium text-gray-700 ${
+          className={`px-1 mx-2 py-0.5 rounded-t-md font-medium text-gray-700 ${
             selected ? 'border-b-2 border-blue-500' : 'border-none'
-          } ${!mobileMenuOpen ? 'text-md' : 'text-base block'}`}
+          } ${!mobileMenuOpen ? 'text-md inline-block' : 'text-base block'}`}
         >
           <FormattedMessage id={pathData.name}>
             {(messages: string[]) => capitalizeFirstLetter(messages[0])}

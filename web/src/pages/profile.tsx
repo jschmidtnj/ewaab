@@ -171,7 +171,7 @@ const ProfilePage = (): JSX.Element => {
     <PrivateRoute>
       <Layout>
         <SEO page="profile" />
-        <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 flex justify-center pt-12">
+        <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 flex justify-center py-12">
           {user === undefined ? (
             <p className="text-sm">loading...</p>
           ) : (
@@ -837,7 +837,7 @@ const ProfilePage = (): JSX.Element => {
                                 onBlur={handleBlur}
                                 value={values.bio}
                                 disabled={isSubmitting}
-                                rows={3}
+                                rows={5}
                                 name="bio"
                                 id="bio"
                                 className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"

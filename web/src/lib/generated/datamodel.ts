@@ -1,8 +1,12 @@
 import gql from 'graphql-tag';
 export type Maybe<T> = T | null;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -47,7 +51,7 @@ export type MediaData = {
 /** media type, used for determining preview type */
 export enum MediaType {
   File = 'file',
-  Image = 'image'
+  Image = 'image',
 }
 
 export type Mutation = {
@@ -70,7 +74,6 @@ export type Mutation = {
   verifyEmail: Scalars['String'];
 };
 
-
 export type MutationAddPostArgs = {
   content: Scalars['String'];
   link?: Maybe<Scalars['String']>;
@@ -79,16 +82,13 @@ export type MutationAddPostArgs = {
   type: PostType;
 };
 
-
 export type MutationDeleteAccountArgs = {
   email?: Maybe<Scalars['String']>;
 };
 
-
 export type MutationDeletePostArgs = {
   id: Scalars['String'];
 };
-
 
 export type MutationInviteUserArgs = {
   alumniYear: Scalars['Int'];
@@ -98,20 +98,17 @@ export type MutationInviteUserArgs = {
   type?: Maybe<UserType>;
 };
 
-
 export type MutationLoginArgs = {
   password: Scalars['String'];
   recaptchaToken: Scalars['String'];
   usernameEmail: Scalars['String'];
 };
 
-
 export type MutationPasswordResetArgs = {
   password: Scalars['String'];
   recaptchaToken: Scalars['String'];
   resetToken: Scalars['String'];
 };
-
 
 export type MutationRegisterArgs = {
   email: Scalars['String'];
@@ -123,17 +120,14 @@ export type MutationRegisterArgs = {
   username: Scalars['String'];
 };
 
-
 export type MutationRevokeRefreshArgs = {
   email?: Maybe<Scalars['String']>;
 };
-
 
 export type MutationSendPasswordResetArgs = {
   email: Scalars['String'];
   recaptchaToken: Scalars['String'];
 };
-
 
 export type MutationSendTestEmailArgs = {
   content?: Maybe<Scalars['String']>;
@@ -141,7 +135,6 @@ export type MutationSendTestEmailArgs = {
   name: Scalars['String'];
   subject?: Maybe<Scalars['String']>;
 };
-
 
 export type MutationUpdateAccountArgs = {
   alumniYear?: Maybe<Scalars['Int']>;
@@ -166,7 +159,6 @@ export type MutationUpdateAccountArgs = {
   url?: Maybe<Scalars['String']>;
 };
 
-
 export type MutationUpdatePostArgs = {
   content?: Maybe<Scalars['String']>;
   deleteMedia?: Maybe<Scalars['Boolean']>;
@@ -176,12 +168,10 @@ export type MutationUpdatePostArgs = {
   title?: Maybe<Scalars['String']>;
 };
 
-
 export type MutationUsernameExistsArgs = {
   recaptchaToken: Scalars['String'];
   username: Scalars['String'];
 };
-
 
 export type MutationVerifyEmailArgs = {
   token: Scalars['String'];
@@ -247,7 +237,7 @@ export enum PostSortOption {
   Created = 'created',
   Publisher = 'publisher',
   Title = 'title',
-  Updated = 'updated'
+  Updated = 'updated',
 }
 
 /** post type */
@@ -255,7 +245,7 @@ export enum PostType {
   Community = 'community',
   EhParticipantNews = 'ehParticipantNews',
   EncourageHer = 'encourageHer',
-  MentorNews = 'mentorNews'
+  MentorNews = 'mentorNews',
 }
 
 /** public user data (not in search) */
@@ -323,16 +313,13 @@ export type Query = {
   users: SearchUsersResult;
 };
 
-
 export type QueryMediaArgs = {
   id: Scalars['String'];
 };
 
-
 export type QueryPostArgs = {
   id: Scalars['String'];
 };
-
 
 export type QueryPostsArgs = {
   ascending?: Maybe<Scalars['Boolean']>;
@@ -346,12 +333,10 @@ export type QueryPostsArgs = {
   type?: Maybe<PostType>;
 };
 
-
 export type QueryPublicUserArgs = {
   id?: Maybe<Scalars['Float']>;
   username?: Maybe<Scalars['String']>;
 };
-
 
 export type QueryUsersArgs = {
   ascending?: Maybe<Scalars['Boolean']>;
@@ -445,7 +430,6 @@ export type SearchUsersResult = {
   results: Array<SearchUser>;
 };
 
-
 /** user account */
 export type User = {
   __typename?: 'User';
@@ -508,7 +492,7 @@ export enum UserSortOption {
   Email = 'email',
   Location = 'location',
   Major = 'major',
-  Name = 'name'
+  Name = 'name',
 }
 
 /** user type */
@@ -516,7 +500,7 @@ export enum UserType {
   Admin = 'admin',
   Mentor = 'mentor',
   User = 'user',
-  Visitor = 'visitor'
+  Visitor = 'visitor',
 }
 
 export type AddPostMutationVariables = Exact<{
@@ -527,61 +511,56 @@ export type AddPostMutationVariables = Exact<{
   media?: Maybe<Scalars['Upload']>;
 }>;
 
-
-export type AddPostMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'addPost'>
-);
+export type AddPostMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'addPost'
+>;
 
 export type DeletePostMutationVariables = Exact<{
   id: Scalars['String'];
 }>;
 
+export type DeletePostMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'deletePost'
+>;
 
-export type DeletePostMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'deletePost'>
-);
+export type CurrentPostMediaFragment = { __typename?: 'MediaData' } & Pick<
+  MediaData,
+  'id' | 'type' | 'name'
+>;
 
-export type CurrentPostMediaFragment = (
-  { __typename?: 'MediaData' }
-  & Pick<MediaData, 'id' | 'type' | 'name'>
-);
-
-export type CurrentPostUpdateFieldsFragment = (
-  { __typename?: 'Post' }
-  & Pick<Post, 'title' | 'content' | 'link'>
-);
+export type CurrentPostUpdateFieldsFragment = { __typename?: 'Post' } & Pick<
+  Post,
+  'title' | 'content' | 'link'
+>;
 
 export type PostUpdateDataQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
+export type PostUpdateDataQuery = { __typename?: 'Query' } & {
+  post: { __typename?: 'Post' } & Pick<Post, 'type'> & {
+      mediaData?: Maybe<
+        { __typename?: 'MediaData' } & CurrentPostMediaFragment
+      >;
+    } & CurrentPostUpdateFieldsFragment;
+};
 
-export type PostUpdateDataQuery = (
-  { __typename?: 'Query' }
-  & { post: (
-    { __typename?: 'Post' }
-    & Pick<Post, 'type'>
-    & { mediaData?: Maybe<(
-      { __typename?: 'MediaData' }
-      & CurrentPostMediaFragment
-    )> }
-    & CurrentPostUpdateFieldsFragment
-  ) }
-);
-
-export type PostSearchFieldsFragment = (
-  { __typename?: 'SearchPost' }
-  & Pick<SearchPost, 'id' | 'title' | 'content' | 'publisher' | 'created' | 'updated' | 'link'>
-  & { publisherData?: Maybe<(
-    { __typename?: 'PostPublisherData' }
-    & Pick<PostPublisherData, 'name' | 'username' | 'avatar' | 'description'>
-  )>, mediaData?: Maybe<(
-    { __typename?: 'MediaData' }
-    & Pick<MediaData, 'id' | 'type' | 'name'>
-  )> }
-);
+export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
+  SearchPost,
+  'id' | 'title' | 'content' | 'publisher' | 'created' | 'updated' | 'link'
+> & {
+    publisherData?: Maybe<
+      { __typename?: 'PostPublisherData' } & Pick<
+        PostPublisherData,
+        'name' | 'username' | 'avatar' | 'description'
+      >
+    >;
+    mediaData?: Maybe<
+      { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'type' | 'name'>
+    >;
+  };
 
 export type PostsQueryVariables = Exact<{
   query?: Maybe<Scalars['String']>;
@@ -593,21 +572,17 @@ export type PostsQueryVariables = Exact<{
   sortBy?: Maybe<PostSortOption>;
 }>;
 
-
-export type PostsQuery = (
-  { __typename?: 'Query' }
-  & { posts: (
-    { __typename?: 'SearchPostsResult' }
-    & Pick<SearchPostsResult, 'count'>
-    & { results: Array<(
-      { __typename?: 'SearchPost' }
-      & PostSearchFieldsFragment
-    )>, postCounts: Array<(
-      { __typename?: 'PostCount' }
-      & Pick<PostCount, 'type' | 'count'>
-    )> }
-  ) }
-);
+export type PostsQuery = { __typename?: 'Query' } & {
+  posts: { __typename?: 'SearchPostsResult' } & Pick<
+    SearchPostsResult,
+    'count'
+  > & {
+      results: Array<{ __typename?: 'SearchPost' } & PostSearchFieldsFragment>;
+      postCounts: Array<
+        { __typename?: 'PostCount' } & Pick<PostCount, 'type' | 'count'>
+      >;
+    };
+};
 
 export type UpdatePostMutationVariables = Exact<{
   id: Scalars['String'];
@@ -618,19 +593,17 @@ export type UpdatePostMutationVariables = Exact<{
   deleteMedia?: Maybe<Scalars['Boolean']>;
 }>;
 
+export type UpdatePostMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'updatePost'
+>;
 
-export type UpdatePostMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'updatePost'>
-);
+export type DeleteAccountMutationVariables = Exact<{ [key: string]: never }>;
 
-export type DeleteAccountMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type DeleteAccountMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'deleteAccount'>
-);
+export type DeleteAccountMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'deleteAccount'
+>;
 
 export type LoginMutationVariables = Exact<{
   usernameEmail: Scalars['String'];
@@ -638,27 +611,24 @@ export type LoginMutationVariables = Exact<{
   recaptchaToken: Scalars['String'];
 }>;
 
+export type LoginMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'login'
+>;
 
-export type LoginMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'login'>
-);
+export type LoginGuestMutationVariables = Exact<{ [key: string]: never }>;
 
-export type LoginGuestMutationVariables = Exact<{ [key: string]: never; }>;
+export type LoginGuestMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'loginGuest'
+>;
 
+export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
-export type LoginGuestMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'loginGuest'>
-);
-
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'logout'>
-);
+export type LogoutMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'logout'
+>;
 
 export type PasswordResetMutationVariables = Exact<{
   recaptchaToken: Scalars['String'];
@@ -666,29 +636,36 @@ export type PasswordResetMutationVariables = Exact<{
   password: Scalars['String'];
 }>;
 
+export type PasswordResetMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'passwordReset'
+>;
 
-export type PasswordResetMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'passwordReset'>
-);
-
-export type PublicUserFieldsFragment = (
-  { __typename?: 'PublicUser' }
-  & Pick<PublicUser, 'name' | 'username' | 'email' | 'major' | 'resume' | 'locationName' | 'avatar' | 'jobTitle' | 'url' | 'facebook' | 'twitter' | 'github' | 'description' | 'bio'>
-);
+export type PublicUserFieldsFragment = { __typename?: 'PublicUser' } & Pick<
+  PublicUser,
+  | 'name'
+  | 'username'
+  | 'email'
+  | 'major'
+  | 'resume'
+  | 'locationName'
+  | 'avatar'
+  | 'jobTitle'
+  | 'url'
+  | 'facebook'
+  | 'twitter'
+  | 'github'
+  | 'description'
+  | 'bio'
+>;
 
 export type PublicUserQueryVariables = Exact<{
   username: Scalars['String'];
 }>;
 
-
-export type PublicUserQuery = (
-  { __typename?: 'Query' }
-  & { publicUser: (
-    { __typename?: 'PublicUser' }
-    & PublicUserFieldsFragment
-  ) }
-);
+export type PublicUserQuery = { __typename?: 'Query' } & {
+  publicUser: { __typename?: 'PublicUser' } & PublicUserFieldsFragment;
+};
 
 export type RegisterMutationVariables = Exact<{
   registrationToken: Scalars['String'];
@@ -700,22 +677,20 @@ export type RegisterMutationVariables = Exact<{
   recaptchaToken: Scalars['String'];
 }>;
 
-
-export type RegisterMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'register'>
-);
+export type RegisterMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'register'
+>;
 
 export type SendPasswordResetMutationVariables = Exact<{
   recaptchaToken: Scalars['String'];
   email: Scalars['String'];
 }>;
 
-
-export type SendPasswordResetMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'sendPasswordReset'>
-);
+export type SendPasswordResetMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'sendPasswordReset'
+>;
 
 export type UpdateAccountMutationVariables = Exact<{
   email?: Maybe<Scalars['String']>;
@@ -738,27 +713,41 @@ export type UpdateAccountMutationVariables = Exact<{
   password?: Maybe<Scalars['String']>;
 }>;
 
+export type UpdateAccountMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'updateAccount'
+>;
 
-export type UpdateAccountMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'updateAccount'>
-);
+export type UserFieldsFragment = { __typename?: 'User' } & Pick<
+  User,
+  | 'id'
+  | 'name'
+  | 'username'
+  | 'email'
+  | 'major'
+  | 'resume'
+  | 'type'
+  | 'avatar'
+  | 'mediaAuth'
+  | 'jobTitle'
+  | 'location'
+  | 'locationName'
+  | 'url'
+  | 'facebook'
+  | 'github'
+  | 'twitter'
+  | 'description'
+  | 'bio'
+  | 'pronouns'
+  | 'university'
+  | 'mentor'
+>;
 
-export type UserFieldsFragment = (
-  { __typename?: 'User' }
-  & Pick<User, 'id' | 'name' | 'username' | 'email' | 'major' | 'resume' | 'type' | 'avatar' | 'mediaAuth' | 'jobTitle' | 'location' | 'locationName' | 'url' | 'facebook' | 'github' | 'twitter' | 'description' | 'bio' | 'pronouns' | 'university' | 'mentor'>
-);
+export type UserQueryVariables = Exact<{ [key: string]: never }>;
 
-export type UserQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type UserQuery = (
-  { __typename?: 'Query' }
-  & { user: (
-    { __typename?: 'User' }
-    & UserFieldsFragment
-  ) }
-);
+export type UserQuery = { __typename?: 'Query' } & {
+  user: { __typename?: 'User' } & UserFieldsFragment;
+};
 
 export type UsersQueryVariables = Exact<{
   query?: Maybe<Scalars['String']>;
@@ -770,294 +759,361 @@ export type UsersQueryVariables = Exact<{
   perpage?: Maybe<Scalars['Int']>;
 }>;
 
-
-export type UsersQuery = (
-  { __typename?: 'Query' }
-  & { users: (
-    { __typename?: 'SearchUsersResult' }
-    & Pick<SearchUsersResult, 'count'>
-    & { results: Array<(
-      { __typename?: 'SearchUser' }
-      & Pick<SearchUser, 'name' | 'username' | 'type' | 'major' | 'avatar'>
-    )> }
-  ) }
-);
+export type UsersQuery = { __typename?: 'Query' } & {
+  users: { __typename?: 'SearchUsersResult' } & Pick<
+    SearchUsersResult,
+    'count'
+  > & {
+      results: Array<
+        { __typename?: 'SearchUser' } & Pick<
+          SearchUser,
+          'name' | 'username' | 'type' | 'major' | 'avatar'
+        >
+      >;
+    };
+};
 
 export type VerifyEmailMutationVariables = Exact<{
   token: Scalars['String'];
 }>;
 
-
-export type VerifyEmailMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'verifyEmail'>
-);
+export type VerifyEmailMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'verifyEmail'
+>;
 
 export const CurrentPostMedia = gql`
-    fragment currentPostMedia on MediaData {
-  id
-  type
-  name
-}
-    `;
-export const CurrentPostUpdateFields = gql`
-    fragment currentPostUpdateFields on Post {
-  title
-  content
-  link
-}
-    `;
-export const PostSearchFields = gql`
-    fragment postSearchFields on SearchPost {
-  id
-  title
-  content
-  publisher
-  created
-  updated
-  link
-  publisherData {
-    name
-    username
-    avatar
-    description
-  }
-  mediaData {
+  fragment currentPostMedia on MediaData {
     id
     type
     name
   }
-}
-    `;
-export const PublicUserFields = gql`
-    fragment publicUserFields on PublicUser {
-  name
-  username
-  email
-  major
-  resume
-  locationName
-  avatar
-  jobTitle
-  url
-  facebook
-  twitter
-  github
-  description
-  bio
-}
-    `;
-export const UserFields = gql`
-    fragment userFields on User {
-  id
-  name
-  username
-  email
-  major
-  resume
-  type
-  avatar
-  mediaAuth
-  jobTitle
-  location
-  locationName
-  url
-  facebook
-  github
-  twitter
-  description
-  bio
-  pronouns
-  university
-  mentor
-}
-    `;
-export const AddPost = gql`
-    mutation addPost($title: String!, $content: String!, $type: PostType!, $link: String, $media: Upload) {
-  addPost(
-    title: $title
-    content: $content
-    type: $type
-    link: $link
-    media: $media
-  )
-}
-    `;
-export const DeletePost = gql`
-    mutation deletePost($id: String!) {
-  deletePost(id: $id)
-}
-    `;
-export const PostUpdateData = gql`
-    query postUpdateData($id: String!) {
-  post(id: $id) {
-    ...currentPostUpdateFields
-    type
-    mediaData {
-      ...currentPostMedia
-    }
+`;
+export const CurrentPostUpdateFields = gql`
+  fragment currentPostUpdateFields on Post {
+    title
+    content
+    link
   }
-}
-    ${CurrentPostUpdateFields}
-${CurrentPostMedia}`;
-export const Posts = gql`
-    query posts($query: String, $type: PostType, $page: Int, $perpage: Int, $ascending: Boolean, $publisher: String, $sortBy: PostSortOption) {
-  posts(
-    query: $query
-    type: $type
-    page: $page
-    perpage: $perpage
-    ascending: $ascending
-    publisher: $publisher
-    sortBy: $sortBy
-  ) {
-    results {
-      ...postSearchFields
-    }
-    count
-    postCounts {
-      type
-      count
-    }
-  }
-}
-    ${PostSearchFields}`;
-export const UpdatePost = gql`
-    mutation updatePost($id: String!, $title: String, $content: String, $link: String, $media: Upload, $deleteMedia: Boolean) {
-  updatePost(
-    id: $id
-    title: $title
-    content: $content
-    link: $link
-    media: $media
-    deleteMedia: $deleteMedia
-  )
-}
-    `;
-export const DeleteAccount = gql`
-    mutation deleteAccount {
-  deleteAccount
-}
-    `;
-export const Login = gql`
-    mutation login($usernameEmail: String!, $password: String!, $recaptchaToken: String!) {
-  login(
-    usernameEmail: $usernameEmail
-    password: $password
-    recaptchaToken: $recaptchaToken
-  )
-}
-    `;
-export const LoginGuest = gql`
-    mutation loginGuest {
-  loginGuest
-}
-    `;
-export const Logout = gql`
-    mutation logout {
-  logout
-}
-    `;
-export const PasswordReset = gql`
-    mutation passwordReset($recaptchaToken: String!, $resetToken: String!, $password: String!) {
-  passwordReset(
-    recaptchaToken: $recaptchaToken
-    resetToken: $resetToken
-    password: $password
-  )
-}
-    `;
-export const PublicUser = gql`
-    query publicUser($username: String!) {
-  publicUser(username: $username) {
-    ...publicUserFields
-  }
-}
-    ${PublicUserFields}`;
-export const Register = gql`
-    mutation register($registrationToken: String!, $username: String!, $name: String!, $pronouns: String!, $email: String!, $password: String!, $recaptchaToken: String!) {
-  register(
-    registrationToken: $registrationToken
-    username: $username
-    name: $name
-    pronouns: $pronouns
-    email: $email
-    password: $password
-    recaptchaToken: $recaptchaToken
-  )
-}
-    `;
-export const SendPasswordReset = gql`
-    mutation sendPasswordReset($recaptchaToken: String!, $email: String!) {
-  sendPasswordReset(recaptchaToken: $recaptchaToken, email: $email)
-}
-    `;
-export const UpdateAccount = gql`
-    mutation updateAccount($email: String, $name: String, $avatar: Upload, $resume: Upload, $jobTitle: String, $location: String, $locationName: String, $url: String, $facebook: String, $github: String, $twitter: String, $description: String, $major: String, $university: String, $mentor: String, $pronouns: String, $bio: String, $password: String) {
-  updateAccount(
-    email: $email
-    name: $name
-    avatar: $avatar
-    resume: $resume
-    jobTitle: $jobTitle
-    location: $location
-    locationName: $locationName
-    url: $url
-    facebook: $facebook
-    github: $github
-    twitter: $twitter
-    description: $description
-    major: $major
-    university: $university
-    mentor: $mentor
-    pronouns: $pronouns
-    bio: $bio
-    password: $password
-  )
-}
-    `;
-export const User = gql`
-    query user {
-  user {
-    ...userFields
-  }
-}
-    ${UserFields}`;
-export const Users = gql`
-    query users($query: String, $types: [UserType!], $majors: [String!], $sortBy: UserSortOption, $ascending: Boolean, $page: Int, $perpage: Int) {
-  users(
-    query: $query
-    types: $types
-    majors: $majors
-    sortBy: $sortBy
-    ascending: $ascending
-    page: $page
-    perpage: $perpage
-  ) {
-    count
-    results {
+`;
+export const PostSearchFields = gql`
+  fragment postSearchFields on SearchPost {
+    id
+    title
+    content
+    publisher
+    created
+    updated
+    link
+    publisherData {
       name
       username
-      type
-      major
       avatar
+      description
+    }
+    mediaData {
+      id
+      type
+      name
     }
   }
-}
-    `;
-export const VerifyEmail = gql`
-    mutation verifyEmail($token: String!) {
-  verifyEmail(token: $token)
-}
-    `;
-
-      export interface PossibleTypesResultData {
-        possibleTypes: {
-          [key: string]: string[]
-        }
+`;
+export const PublicUserFields = gql`
+  fragment publicUserFields on PublicUser {
+    name
+    username
+    email
+    major
+    resume
+    locationName
+    avatar
+    jobTitle
+    url
+    facebook
+    twitter
+    github
+    description
+    bio
+  }
+`;
+export const UserFields = gql`
+  fragment userFields on User {
+    id
+    name
+    username
+    email
+    major
+    resume
+    type
+    avatar
+    mediaAuth
+    jobTitle
+    location
+    locationName
+    url
+    facebook
+    github
+    twitter
+    description
+    bio
+    pronouns
+    university
+    mentor
+  }
+`;
+export const AddPost = gql`
+  mutation addPost(
+    $title: String!
+    $content: String!
+    $type: PostType!
+    $link: String
+    $media: Upload
+  ) {
+    addPost(
+      title: $title
+      content: $content
+      type: $type
+      link: $link
+      media: $media
+    )
+  }
+`;
+export const DeletePost = gql`
+  mutation deletePost($id: String!) {
+    deletePost(id: $id)
+  }
+`;
+export const PostUpdateData = gql`
+  query postUpdateData($id: String!) {
+    post(id: $id) {
+      ...currentPostUpdateFields
+      type
+      mediaData {
+        ...currentPostMedia
       }
-      const result: PossibleTypesResultData = {
-  "possibleTypes": {}
+    }
+  }
+  ${CurrentPostUpdateFields}
+  ${CurrentPostMedia}
+`;
+export const Posts = gql`
+  query posts(
+    $query: String
+    $type: PostType
+    $page: Int
+    $perpage: Int
+    $ascending: Boolean
+    $publisher: String
+    $sortBy: PostSortOption
+  ) {
+    posts(
+      query: $query
+      type: $type
+      page: $page
+      perpage: $perpage
+      ascending: $ascending
+      publisher: $publisher
+      sortBy: $sortBy
+    ) {
+      results {
+        ...postSearchFields
+      }
+      count
+      postCounts {
+        type
+        count
+      }
+    }
+  }
+  ${PostSearchFields}
+`;
+export const UpdatePost = gql`
+  mutation updatePost(
+    $id: String!
+    $title: String
+    $content: String
+    $link: String
+    $media: Upload
+    $deleteMedia: Boolean
+  ) {
+    updatePost(
+      id: $id
+      title: $title
+      content: $content
+      link: $link
+      media: $media
+      deleteMedia: $deleteMedia
+    )
+  }
+`;
+export const DeleteAccount = gql`
+  mutation deleteAccount {
+    deleteAccount
+  }
+`;
+export const Login = gql`
+  mutation login(
+    $usernameEmail: String!
+    $password: String!
+    $recaptchaToken: String!
+  ) {
+    login(
+      usernameEmail: $usernameEmail
+      password: $password
+      recaptchaToken: $recaptchaToken
+    )
+  }
+`;
+export const LoginGuest = gql`
+  mutation loginGuest {
+    loginGuest
+  }
+`;
+export const Logout = gql`
+  mutation logout {
+    logout
+  }
+`;
+export const PasswordReset = gql`
+  mutation passwordReset(
+    $recaptchaToken: String!
+    $resetToken: String!
+    $password: String!
+  ) {
+    passwordReset(
+      recaptchaToken: $recaptchaToken
+      resetToken: $resetToken
+      password: $password
+    )
+  }
+`;
+export const PublicUser = gql`
+  query publicUser($username: String!) {
+    publicUser(username: $username) {
+      ...publicUserFields
+    }
+  }
+  ${PublicUserFields}
+`;
+export const Register = gql`
+  mutation register(
+    $registrationToken: String!
+    $username: String!
+    $name: String!
+    $pronouns: String!
+    $email: String!
+    $password: String!
+    $recaptchaToken: String!
+  ) {
+    register(
+      registrationToken: $registrationToken
+      username: $username
+      name: $name
+      pronouns: $pronouns
+      email: $email
+      password: $password
+      recaptchaToken: $recaptchaToken
+    )
+  }
+`;
+export const SendPasswordReset = gql`
+  mutation sendPasswordReset($recaptchaToken: String!, $email: String!) {
+    sendPasswordReset(recaptchaToken: $recaptchaToken, email: $email)
+  }
+`;
+export const UpdateAccount = gql`
+  mutation updateAccount(
+    $email: String
+    $name: String
+    $avatar: Upload
+    $resume: Upload
+    $jobTitle: String
+    $location: String
+    $locationName: String
+    $url: String
+    $facebook: String
+    $github: String
+    $twitter: String
+    $description: String
+    $major: String
+    $university: String
+    $mentor: String
+    $pronouns: String
+    $bio: String
+    $password: String
+  ) {
+    updateAccount(
+      email: $email
+      name: $name
+      avatar: $avatar
+      resume: $resume
+      jobTitle: $jobTitle
+      location: $location
+      locationName: $locationName
+      url: $url
+      facebook: $facebook
+      github: $github
+      twitter: $twitter
+      description: $description
+      major: $major
+      university: $university
+      mentor: $mentor
+      pronouns: $pronouns
+      bio: $bio
+      password: $password
+    )
+  }
+`;
+export const User = gql`
+  query user {
+    user {
+      ...userFields
+    }
+  }
+  ${UserFields}
+`;
+export const Users = gql`
+  query users(
+    $query: String
+    $types: [UserType!]
+    $majors: [String!]
+    $sortBy: UserSortOption
+    $ascending: Boolean
+    $page: Int
+    $perpage: Int
+  ) {
+    users(
+      query: $query
+      types: $types
+      majors: $majors
+      sortBy: $sortBy
+      ascending: $ascending
+      page: $page
+      perpage: $perpage
+    ) {
+      count
+      results {
+        name
+        username
+        type
+        major
+        avatar
+      }
+    }
+  }
+`;
+export const VerifyEmail = gql`
+  mutation verifyEmail($token: String!) {
+    verifyEmail(token: $token)
+  }
+`;
+
+export interface PossibleTypesResultData {
+  possibleTypes: {
+    [key: string]: string[];
+  };
+}
+const result: PossibleTypesResultData = {
+  possibleTypes: {},
 };
-      export default result;
-    
+export default result;

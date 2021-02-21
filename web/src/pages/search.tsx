@@ -168,7 +168,7 @@ const SearchPage = (): JSX.Element => {
                         <span className="h-full absolute inset-y-0 left-0 pl-2">
                           <svg
                             viewBox="0 0 24 24"
-                            className="mt-4 h-4 w-4 fill-current text-gray-500"
+                            className="mt-5 h-4 w-4 fill-current text-gray-500"
                           >
                             <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z"></path>
                           </svg>
@@ -187,7 +187,7 @@ const SearchPage = (): JSX.Element => {
                           name="query"
                           id="query"
                           placeholder="Search"
-                          className="lg:w-64 shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none sm:rounded-l"
+                          className="lg:w-64 h-12 shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-md border-gray-300 rounded-none sm:rounded-l"
                         />
                       </div>
                     </div>
@@ -228,6 +228,7 @@ const SearchPage = (): JSX.Element => {
                                   ? 'red'
                                   : styles.borderColor,
                               borderRadius: 0,
+                              minHeight: 48,
                             }),
                           }}
                           invalid={!!(touched.perpage && errors.perpage)}
@@ -244,14 +245,14 @@ const SearchPage = (): JSX.Element => {
                     </div>
 
                     <button
-                      className="mt-1 text-sm bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none sm:rounded-r w-20"
+                      className="mt-1 flex justify-center items-center bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none sm:rounded-r"
                       onClick={(evt) => {
                         evt.preventDefault();
                         toggleWritePost();
                       }}
                     >
-                      <span>New</span>
-                      <AiOutlinePlus className="inline-block ml-1 text-md text-white mb-0.5" />
+                      <span className="inline-block text-md">New</span>
+                      <AiOutlinePlus className="ml-1 text-md text-white mb-0.5" />
                     </button>
                   </div>
                 </div>
