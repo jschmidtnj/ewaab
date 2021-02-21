@@ -183,7 +183,7 @@ const ProfilePage = (): JSX.Element => {
                     {"'"}s Profile
                   </h3>
                 </div>
-                <div className="mt-2 float-right">
+                <div className="mt-2 ml-3 float-left sm:float-right">
                   <Link href={`/${user.username}`}>
                     <a className="font-medium text-indigo-600 hover:text-indigo-500">
                       @ {user.username}
@@ -191,7 +191,7 @@ const ProfilePage = (): JSX.Element => {
                   </Link>
                 </div>
               </div>
-              <div className="mt-5 md:mt-0 md:col-span-3">
+              <div className="mt-12 sm:mt-5 md:mt-0 md:col-span-3">
                 <Formik
                   initialValues={{
                     email: user.email,
@@ -470,34 +470,6 @@ const ProfilePage = (): JSX.Element => {
 
                           <div>
                             <label
-                              htmlFor="mentor"
-                              className="block text-sm font-medium text-gray-700"
-                            >
-                              Mentor
-                            </label>
-                            <div className="mt-2 flex rounded-md shadow-sm">
-                              <input
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.mentor}
-                                disabled={isSubmitting}
-                                type="text"
-                                name="mentor"
-                                id="mentor"
-                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                              />
-                            </div>
-                            <p
-                              className={`${
-                                touched.mentor && errors.mentor ? '' : 'hidden'
-                              } text-red-700 pl-3 pt-1 pb-2 text-sm`}
-                            >
-                              {errors.mentor}
-                            </p>
-                          </div>
-
-                          <div>
-                            <label
                               htmlFor="jobTitle"
                               className="block text-sm font-medium text-gray-700"
                             >
@@ -523,6 +495,34 @@ const ProfilePage = (): JSX.Element => {
                               } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                             >
                               {errors.jobTitle}
+                            </p>
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor="mentor"
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              Mentor
+                            </label>
+                            <div className="mt-2 flex rounded-md shadow-sm">
+                              <input
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.mentor}
+                                disabled={isSubmitting}
+                                type="text"
+                                name="mentor"
+                                id="mentor"
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                              />
+                            </div>
+                            <p
+                              className={`${
+                                touched.mentor && errors.mentor ? '' : 'hidden'
+                              } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                            >
+                              {errors.mentor}
                             </p>
                           </div>
 

@@ -26,6 +26,8 @@ import WritePostModal from 'components/modals/WritePostModal';
 import PostView from 'components/PostView';
 import DeletePostModal from 'components/modals/DeletePostModal';
 import sleep from 'shared/sleep';
+import { useSelector } from 'react-redux';
+import { RootState } from 'state';
 
 const typeLabelMap: Record<PostType, string> = {
   [PostType.Community]: 'Community',
@@ -37,6 +39,9 @@ const typeLabelMap: Record<PostType, string> = {
 const SearchPage = (): JSX.Element => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
     undefined
+  );
+  const userID = useSelector<RootState, string | undefined>(
+    (state) => state.authReducer.user?.id
   );
 
   const [defaultQuery, setDefaultQuery] = useState<string>('');
@@ -62,6 +67,7 @@ const SearchPage = (): JSX.Element => {
     page: 0,
     perpage: defaultPerPage,
     type: undefined,
+    publisher: undefined,
   };
 
   const formRef = useRef<
@@ -70,15 +76,15 @@ const SearchPage = (): JSX.Element => {
       FormikHandlers
   >();
 
-  const [newPostModalIsOpen, setWritePostIsOpen] = useState<boolean>(false);
+  const [writePostModalIsOpen, setWritePostIsOpen] = useState<boolean>(false);
   const [updatePostID, setUpdatePostID] = useState<string | undefined>(
     undefined
   );
   const toggleWritePost = () => {
-    if (newPostModalIsOpen) {
+    if (writePostModalIsOpen) {
       setUpdatePostID(undefined);
     }
-    setWritePostIsOpen(!newPostModalIsOpen);
+    setWritePostIsOpen(!writePostModalIsOpen);
   };
 
   const [deletePostModalIsOpen, setDeletePostModalIsOpen] = useState<boolean>(
@@ -108,6 +114,8 @@ const SearchPage = (): JSX.Element => {
     })();
   }, []);
 
+  const [onlyUser, setOnlyUser] = useState<boolean>(false);
+
   return (
     <PrivateRoute>
       <Layout>
@@ -123,6 +131,7 @@ const SearchPage = (): JSX.Element => {
               page: yup.number().integer(),
               perpage: yup.number().integer(),
               type: yup.string(),
+              publisher: yup.string(),
             })}
             onSubmit={async (formData, { setSubmitting, setStatus }) => {
               const onError = () => {
@@ -249,7 +258,7 @@ const SearchPage = (): JSX.Element => {
               </form>
             )}
           </Formik>
-          {!newPostModalIsOpen ? null : (
+          {!writePostModalIsOpen ? null : (
             <WritePostModal
               toggleModal={toggleWritePost}
               defaultPostType={
@@ -270,60 +279,84 @@ const SearchPage = (): JSX.Element => {
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-6">
-                  <div className="col-start-1 col-span-2 mb-4 rounded-lg">
-                    <ul className="lg:ml-12 lg:w-64 flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md">
-                      {!posts ||
-                      posts.loading ||
-                      !posts.data ||
-                      !formRef.current
-                        ? null
-                        : posts.data.posts.postCounts.map((countData, i) => (
-                            <li
-                              key={`post-type-${i}-${countData.type}`}
-                              className={
-                                countData.type === formRef.current.values.type
-                                  ? 'bg-gray-200'
-                                  : 'bg-white'
-                              }
+                  {!posts ||
+                  posts.loading ||
+                  !posts.data ||
+                  !formRef.current ? null : (
+                    <div className="lg:ml-12 lg:w-64 col-start-1 col-span-2 mb-4 rounded-lg">
+                      <ul className="flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md">
+                        {posts.data.posts.postCounts.map((countData, i) => (
+                          <li
+                            key={`post-type-${i}-${countData.type}`}
+                            className={
+                              countData.type === formRef.current.values.type
+                                ? 'bg-gray-200'
+                                : 'bg-white'
+                            }
+                          >
+                            <button
+                              className="w-full flex flex-row p-3 border-b first:rounded-md last:rounded-md"
+                              onClick={(evt) => {
+                                evt.preventDefault();
+                                let newType: PostType | undefined;
+                                if (
+                                  formRef.current.values.type === countData.type
+                                ) {
+                                  newType = undefined;
+                                } else {
+                                  newType = countData.type;
+                                }
+                                formRef.current.setFieldValue('type', newType);
+                                formRef.current.handleSubmit();
+                              }}
+                              type="button"
                             >
-                              <button
-                                className="w-full flex flex-row p-3 border-b first:rounded-md last:rounded-md"
-                                onClick={(evt) => {
-                                  evt.preventDefault();
-                                  let newType: PostType | undefined;
-                                  if (
-                                    formRef.current.values.type ===
-                                    countData.type
-                                  ) {
-                                    newType = undefined;
-                                  } else {
-                                    newType = countData.type;
-                                  }
-                                  formRef.current.setFieldValue(
-                                    'type',
-                                    newType
-                                  );
-                                  formRef.current.handleSubmit();
-                                }}
-                                type="button"
-                              >
-                                <span className="inline-block text-left text-base w-full">
-                                  {typeLabelMap[countData.type]}
-                                </span>
-                                <span className="float-right inline-block pr-2">
-                                  <div className="flex items-center justify-center rounded-full h-0.5 w-0.5 bg-purple-500 text-white p-3 text-sm">
-                                    {!formRef.current.values.type ||
-                                    countData.type ===
-                                      formRef.current.values.type
-                                      ? countData.count
-                                      : '-'}
-                                  </div>
-                                </span>
-                              </button>
-                            </li>
-                          ))}
-                    </ul>
-                  </div>
+                              <span className="inline-block text-left text-base w-full">
+                                {typeLabelMap[countData.type]}
+                              </span>
+                              <span className="float-right inline-block pr-2">
+                                <div className="flex items-center justify-center rounded-full h-0.5 w-0.5 bg-purple-500 text-white p-3 text-sm">
+                                  {!formRef.current.values.type ||
+                                  countData.type === formRef.current.values.type
+                                    ? countData.count
+                                    : '-'}
+                                </div>
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      <div
+                        className="flex flex-row items-center justify-start p-3"
+                        onClick={(evt) => {
+                          evt.preventDefault();
+                          formRef.current.setFieldValue(
+                            'publisher',
+                            formRef.current.values.publisher
+                              ? undefined
+                              : userID
+                          );
+                          setOnlyUser(!onlyUser);
+                          formRef.current.handleSubmit();
+                        }}
+                      >
+                        <span className="text-sm">Only your posts</span>
+                        <div
+                          className={
+                            'ml-2 w-10 h-6 bg-gray-300 rounded-full p-1 duration-300 ease-in-out' +
+                            (onlyUser ? ' bg-green-400' : '')
+                          }
+                        >
+                          <div
+                            className={
+                              'bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out' +
+                              (onlyUser ? ' translate-x-4' : '')
+                            }
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {!deletePostModalIsOpen || !deletePostVariables ? null : (
                     <DeletePostModal
@@ -338,10 +371,9 @@ const SearchPage = (): JSX.Element => {
                   )}
 
                   <div className="col-span-3 lg:mx-4">
-                    {!posts ||
-                    posts.loading ||
-                    !posts.data ||
-                    posts.data.posts.results.length === 0 ? (
+                    {!posts || posts.loading ? (
+                      <p className="text-md pt-4">Loading...</p>
+                    ) : !posts.data || posts.data.posts.results.length === 0 ? (
                       <p className="text-md pt-4">No posts found</p>
                     ) : (
                       <>

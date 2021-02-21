@@ -20,9 +20,9 @@ fragment postSearchFields on SearchPost {
 }
 
 query posts($query: String, $type: PostType, $page: Int, $perpage: Int,
-            $ascending: Boolean, $publisher: String) {
+            $ascending: Boolean, $publisher: String, $sortBy: PostSortOption) {
   posts(query: $query, type: $type, page: $page, perpage: $perpage,
-        ascending: $ascending, publisher: $publisher) {
+        ascending: $ascending, publisher: $publisher, sortBy: $sortBy) {
     results {
       ...postSearchFields
     }

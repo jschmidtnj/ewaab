@@ -8,4 +8,8 @@ export default interface Messages {
   users: string;
   search: string;
   account: string;
+  community: string;
+  'encourage her': string;
+  'participant news': string;
+  'mentor news': string;
 }

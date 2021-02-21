@@ -67,6 +67,22 @@ const Header = (): JSX.Element => {
             href: '/users',
           },
           {
+            name: 'community',
+            href: '/community',
+          },
+          {
+            name: 'encourage her',
+            href: '/encourage-her',
+          },
+          {
+            name: 'participant news',
+            href: '/participant-news',
+          },
+          {
+            name: 'mentor news',
+            href: '/mentor-news',
+          },
+          {
             name: 'search',
             href: '/search',
           },
@@ -109,13 +125,13 @@ const Header = (): JSX.Element => {
   });
 
   const allPathElements: JSX.Element[] = paths.map((pathData, i) => {
-    const highlighted = pathData.href === router.pathname;
+    const selected = pathData.href === router.pathname;
     return (
       <Link href={pathData.href} key={`path-${i}`}>
         <a
-          className={`px-3 py-2 rounded-md font-bold text-blue-700 ${
-            highlighted ? 'bg-blue-100' : 'bg-none'
-          } ${!mobileMenuOpen ? 'text-lg' : 'text-base block'}`}
+          className={`px-3 py-2 rounded-t-md font-medium text-gray-700 ${
+            selected ? 'border-b-2 border-blue-500' : 'border-none'
+          } ${!mobileMenuOpen ? 'text-md' : 'text-base block'}`}
         >
           <FormattedMessage id={pathData.name}>
             {(messages: string[]) => capitalizeFirstLetter(messages[0])}
@@ -128,7 +144,7 @@ const Header = (): JSX.Element => {
   return (
     <nav className="bg-white dark:bg-gray-800">
       <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="relative flex items-center justify-between h-32">
+        <div className="relative flex items-center justify-between h-20">
           <div className="sm:hidden absolute inset-y-0 left-0 flex items-center">
             <button
               onClick={(evt) => {
@@ -176,8 +192,8 @@ const Header = (): JSX.Element => {
               <a className="flex-shrink-0 flex items-center">
                 <Image
                   src="/assets/img/logo.png"
-                  width={100}
-                  height={100}
+                  width={80}
+                  height={80}
                   alt="ewaab"
                 />
                 <h1 className="hidden ml-4 text-2xl">EWAAB</h1>
@@ -207,7 +223,7 @@ const Header = (): JSX.Element => {
                 <div
                   className={`${
                     !userMenuOpen ? 'hidden' : ''
-                  } origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5`}
+                  } z-10 origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5`}
                   role="menu"
                   aria-orientation="vertical"
                   aria-labelledby="user-menu"

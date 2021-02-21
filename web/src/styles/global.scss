@@ -1,3 +1,5 @@
+@import '~react-toastify/dist/ReactToastify.css';
+
 /* base styles */
 
 @tailwind base;
@@ -20,6 +22,28 @@
 /* fix select dropdown thing */
 .select-dropdown input:focus {
   box-shadow: none;
+}
+
+/* colors for toasts */
+.Toastify__toast--default {
+  @apply bg-gray-500;
+  @apply text-gray-100;
+}
+
+.Toastify__toast--info {
+  @apply bg-blue-500;
+}
+
+.Toastify__toast--success {
+  @apply bg-green-500;
+}
+
+.Toastify__toast--warning {
+  @apply bg-yellow-300;
+}
+
+.Toastify__toast--error {
+  @apply bg-red-500;
 }
 
 /* utilities */

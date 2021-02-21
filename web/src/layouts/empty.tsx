@@ -1,7 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { IntlProvider } from 'react-intl';
-import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/dist/client/router';
 import { Theme, themeMap } from 'utils/theme';
 import Messages from 'locale/type';

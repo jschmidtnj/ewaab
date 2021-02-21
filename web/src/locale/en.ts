@@ -10,6 +10,10 @@ const englishMessages: Messages = {
   users: 'users',
   search: 'search',
   account: 'account',
+  community: 'community',
+  'encourage her': 'encourage her',
+  'mentor news': 'mentor news',
+  'participant news': 'participant news',
 };
 
 export default englishMessages;

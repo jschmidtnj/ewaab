@@ -1,9 +1,11 @@
 import { isLoggedIn } from 'state/auth/getters';
 import React, { useState, ReactNode, useEffect } from 'react';
-import { isSSR } from 'utils/checkSSR';
+import { useRouter } from 'next/dist/client/router';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
-import { useRouter } from 'next/dist/client/router';
+import { isSSR } from 'utils/checkSSR';
+
+const checkAuthInterval = 5; // check every few minutes
 
 interface PrivateRouteData {
   children?: ReactNode;
@@ -12,24 +14,46 @@ interface PrivateRouteData {
 const PrivateRoute = (args: PrivateRouteData): JSX.Element => {
   const [isLoading, setLoading] = useState(true);
   const router = useRouter();
+
   const getRedirect = (): string =>
     `?redirect=${encodeURIComponent(router.asPath)}`;
+  const checkLoggedIn = async (): Promise<boolean> => {
+    try {
+      const loggedIn = await isLoggedIn();
+      if (!loggedIn) {
+        router.push('/login' + getRedirect());
+      }
+      return loggedIn;
+    } catch (_err) {
+      // handle error
+      router.push('/login' + getRedirect());
+      return false;
+    }
+  };
+
+  const [checkInterval, setCheckInterval] = useState<
+    ReturnType<typeof setInterval> | undefined
+  >(undefined);
+
   useEffect(() => {
     (async () => {
       // trigger check to see if user is logged in
-      try {
-        const loggedIn = await isLoggedIn();
-        if (!loggedIn) {
-          router.push('/login' + getRedirect());
-        } else {
-          setLoading(false);
-        }
-      } catch (_err) {
-        // handle error
-        router.push('/login' + getRedirect());
+      if (await checkLoggedIn()) {
+        setLoading(false);
       }
     })();
+    setCheckInterval(
+      setInterval(async () => {
+        await checkLoggedIn();
+      }, checkAuthInterval * 60 * 1000)
+    );
+    return () => {
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+    };
   }, []);
+
   const currentlyLoggedIn = isSSR
     ? undefined
     : useSelector<RootState, boolean | undefined>(
@@ -41,6 +65,7 @@ const PrivateRoute = (args: PrivateRouteData): JSX.Element => {
       router.push('/login' + getRedirect());
     }
   }, [currentlyLoggedIn]);
+
   return <>{isLoading ? null : args.children}</>;
 };
 

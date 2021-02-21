@@ -71,7 +71,6 @@ const Login = (): JSX.Element => {
           toast(message, {
             type: 'success',
           });
-          router.push(defaultLoggedInPage);
         } catch (err) {
           toast(err.message, {
             type: 'error',
@@ -82,7 +81,8 @@ const Login = (): JSX.Element => {
       try {
         const loggedIn = await isLoggedIn();
         if (localToken === undefined && loggedIn) {
-          router.push(redirect !== null ? redirect : defaultLoggedInPage);
+          console.log('redirect here');
+          router.replace(redirect !== null ? redirect : defaultLoggedInPage);
         }
       } catch (err) {
         dispatchAuthThunk(thunkLogout());

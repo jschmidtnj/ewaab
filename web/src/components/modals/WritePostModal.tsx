@@ -414,12 +414,24 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                 </div>
               </div>
             </div>
-            {!previewImage &&
-            !(currentMedia && currentMedia.type === MediaType.Image) ? null : (
+            {previewFile ||
+            (!previewImage &&
+              !(
+                currentMedia && currentMedia.type === MediaType.Image
+              )) ? null : (
               <>
                 <hr />
                 <div className="my-4">
-                  <div className="ml-64 flex justify-center text-2xl text-gray-300">
+                  <div className="ml-80 flex justify-center text-2xl text-gray-300">
+                    <button
+                      className="mr-20 absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
+                      onClick={(evt) => {
+                        evt.preventDefault();
+                        imageInputElem.click();
+                      }}
+                    >
+                      <BsPencil />
+                    </button>
                     <button
                       className="absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
                       onClick={(evt) => {
@@ -433,15 +445,6 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                       }}
                     >
                       <FaTimes />
-                    </button>
-                    <button
-                      className="ml-20 absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
-                      onClick={(evt) => {
-                        evt.preventDefault();
-                        imageInputElem.click();
-                      }}
-                    >
-                      <BsPencil />
                     </button>
                   </div>
                   <div className="flex items-center justify-center">
@@ -464,15 +467,18 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                 </div>
               </>
             )}
-            {fileName.length === 0 &&
-            !(currentMedia && currentMedia.type === MediaType.File) ? null : (
+            {previewImage ||
+            (!previewFile &&
+              !(
+                currentMedia && currentMedia.type === MediaType.File
+              )) ? null : (
               <>
                 <hr />
                 <div className="my-4 flex items-center justify-center">
                   <div className="bg-gray-100 p-4 rounded-md">
                     <div className="flex justify-end text-2xl text-gray-300">
                       <button
-                        className="absolute z-10 rounded-full bg-gray-700 p-1"
+                        className="mr-10 absolute z-10 rounded-full bg-gray-700 p-1"
                         onClick={(evt) => {
                           evt.preventDefault();
                           fileInputElem.click();
@@ -481,7 +487,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                         <BsPencil />
                       </button>
                       <button
-                        className="mr-10 absolute z-10 rounded-full bg-gray-700 p-1"
+                        className="absolute z-10 rounded-full bg-gray-700 p-1"
                         onClick={(evt) => {
                           evt.preventDefault();
                           setFileName('');
