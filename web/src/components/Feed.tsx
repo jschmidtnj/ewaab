@@ -81,7 +81,7 @@ const Feed = (args: FeedArgs): JSX.Element => {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
+    <div className="max-w-2xl mx-auto px-2 sm:px-6 lg:px-8 pt-2">
       {!writePostModalIsOpen ? null : (
         <WritePostModal
           toggleModal={toggleWritePost}
@@ -111,7 +111,7 @@ const Feed = (args: FeedArgs): JSX.Element => {
         <div className="col-span-3 lg:mx-4">
           <div className="bg-white px-4 sm:px-16 py-4 flex items-center justify-center mt-4 mb-8 rounded-md">
             <button
-              className="flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
+              className="focus:outline-none flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
               onClick={(evt) => {
                 evt.preventDefault();
                 toggleWritePost();

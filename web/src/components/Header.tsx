@@ -63,10 +63,6 @@ const Header = (): JSX.Element => {
       } else {
         setPaths([
           {
-            name: 'users',
-            href: '/users',
-          },
-          {
             name: 'community',
             href: '/community',
           },
@@ -81,6 +77,10 @@ const Header = (): JSX.Element => {
           {
             name: 'mentor news',
             href: '/mentor-news',
+          },
+          {
+            name: 'users',
+            href: '/users',
           },
           {
             name: 'search',
@@ -213,7 +213,7 @@ const Header = (): JSX.Element => {
                       evt.preventDefault();
                       setUserMenuOpen(!userMenuOpen);
                     }}
-                    className="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+                    className="focus:bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
                     id="user-menu"
                     aria-haspopup="true"
                   >

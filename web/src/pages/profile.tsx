@@ -43,11 +43,14 @@ import { FiFileText } from 'react-icons/fi';
 import Select, { ValueType } from 'react-select';
 import { capitalizeFirstLetter } from 'utils/misc';
 import universities from 'shared/universities';
+import Editor from 'components/markdown/Editor';
 
 interface SelectMajorObject {
   value: string;
   label: string;
 }
+
+const minSelectSearchLen = 3;
 
 const universityOptions = universities.map(
   (university): SelectMajorObject => ({
@@ -164,6 +167,11 @@ const ProfilePage = (): JSX.Element => {
       setShowAuthToken(true);
     }
   }, []);
+
+  const [showUniversityOptions, setShowUniversityOptions] = useState<boolean>(
+    false
+  );
+  const [showMajorOptions, setShowMajorOptions] = useState<boolean>(false);
 
   const apiURL = getAPIURL();
 
@@ -549,11 +557,23 @@ const ProfilePage = (): JSX.Element => {
                                 id="university"
                                 name="university"
                                 isMulti={false}
-                                options={universityOptions}
+                                options={
+                                  showUniversityOptions ? universityOptions : []
+                                }
                                 cacheOptions={true}
                                 defaultValue={universityOptions.find(
                                   (elem) => elem.value === user.university
                                 )}
+                                onInputChange={(newVal) => {
+                                  setShowUniversityOptions(
+                                    newVal.length >= minSelectSearchLen
+                                  );
+                                }}
+                                noOptionsMessage={() =>
+                                  showUniversityOptions
+                                    ? 'No universities found'
+                                    : `Enter at least ${minSelectSearchLen} characters`
+                                }
                                 onChange={(
                                   selectedOption: ValueType<
                                     SelectMajorObject,
@@ -612,11 +632,21 @@ const ProfilePage = (): JSX.Element => {
                                 id="major"
                                 name="major"
                                 isMulti={false}
-                                options={majorOptions}
+                                options={showMajorOptions ? majorOptions : []}
                                 cacheOptions={true}
                                 defaultValue={majorOptions.find(
                                   (elem) => elem.value === user.major
                                 )}
+                                noOptionsMessage={() =>
+                                  showMajorOptions
+                                    ? 'No majors found'
+                                    : `Enter at least ${minSelectSearchLen} characters`
+                                }
+                                onInputChange={(newVal) => {
+                                  setShowMajorOptions(
+                                    newVal.length >= minSelectSearchLen
+                                  );
+                                }}
                                 onChange={(
                                   selectedOption: ValueType<
                                     SelectMajorObject,
@@ -832,15 +862,11 @@ const ProfilePage = (): JSX.Element => {
                               Bio
                             </label>
                             <div className="mt-2 flex rounded-md shadow-sm">
-                              <textarea
-                                onChange={handleChange}
-                                onBlur={handleBlur}
+                              <Editor
                                 value={values.bio}
-                                disabled={isSubmitting}
-                                rows={5}
-                                name="bio"
-                                id="bio"
-                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                onChange={(newVal) =>
+                                  setFieldValue('bio', newVal)
+                                }
                               />
                             </div>
                             <p

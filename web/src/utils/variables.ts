@@ -3,7 +3,7 @@ export interface SelectNumberObject {
   value: number;
 }
 
-export const defaultLoggedInPage = '/users';
+export const defaultLoggedInPage = '/community';
 
 export const defaultPerPage = 10;
 

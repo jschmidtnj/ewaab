@@ -27,7 +27,6 @@ import { baseFacebook, baseGitHub, baseTwitter } from 'shared/variables';
 import { defaultMajor } from 'shared/majors';
 import Avatar from 'components/Avatar';
 import Markdown from 'components/markdown/Markdown';
-import Editor from 'components/markdown/Editor';
 
 const avatarWidth = 40;
 
@@ -199,7 +198,6 @@ const UserPage = (): JSX.Element => {
             <div className="mt-2 ml-2">
               <p>{user.description}</p>
             </div>
-            <Editor initialContent={user.bio} />
             <div className="mt-1 ml-1">
               <hr className="mt-2 mb-4" />
               <Markdown content={user.bio} />

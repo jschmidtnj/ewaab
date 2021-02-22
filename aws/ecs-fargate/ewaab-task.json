@@ -56,6 +56,10 @@
         {
           "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_SENDGRID_API_KEY-ponlm7",
           "name": "SENDGRID_API_KEY"
+        },
+        {
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_ELASTICSEARCH_URI-cSkbaT",
+          "name": "EWAAB_ELASTICSEARCH_URI"
         }
       ],
       "dockerSecurityOptions": null,

@@ -66,12 +66,12 @@ const PostView = (args: PostViewArgs): JSX.Element => {
   );
 
   return (
-    <div className="bg-white rounded-lg text-left overflow-hidden shadow-sm">
+    <div className="bg-white rounded-lg text-left overflow-hidden shadow-sm mb-4">
       <div className="sm:p-4 p-2">
         {args.data.publisher !== userID ? null : (
           <div className="flex justify-end text-2xl text-gray-800">
             <button
-              className="mr-8 p-2 absolute z-10 hover:text-gray-600"
+              className="focus:outline-none mr-8 p-2 absolute z-10 hover:text-gray-600"
               onClick={(evt) => {
                 evt.preventDefault();
                 args.onUpdatePost(args.data.id);
@@ -80,7 +80,7 @@ const PostView = (args: PostViewArgs): JSX.Element => {
               <BsPencil />
             </button>
             <button
-              className="p-2 absolute z-10 hover:text-gray-600"
+              className="focus:outline-none p-2 absolute z-10 hover:text-gray-600"
               onClick={(evt) => {
                 evt.preventDefault();
                 args.onDeletePost({
@@ -105,7 +105,7 @@ const PostView = (args: PostViewArgs): JSX.Element => {
               }
               router.push(`/${args.data.publisherData.username}`);
             }}
-            className="mx-4 flex items-center text-left w-full"
+            className="focus:outline-none mx-4 flex items-center text-left w-full"
           >
             <Avatar avatar={args.data.publisherData?.avatar} avatarWidth={40} />
             <div className="inline-block ml-2">

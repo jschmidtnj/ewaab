@@ -30,6 +30,7 @@ import { postMediaWidth } from 'shared/variables';
 import isDebug from 'utils/mode';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { getAPIURL } from 'utils/axios';
+import Editor from 'components/markdown/Editor';
 
 interface ModalArgs {
   defaultPostType: PostType;
@@ -322,6 +323,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                       touched,
                       handleBlur,
                       handleChange,
+                      setFieldValue,
                       isSubmitting,
                     }) => (
                       <form>
@@ -358,16 +360,11 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                               Content
                             </label>
                             <div className="mt-2">
-                              <textarea
-                                onChange={handleChange}
-                                onBlur={handleBlur}
+                              <Editor
                                 value={values.content}
-                                disabled={isSubmitting}
-                                rows={3}
-                                name="content"
-                                id="content"
-                                placeholder="What do you want to talk about?"
-                                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-white rounded-md"
+                                onChange={(newVal) =>
+                                  setFieldValue('content', newVal)
+                                }
                               />
                             </div>
                             <p
@@ -424,7 +421,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                 <div className="my-4">
                   <div className="ml-80 flex justify-center text-2xl text-gray-300">
                     <button
-                      className="mr-20 absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
+                      className="focus:outline-none mr-20 absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
                       onClick={(evt) => {
                         evt.preventDefault();
                         imageInputElem.click();
@@ -433,7 +430,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                       <BsPencil />
                     </button>
                     <button
-                      className="absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
+                      className="focus:outline-none absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
                       onClick={(evt) => {
                         evt.preventDefault();
                         setPreviewImage(undefined);

@@ -46,6 +46,14 @@
   @apply bg-red-500;
 }
 
+@import '~easymde/dist/easymde.min.css';
+
+.CodeMirror-scroll {
+  min-height: 0 !important;
+  @apply h-40;
+  overflow-y: auto;
+}
+
 @import './markdown.scss';
 
 /* utilities */
