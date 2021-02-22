@@ -88,8 +88,9 @@ class PostsResolver {
     const filterParams: esb.Query[] = [];
 
     if (args.query) {
-      mustShouldParams.push(esb.termQuery('title', args.query));
-      mustShouldParams.push(esb.termQuery('content', args.query));
+      args.query = args.query.toLowerCase();
+      mustShouldParams.push(esb.matchQuery('title', args.query).fuzziness('AUTO'));
+      mustShouldParams.push(esb.matchQuery('content', args.query).fuzziness('AUTO'));
     }
 
     if (args.publisher !== undefined) {

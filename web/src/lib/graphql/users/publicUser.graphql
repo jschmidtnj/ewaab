@@ -13,6 +13,9 @@ fragment publicUserFields on PublicUser {
   github
   description
   bio
+  pronouns
+  university
+  mentor
 }
 
 query publicUser($username: String!) {

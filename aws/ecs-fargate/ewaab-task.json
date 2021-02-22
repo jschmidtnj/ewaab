@@ -59,7 +59,7 @@
         },
         {
           "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_ELASTICSEARCH_URI-cSkbaT",
-          "name": "EWAAB_ELASTICSEARCH_URI"
+          "name": "ELASTICSEARCH_URI"
         }
       ],
       "dockerSecurityOptions": null,

@@ -657,6 +657,9 @@ export type PublicUserFieldsFragment = { __typename?: 'PublicUser' } & Pick<
   | 'github'
   | 'description'
   | 'bio'
+  | 'pronouns'
+  | 'university'
+  | 'mentor'
 >;
 
 export type PublicUserQueryVariables = Exact<{
@@ -834,6 +837,9 @@ export const PublicUserFields = gql`
     github
     description
     bio
+    pronouns
+    university
+    mentor
   }
 `;
 export const UserFields = gql`

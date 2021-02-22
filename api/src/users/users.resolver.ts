@@ -83,12 +83,13 @@ class UsersResolver {
     const filterMustParams: esb.Query[] = [];
 
     if (args.query) {
-      mustShouldParams.push(esb.termQuery('name', args.query));
+      args.query = args.query.toLowerCase();
+      mustShouldParams.push(esb.matchQuery('name', args.query).fuzziness('AUTO'));
       if (isEmail(args.query)) {
-        mustShouldParams.push(esb.termQuery('email', args.query));
+        mustShouldParams.push(esb.matchQuery('email', args.query));
       }
-      mustShouldParams.push(esb.termQuery('username', args.query));
-      mustShouldParams.push(esb.termQuery('locationName', args.query));
+      mustShouldParams.push(esb.matchQuery('username', args.query));
+      mustShouldParams.push(esb.matchQuery('locationName', args.query).fuzziness('AUTO'));
     }
     const filterTypeParams: esb.Query[] = [];
     for (const type of args.types) {

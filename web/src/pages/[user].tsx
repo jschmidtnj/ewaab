@@ -18,15 +18,23 @@ import { client } from 'utils/apollo';
 import { isSSR } from 'utils/checkSSR';
 import { useRouter } from 'next/dist/client/router';
 import { getAPIURL } from 'utils/axios';
-import { FaFacebook, FaTwitter, FaGithub, FaEnvelope } from 'react-icons/fa';
+import {
+  FaFacebook,
+  FaTwitter,
+  FaGithub,
+  FaEnvelope,
+  FaSchool,
+} from 'react-icons/fa';
 import { FiFileText } from 'react-icons/fi';
 import { IoMdSchool } from 'react-icons/io';
 import { GrLocation } from 'react-icons/gr';
-import { BsLink45Deg } from 'react-icons/bs';
+import { BsLink45Deg, BsPersonSquare } from 'react-icons/bs';
+import { IoPersonCircle } from 'react-icons/io5';
 import { baseFacebook, baseGitHub, baseTwitter } from 'shared/variables';
 import { defaultMajor } from 'shared/majors';
 import Avatar from 'components/Avatar';
 import Markdown from 'components/markdown/Markdown';
+import { defaultUniversity } from 'shared/universities';
 
 const avatarWidth = 40;
 
@@ -92,6 +100,20 @@ const UserPage = (): JSX.Element => {
                   </h2>
                 </div>
                 <div className="mt-2 ml-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3">
+                  {!user.pronouns ? null : (
+                    <div className="mt-1 flex items-center text-md text-gray-500">
+                      <a href={user.url} target="_blank" rel="noreferrer">
+                        <IoPersonCircle className="inline-block mr-1 text-md" />
+                        <span className="text-sm">{user.pronouns}</span>
+                      </a>
+                    </div>
+                  )}
+                  {!user.locationName ? null : (
+                    <div className="mt-1 flex items-center text-md text-gray-500">
+                      <GrLocation className="inline-block mr-1 text-md" />
+                      <span className="text-sm">{user.locationName}</span>
+                    </div>
+                  )}
                   <div className="mt-1 flex items-center text-gray-500">
                     <a href={`mailto:${user.email}`}>
                       <FaEnvelope className="inline-block mr-2 text-md" />
@@ -106,6 +128,8 @@ const UserPage = (): JSX.Element => {
                       </a>
                     </div>
                   )}
+                </div>
+                <div className="mt-1 ml-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3">
                   {!user.resume ? null : (
                     <div className="mt-1 flex items-center text-md text-gray-500">
                       <a
@@ -118,6 +142,14 @@ const UserPage = (): JSX.Element => {
                       </a>
                     </div>
                   )}
+                  {user.university === defaultUniversity ? null : (
+                    <div className="mt-1 flex items-center text-md text-gray-500">
+                      <FaSchool className="inline-block mr-1 text-md" />
+                      <span className="text-sm">
+                        {capitalizeFirstLetter(user.university)}
+                      </span>
+                    </div>
+                  )}
                   {user.major === defaultMajor ? null : (
                     <div className="mt-1 flex items-center text-md text-gray-500">
                       <IoMdSchool className="inline-block mr-1 text-md" />
@@ -126,14 +158,14 @@ const UserPage = (): JSX.Element => {
                       </span>
                     </div>
                   )}
-                  {!user.locationName ? null : (
+                  {!user.mentor ? null : (
                     <div className="mt-1 flex items-center text-md text-gray-500">
-                      <GrLocation className="inline-block mr-1 text-md" />
-                      <span className="text-sm">{user.locationName}</span>
+                      <BsPersonSquare className="inline-block mr-1 text-md" />
+                      <span className="text-sm">{user.mentor}</span>
                     </div>
                   )}
                 </div>
-                <div className="mt-2 ml-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-2">
+                <div className="mt-1 ml-2 flex flex-row flex-wrap space-x-2">
                   {!user.github ? null : (
                     <div className="mt-1 flex items-center text-md text-gray-500">
                       <a
@@ -195,10 +227,10 @@ const UserPage = (): JSX.Element => {
                 </div>
               )}
             </div>
-            <div className="mt-2 ml-2">
+            <div className="mt-4 ml-2">
               <p>{user.description}</p>
             </div>
-            <div className="mt-1 ml-1">
+            <div className="mt-3 ml-1">
               <hr className="mt-2 mb-4" />
               <Markdown content={user.bio} />
             </div>
