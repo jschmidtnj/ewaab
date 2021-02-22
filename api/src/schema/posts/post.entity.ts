@@ -2,8 +2,9 @@ import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { BaseTimestamp } from '../utils/baseTimestamp';
-import { PostPublisherData } from '../users/user.entity';
+import { PublisherData } from '../users/user.entity';
 import { MediaData } from '../media/media.entity';
+import { SearchCommentsResult } from './comment.entity';
 
 export enum PostType {
   ehParticipantNews = 'ehParticipantNews',
@@ -46,8 +47,8 @@ export class SearchPost extends BaseTimestamp {
   @IsDefined()
   publisher: string;
 
-  @Field(_type => PostPublisherData, { description: 'publisher user data', nullable: true })
-  publisherData?: PostPublisherData;
+  @Field(_type => PublisherData, { description: 'publisher user data', nullable: true })
+  publisherData?: PublisherData;
 
   @Field(_type => String, { description: 'media for post', nullable: true })
   @Column({ type: 'uuid', nullable: true })
@@ -55,11 +56,13 @@ export class SearchPost extends BaseTimestamp {
 
   @Field(_type => MediaData, { description: 'media data', nullable: true })
   mediaData?: MediaData;
+
+  @Field(_type => SearchCommentsResult, { description: 'comments', nullable: true })
+  comments?: SearchCommentsResult;
 }
 
 export enum PostSortOption {
   title = 'title',
-  publisher = 'publisher',
   created = 'created',
   updated = 'updated',
 }

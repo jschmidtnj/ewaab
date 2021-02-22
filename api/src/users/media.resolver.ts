@@ -1,6 +1,6 @@
 import { Resolver, ArgsType, Field, Args, Ctx, Query } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
-import { checkPostAccess, verifyLoggedIn } from '../auth/checkAuth';
+import { AuthAccessType, checkPostAccess, verifyLoggedIn } from '../auth/checkAuth';
 import Media, { MediaParentType } from '../schema/media/media.entity';
 import { getRepository } from 'typeorm';
 import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
@@ -50,8 +50,12 @@ export const getMediaAuthenticated = async (args: MediaArgs, ctx: GraphQLContext
     throw new Error('user not logged in');
   }
   if (media.parentType === MediaParentType.post) {
-    if (!checkPostAccess(ctx, media.parent)) {
-      throw new Error(`user does not have access to post ${media.parent}`);
+    if (!await checkPostAccess({
+      ctx,
+      accessType: AuthAccessType.view,
+      id: args.id
+    })) {
+      throw new Error(`user of type ${ctx.auth.type} not authorized to view post ${args.id}`);
     }
   } else {
     throw new Error(`unhandled media type ${media.parentType}`);

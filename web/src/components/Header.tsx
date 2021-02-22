@@ -13,14 +13,34 @@ import { AppThunkDispatch } from 'state/thunk';
 import Avatar from 'components/Avatar';
 import { RootState } from 'state';
 import { avatarWidth } from 'shared/variables';
-import { UserFieldsFragment } from 'lib/generated/datamodel';
+import { PostType, UserFieldsFragment } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
-import { getUsername } from 'state/auth/getters';
+import { getType, getUsername } from 'state/auth/getters';
+import { postViewMap } from 'utils/variables';
 
 interface LinkData {
   name: string;
   href: string;
 }
+
+const linkMap: Record<PostType, LinkData> = {
+  [PostType.Community]: {
+    name: 'community',
+    href: '/community',
+  },
+  [PostType.EhParticipantNews]: {
+    name: 'participant news',
+    href: '/participant-news',
+  },
+  [PostType.EncourageHer]: {
+    name: 'encourage her',
+    href: '/encourage-her',
+  },
+  [PostType.MentorNews]: {
+    name: 'mentor news',
+    href: '/mentor-news',
+  },
+};
 
 const Header = (): JSX.Element => {
   const dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
@@ -61,32 +81,6 @@ const Header = (): JSX.Element => {
           },
         ]);
       } else {
-        setPaths([
-          {
-            name: 'community',
-            href: '/community',
-          },
-          {
-            name: 'encourage her',
-            href: '/encourage-her',
-          },
-          {
-            name: 'participant news',
-            href: '/participant-news',
-          },
-          {
-            name: 'mentor news',
-            href: '/mentor-news',
-          },
-          {
-            name: 'users',
-            href: '/users',
-          },
-          {
-            name: 'search',
-            href: '/search',
-          },
-        ]);
         if (!user) {
           try {
             await dispatchAuthThunk(thunkGetUser());
@@ -97,6 +91,21 @@ const Header = (): JSX.Element => {
             });
           }
         }
+        const userType = getType();
+        const feedPaths = postViewMap[userType].map(
+          (postType) => linkMap[postType]
+        );
+        setPaths([
+          ...feedPaths,
+          {
+            name: 'users',
+            href: '/users',
+          },
+          {
+            name: 'search',
+            href: '/search',
+          },
+        ]);
         const username = getUsername();
         setUserPaths([
           {

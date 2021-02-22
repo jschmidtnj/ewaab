@@ -10,7 +10,7 @@ import esb from 'elastic-builder';
 const maxPerPage = 20;
 
 @ArgsType()
-export class UsersArgs {
+class UsersArgs {
   @Field(_type => String, { description: 'search query', nullable: true })
   @IsOptional()
   query?: string;

@@ -13,7 +13,7 @@ export interface SaveElasticElement {
   index: string;
 }
 
-export const bulkSaveToElastic = async (elements: SaveElasticElement[]): Promise<void> => {
+export const bulkWriteToElastic = async (elements: SaveElasticElement[]): Promise<void> => {
   let writeBody: object[] = [];
   for (const element of elements) {
     if (element.action === WriteType.add) {

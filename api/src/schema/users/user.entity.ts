@@ -15,8 +15,8 @@ registerEnumType(UserType, {
   description: 'user type',
 });
 
-@ObjectType({ description: 'user data that you can get from post search', isAbstract: true })
-export class PostPublisherData extends BaseTimestamp {
+@ObjectType({ description: 'user data that you can get from post / comment search', isAbstract: true })
+export class PublisherData extends BaseTimestamp {
   @Field({ description: 'user id' })
   id?: string;
 
@@ -42,7 +42,7 @@ export class PostPublisherData extends BaseTimestamp {
 }
 
 @ObjectType({ description: 'user data, indexed for search', isAbstract: true })
-export class SearchUser extends PostPublisherData {
+export class SearchUser extends PublisherData {
   @Field({ description: 'email' })
   @Column({ type: 'text' })
   @Index({ unique: true })
@@ -166,6 +166,11 @@ export default class User extends PublicUser {
 
   @Field({ description: 'media auth token' })
   mediaAuth?: string;
+ 
+  @Field(_type => [String], { description: 'active direct messages' })
+  @Column({ type: 'text', array: true })
+  @IsDefined()
+  activeMessages: string[];
 
   @Column({ type: 'text' })
   @IsDefined()

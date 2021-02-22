@@ -182,6 +182,7 @@ class RegisterResolver {
     const newUser = await UserModel.save({
       ...searchUser,
       id,
+      activeMessages: [],
       pronouns: args.pronouns,
       password: hashedPassword,
       tokenVersion: 0,

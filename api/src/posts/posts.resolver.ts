@@ -6,14 +6,14 @@ import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { Min, Max, IsOptional, Matches, ValidateIf } from 'class-validator';
 import { PostCount, PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
-import { postViewMap } from './post.resolver';
 import esb from 'elastic-builder';
 import { uuidRegex } from '../shared/variables';
+import { postViewMap } from '../utils/variables';
 
 const maxPerPage = 20;
 
 @ArgsType()
-export class PostsArgs {
+class PostsArgs {
   @Field(_type => String, { description: 'search query', nullable: true })
   @IsOptional()
   query?: string;
@@ -67,13 +67,18 @@ export class PostsArgs {
   perpage: number;
 }
 
-const buildFilters = (mustShouldParams: esb.Query[], filterParams: esb.Query[]): esb.BoolQuery => {
+const buildFilters = (mustShouldParams: esb.Query[], filterMustParams: esb.Query[],
+  filterShouldParams: esb.Query[]): esb.BoolQuery => {
   return esb.boolQuery()
     .must(
       esb.boolQuery()
         .should(mustShouldParams)
     )
-    .filter(filterParams);
+    .filter(
+      esb.boolQuery()
+        .should(filterShouldParams)
+        .must(filterMustParams)
+    );
 };
 
 @Resolver()
@@ -85,7 +90,8 @@ class PostsResolver {
     }
 
     const mustShouldParams: esb.Query[] = [];
-    const filterParams: esb.Query[] = [];
+    const filterMustParams: esb.Query[] = [];
+    let filterShouldParams: esb.Query[] = [];
 
     if (args.query) {
       args.query = args.query.toLowerCase();
@@ -94,18 +100,21 @@ class PostsResolver {
     }
 
     if (args.publisher !== undefined) {
-      filterParams.push(esb.termQuery('publisher', args.publisher));
+      filterMustParams.push(esb.termQuery('publisher', args.publisher));
     }
 
     if (args.created !== undefined) {
-      filterParams.push(esb.rangeQuery('created').gte(args.created));
+      filterMustParams.push(esb.rangeQuery('created').gte(args.created));
     }
 
     if (args.type) {
       if (!postViewMap[ctx.auth.type].includes(args.type)) {
         throw new Error(`user of type ${ctx.auth.type} not authorized to find posts of type ${args.type}`);
       }
-      filterParams.push(esb.termQuery('type', args.type));
+      filterShouldParams.push(esb.termQuery('type', args.type));
+    } else {
+      filterShouldParams = filterShouldParams.concat(postViewMap[ctx.auth.type]
+        .map(post_type => esb.termQuery('type', post_type)));
     }
 
     if (args.postCounts === undefined) {
@@ -116,12 +125,12 @@ class PostsResolver {
 
     const aggregates: esb.Aggregation[] = [];
 
-    for (const postType of Object.values(PostType)) {
-      const filters = [...filterParams, esb.matchQuery('type', postType)];
-      aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters)));
+    for (const postType of postViewMap[ctx.auth.type]) {
+      const filters = [...filterMustParams, esb.matchQuery('type', postType)];
+      aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters, filterShouldParams)));
     }
 
-    let requestBody = esb.requestBodySearch().query(buildFilters(mustShouldParams, filterParams));
+    let requestBody = esb.requestBodySearch().query(buildFilters(mustShouldParams, filterMustParams, filterShouldParams));
     if (args.sortBy) {
       requestBody = requestBody.sort(esb.sort(args.sortBy,
         args.ascending ? 'asc' : 'desc'));

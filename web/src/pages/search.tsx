@@ -7,6 +7,7 @@ import {
   PostsQuery,
   PostsQueryVariables,
   PostType,
+  UserType,
 } from 'lib/generated/datamodel';
 import Select, { ValueType } from 'react-select';
 import { useEffect, useRef, useState } from 'react';
@@ -15,12 +16,13 @@ import * as yup from 'yup';
 import { Formik, FormikHandlers, FormikHelpers, FormikState } from 'formik';
 import {
   defaultPerPage,
+  postTypeLabelMap,
   perPageOptions,
+  postWriteMap,
   SelectNumberObject,
 } from 'utils/variables';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
-import isDebug from 'utils/mode';
 import { AiOutlinePlus } from 'react-icons/ai';
 import WritePostModal from 'components/modals/WritePostModal';
 import PostView from 'components/PostView';
@@ -29,19 +31,15 @@ import sleep from 'shared/sleep';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 
-const typeLabelMap: Record<PostType, string> = {
-  [PostType.Community]: 'Community',
-  [PostType.EncourageHer]: 'Encourage Her',
-  [PostType.MentorNews]: 'Mentor News',
-  [PostType.EhParticipantNews]: 'EH Participant News',
-};
-
 const SearchPage = (): JSX.Element => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
     undefined
   );
   const userID = useSelector<RootState, string | undefined>(
     (state) => state.authReducer.user?.id
+  );
+  const userType = useSelector<RootState, UserType | undefined>(
+    (state) => state.authReducer.user?.type as UserType | undefined
   );
 
   const [defaultQuery, setDefaultQuery] = useState<string>('');
@@ -53,7 +51,7 @@ const SearchPage = (): JSX.Element => {
     const res = await client.query<PostsQuery, PostsQueryVariables>({
       query: Posts,
       variables,
-      fetchPolicy: isDebug() ? 'no-cache' : 'cache-first', // disable cache if in debug
+      fetchPolicy: 'network-only', // disable cache
     });
     if (res.errors) {
       throw new Error(res.errors.join(', '));
@@ -187,7 +185,7 @@ const SearchPage = (): JSX.Element => {
                           name="query"
                           id="query"
                           placeholder="Search"
-                          className="lg:w-64 h-12 shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-md border-gray-300 rounded-none sm:rounded-l"
+                          className="lg:w-64 h-12 shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full border-gray-300 rounded-none sm:rounded-l"
                         />
                       </div>
                     </div>
@@ -245,11 +243,18 @@ const SearchPage = (): JSX.Element => {
                     </div>
 
                     <button
-                      className="mt-1 flex justify-center items-center bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none sm:rounded-r"
+                      className="disabled:bg-blue-400 mt-1 flex justify-center items-center bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none sm:rounded-r"
                       onClick={(evt) => {
                         evt.preventDefault();
                         toggleWritePost();
                       }}
+                      type="button"
+                      disabled={
+                        !userType ||
+                        (values.type !== undefined
+                          ? !postWriteMap[userType].includes(values.type)
+                          : postWriteMap[userType].length === 0)
+                      }
                     >
                       <span className="inline-block text-md">New</span>
                       <AiOutlinePlus className="ml-1 text-md text-white mb-0.5" />
@@ -262,10 +267,10 @@ const SearchPage = (): JSX.Element => {
           {!writePostModalIsOpen ? null : (
             <WritePostModal
               toggleModal={toggleWritePost}
-              defaultPostType={
+              postType={
                 formRef.current.values.type
                   ? formRef.current.values.type
-                  : PostType.Community
+                  : postWriteMap[userType][0]
               }
               onSubmit={async () => {
                 // wait for elasticsearch to update
@@ -296,7 +301,7 @@ const SearchPage = (): JSX.Element => {
                             }
                           >
                             <button
-                              className="w-full flex flex-row p-3 border-b first:rounded-md last:rounded-md"
+                              className="w-full flex flex-row p-3 border-b first:rounded-md last:rounded-md focus:outline-none"
                               onClick={(evt) => {
                                 evt.preventDefault();
                                 let newType: PostType | undefined;
@@ -313,7 +318,7 @@ const SearchPage = (): JSX.Element => {
                               type="button"
                             >
                               <span className="inline-block text-left text-base w-full">
-                                {typeLabelMap[countData.type]}
+                                {postTypeLabelMap[countData.type]}
                               </span>
                               <span className="float-right inline-block pr-2">
                                 <div className="flex items-center justify-center rounded-full h-0.5 w-0.5 bg-purple-500 text-white p-3 text-sm">

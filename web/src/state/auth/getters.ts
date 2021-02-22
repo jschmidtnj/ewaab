@@ -29,7 +29,7 @@ export const getType = (): UserType => {
   if (!state.loggedIn || !state.user) {
     return UserType.Visitor;
   }
-  return UserType[state.user.type];
+  return state.user.type as UserType;
 };
 
 export const getUsername = (): string => {

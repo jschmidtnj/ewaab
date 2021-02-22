@@ -1,7 +1,7 @@
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { MinLength, IsOptional, IsUrl, ValidateIf } from 'class-validator';
-import { strMinLen } from '../shared/variables';
+import { MinLength, IsOptional, IsUrl, ValidateIf, Matches } from 'class-validator';
+import { strMinLen, uuidRegex } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -19,6 +19,9 @@ import { handlePostMedia } from './addPost.resolver';
 @ArgsType()
 class UpdatePostArgs {
   @Field(_type => String, { description: 'post id' })
+  @Matches(uuidRegex, {
+    message: 'invalid post id provided, must be uuid v4'
+  })
   id: string;
 
   @Field(_type => String, { description: 'title', nullable: true })
@@ -58,10 +61,10 @@ class UpdatePostResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
-    if (!Object.values(Object.assign({}, args, { deleteMedia: undefined })).some(elem => elem !== undefined)) {
+    if (!Object.values(Object.assign({}, args, { deleteMedia: undefined, id: undefined })).some(elem => elem !== undefined)) {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
-    const postUpdateData: QueryPartialEntity<Post> = {};
+
     const PostModel = getRepository(Post);
     const postData = await PostModel.findOne(args.id, {
       select: ['id', 'publisher', 'media']
@@ -76,7 +79,7 @@ class UpdatePostResolver {
       }
     }
 
-    // other fields
+    const postUpdateData: QueryPartialEntity<Post> = {};
     if (args.title !== undefined) {
       postUpdateData.title = args.title;
     }

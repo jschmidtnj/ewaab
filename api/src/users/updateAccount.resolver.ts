@@ -2,7 +2,7 @@ import argon2 from 'argon2';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation, Int } from 'type-graphql';
 import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn, Min, Max } from 'class-validator';
-import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen, ewaabFounded } from '../shared/variables';
+import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen, ewaabFounded, uuidRegex } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
 import User from '../schema/users/user.entity';
@@ -31,7 +31,23 @@ import universities from '../shared/universities';
 @ArgsType()
 class UpdateArgs {
   @Field(_type => String, { description: 'user id', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
+  @Matches(uuidRegex, {
+    message: 'invalid user id provided, must be uuid v4'
+  })
   id?: string;
+
+  @Field(_type => String, { description: 'active message id', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
+  @Matches(uuidRegex, {
+    message: 'invalid active message user id provided, must be uuid v4'
+  })
+  activeMessage?: string;
+
+  @Field(_type => Boolean, { description: 'delete active message', nullable: true, defaultValue: false })
+  deleteActiveMessage: boolean;
 
   @Field(_type => String, { description: 'name', nullable: true })
   @IsOptional()
@@ -193,7 +209,7 @@ class UpdateAccountResolver {
     const UserModel = getRepository(User);
 
     const currentUser = await UserModel.findOne(id, {
-      select: ['name', 'avatar']
+      select: ['name', 'avatar', 'activeMessages']
     });
     if (!currentUser) {
       throw new ApolloError('could not get current user', `${statusCodes.INTERNAL_SERVER_ERROR}`);
@@ -235,6 +251,23 @@ class UpdateAccountResolver {
     if (args.location !== undefined) {
       userUpdateData.location = args.location;
       userUpdateData.locationName = args.locationName;
+    }
+    if (args.activeMessage !== undefined) {
+      if (await UserModel.count({
+        id: args.activeMessage
+      }) === 0) {
+        throw new Error(`cannot find user with id ${args.activeMessage}`);
+      }
+      if (args.deleteActiveMessage) {
+        if (currentUser.activeMessages.includes(args.activeMessage)) {
+          userUpdateData.activeMessages = currentUser.activeMessages.filter(
+            receiverID => receiverID !== args.activeMessage);
+        }
+      } else {
+        if (!currentUser.activeMessages.includes(args.activeMessage)) {
+          userUpdateData.activeMessages = [...currentUser.activeMessages, args.activeMessage];
+        }
+      }
     }
 
     const now = getTime();

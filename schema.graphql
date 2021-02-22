@@ -3,6 +3,30 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+"""comment data"""
+type Comment {
+  """comment content"""
+  content: String!
+
+  """date created"""
+  created: Float!
+
+  """comment id"""
+  id: String!
+
+  """comment publisher"""
+  publisher: String!
+
+  """date updated"""
+  updated: Float!
+}
+
+"""comment sort options"""
+enum CommentSortOption {
+  created
+  updated
+}
+
 """media object"""
 type Media {
   """file size"""
@@ -44,7 +68,35 @@ enum MediaType {
   image
 }
 
+"""message data"""
+type Message {
+  """message content"""
+  content: String!
+
+  """date created"""
+  created: Float!
+
+  """message id"""
+  id: String!
+
+  """message publisher"""
+  publisher: String!
+
+  """message recipient"""
+  receiver: String!
+
+  """date updated"""
+  updated: Float!
+}
+
 type Mutation {
+  addComment(
+    """comment content"""
+    content: String!
+
+    """post id"""
+    post: String!
+  ): String!
   addPost(
     """post content"""
     content: String!
@@ -64,6 +116,14 @@ type Mutation {
   deleteAccount(
     """email"""
     email: String
+  ): String!
+  deleteComment(
+    """comment id"""
+    id: String!
+  ): String!
+  deleteMessage(
+    """message id"""
+    id: String!
   ): String!
   deletePost(
     """post id"""
@@ -132,6 +192,13 @@ type Mutation {
   revokeRefresh(
     """email"""
     email: String
+  ): String!
+  sendMessage(
+    """message content"""
+    content: String!
+
+    """receiver id"""
+    receiver: String!
   ): String!
   sendPasswordReset(
     """email"""
@@ -214,6 +281,20 @@ type Mutation {
     """url"""
     url: String
   ): String!
+  updateComment(
+    """comment content"""
+    content: String
+
+    """post id"""
+    id: String!
+  ): String!
+  updateMessage(
+    """message content"""
+    content: String
+
+    """post id"""
+    id: String!
+  ): String!
   updatePost(
     """content"""
     content: String
@@ -248,6 +329,24 @@ type Mutation {
 
 """post data"""
 type Post {
+  """comments"""
+  comments(
+    """sort direction"""
+    ascending: Boolean = true
+
+    """page number"""
+    page: Int = 0
+
+    """number per page"""
+    perpage: Int = 10
+
+    """search query"""
+    query: String
+
+    """sort by this field"""
+    sortBy: CommentSortOption
+  ): SearchCommentsResult
+
   """post content"""
   content: String!
 
@@ -270,7 +369,7 @@ type Post {
   publisher: String!
 
   """publisher user data"""
-  publisherData: PostPublisherData
+  publisherData: PublisherData
 
   """title"""
   title: String!
@@ -292,7 +391,7 @@ type PostCount {
 }
 
 """user data that you can get from post search"""
-type PostPublisherData {
+type PublisherData {
   """avatar id"""
   avatar: String
 
@@ -318,7 +417,6 @@ type PostPublisherData {
 """post sort options"""
 enum PostSortOption {
   created
-  publisher
   title
   updated
 }
@@ -404,6 +502,25 @@ type PublicUser {
 }
 
 type Query {
+  comments(
+    """sort direction"""
+    ascending: Boolean = true
+
+    """page number"""
+    page: Int = 0
+
+    """number per page"""
+    perpage: Int = 10
+
+    """post id"""
+    post: String!
+
+    """search query"""
+    query: String
+
+    """sort by this field"""
+    sortBy: CommentSortOption
+  ): SearchCommentsResult!
   hello: String!
   media(
     """media id"""
@@ -485,8 +602,83 @@ type Query {
   ): SearchUsersResult!
 }
 
+"""comment data, indexed in elasticsearch"""
+type SearchComment {
+  """comment content"""
+  content: String!
+
+  """date created"""
+  created: Float!
+
+  """comment id"""
+  id: String!
+
+  """comment publisher"""
+  publisher: String!
+
+  """date updated"""
+  updated: Float!
+}
+
+"""comment data search results"""
+type SearchCommentsResult {
+  """total comments count"""
+  count: Int!
+
+  """results"""
+  results: [SearchComment!]!
+}
+
+"""message data, indexed in elasticsearch"""
+type SearchMessage {
+  """message content"""
+  content: String!
+
+  """date created"""
+  created: Float!
+
+  """message id"""
+  id: String!
+
+  """message publisher"""
+  publisher: String!
+
+  """message recipient"""
+  receiver: String!
+
+  """date updated"""
+  updated: Float!
+}
+
+"""message data search results"""
+type SearchMessagesResult {
+  """total message count"""
+  count: Int!
+
+  """results"""
+  results: [SearchMessage!]!
+}
+
 """post data, indexed in elasticsearch"""
 type SearchPost {
+  """comments"""
+  comments(
+    """sort direction"""
+    ascending: Boolean = true
+
+    """page number"""
+    page: Int = 0
+
+    """number per page"""
+    perpage: Int = 10
+
+    """search query"""
+    query: String
+
+    """sort by this field"""
+    sortBy: CommentSortOption
+  ): SearchCommentsResult
+
   """post content"""
   content: String!
 
@@ -509,7 +701,7 @@ type SearchPost {
   publisher: String!
 
   """publisher user data"""
-  publisherData: PostPublisherData
+  publisherData: PublisherData
 
   """title"""
   title: String!

@@ -8,6 +8,7 @@ import { FindOneOptions, getRepository } from 'typeorm';
 import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
+import { deleteMessages } from '../messages/deleteMessages.resolver';
 
 @ArgsType()
 class DeleteArgs {
@@ -39,7 +40,7 @@ class DeleteResolver {
     const UserModel = getRepository(User);
     let userFindRes: User | undefined;
     const findOptions: FindOneOptions<User> = {
-      select: ['id']
+      select: ['id', 'activeMessages']
     };
     if (!isAdmin) {
       userFindRes = await UserModel.findOne(ctx.auth.id, findOptions);
@@ -51,6 +52,13 @@ class DeleteResolver {
     if (!userFindRes) {
       throw new Error('no user found');
     }
+
+    for (const receiver of userFindRes.activeMessages) {
+      await deleteMessages({
+        receiver
+      }, userFindRes.id);
+    }
+
     const userData = userFindRes as User;
     if (userData.avatar) {
       await deleteMedia(userData.avatar);

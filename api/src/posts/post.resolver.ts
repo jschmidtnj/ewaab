@@ -1,16 +1,8 @@
-import { verifyLoggedIn } from '../auth/checkAuth';
+import { AuthAccessType, checkPostAccess, verifyLoggedIn } from '../auth/checkAuth';
 import { Resolver, Ctx, Query, ArgsType, Field, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
 import { getRepository } from 'typeorm';
-import Post, { PostType } from '../schema/posts/post.entity';
-import { UserType } from '../schema/users/user.entity';
-
-export const postViewMap: Record<UserType, PostType[]> = {
-  [UserType.admin]: Object.values(PostType),
-  [UserType.user]: Object.values(PostType),
-  [UserType.mentor]: [PostType.mentorNews, PostType.community],
-  [UserType.visitor]: [],
-};
+import Post from '../schema/posts/post.entity';
 
 @ArgsType()
 export class PostArgs {
@@ -30,8 +22,12 @@ class PostResolver {
     if (!post) {
       throw new Error(`cannot find user with id ${ctx.auth.id}`);
     }
-    if (!postViewMap[ctx.auth.type].includes(post.type)) {
-      throw new Error(`user of type ${ctx.auth.type} not authorized to find posts of type ${post.type}`);
+    if (!await checkPostAccess({
+      ctx,
+      accessType: AuthAccessType.view,
+      ...post
+    })) {
+      throw new Error(`user of type ${ctx.auth!.type} not authorized to view post ${args.id}`);
     }
     return post;
   }

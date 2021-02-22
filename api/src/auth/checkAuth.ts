@@ -3,15 +3,14 @@ import { configData } from '../utils/config';
 import { getRepository } from 'typeorm';
 import Post, { PostType } from '../schema/posts/post.entity';
 import { UserType } from '../schema/users/user.entity';
+import { postViewMap, postWriteMap } from '../utils/variables';
+import Message from '../schema/users/message.entity';
 
 export const verifyGuest = (ctx: GraphQLContext): boolean => {
   return ctx.auth !== undefined;
 };
 
-export const verifyLoggedIn = (ctx: GraphQLContext, checkEmailVerified?: boolean): boolean => {
-  if (checkEmailVerified === undefined) {
-    checkEmailVerified = true;
-  }
+export const verifyLoggedIn = (ctx: GraphQLContext, checkEmailVerified = true): boolean => {
   return verifyGuest(ctx) && ctx.auth !== undefined && ctx.auth.type !== UserType.visitor &&
     (checkEmailVerified ? ctx.auth.emailVerified : true);
 };
@@ -26,23 +25,95 @@ export const verifyAdmin = (ctx: GraphQLContext, executeAdmin?: boolean): boolea
   return verifyLoggedIn(ctx) && ctx.auth?.type === UserType.admin;
 };
 
-export const checkPostAccess = async (ctx: GraphQLContext, id: string, postType?: PostType): Promise<boolean> => {
-  if (!verifyLoggedIn(ctx)) {
+export enum AuthAccessType {
+  view = 'view',
+  add = 'add',
+  modify = 'modify'
+}
+
+interface CheckPostAccessArgs {
+  ctx: GraphQLContext;
+  accessType: AuthAccessType;
+  id?: string;
+  postType?: PostType;
+  publisher?: string;
+}
+
+export const checkPostAccess = async (args: CheckPostAccessArgs): Promise<boolean> => {
+  if (!verifyLoggedIn(args.ctx) || !args.ctx.auth) {
     return false;
   }
-  if (!postType) {
-    const postModel = getRepository(Post);
-    const post = await postModel.findOne(id, {
-      select: ['type']
+  if (args.accessType === AuthAccessType.add) {
+    if (!args.postType) {
+      throw new Error('post type must be provided for add');
+    }
+    return postWriteMap[args.ctx.auth.type].includes(args.postType);
+  } else if (!args.id) {
+    throw new Error('post id must be provided');
+  }
+  if (args.ctx.auth.type === UserType.admin) {
+    // admin can do anything
+    return true;
+  }
+  if (!args.postType || !args.publisher) {
+    const PostModel = getRepository(Post);
+    const post = await PostModel.findOne(args.id, {
+      select: ['type', 'publisher']
     });
     if (!post) {
-      throw new Error(`cannot find post with id ${id}`);
+      throw new Error(`cannot find post with id ${args.id}`);
     }
-    postType = post.type;
+    args.postType = post.type;
+    args.publisher = post.publisher;
   }
-  const mentorPostTypes = [PostType.mentorNews];
-  if (mentorPostTypes.includes(postType)) {
-    return ctx.auth?.type === UserType.mentor;
+  if (args.accessType === AuthAccessType.view) {
+    return postViewMap[args.ctx.auth.type].includes(args.postType);
+  } else if (args.accessType === AuthAccessType.modify) {
+    return args.publisher === args.ctx.auth.id;
+  } else {
+    throw new Error(`unhandled access type for post: ${args.accessType}`);
   }
-  return true;
+};
+
+interface CheckMessageAccessArgs {
+  ctx: GraphQLContext;
+  accessType: AuthAccessType;
+  messageID?: string;
+  publisher?: string;
+  receiver?: string;
+}
+
+export const checkMessageAccess = async (args: CheckMessageAccessArgs): Promise<boolean> => {
+  if (!verifyLoggedIn(args.ctx) || !args.ctx.auth) {
+    return false;
+  }
+  if (args.accessType === AuthAccessType.add) {
+    // anyone who is signed in can send a message to anyone else
+    return true;
+  } else if (!args.messageID) {
+    throw new Error('message id must be provided');
+  }
+  if (args.ctx.auth.type === UserType.admin) {
+    // admin can do anything
+    return true;
+  }
+  if (!args.publisher || !args.receiver) {
+    const MessageModel = getRepository(Message);
+    const message = await MessageModel.findOne(args.messageID, {
+      select: ['publisher', 'receiver']
+    });
+    if (!message) {
+      throw new Error(`cannot find message with id ${args.messageID}`);
+    }
+    args.publisher = message.publisher;
+    args.receiver = message.receiver;
+  }
+  if (args.accessType === AuthAccessType.view) {
+    // publisher and receiver can view messages
+    return [args.publisher, args.receiver].includes(args.ctx.auth.id);
+  } else if (args.accessType === AuthAccessType.modify) {
+    return args.publisher === args.ctx.auth.id;
+  } else {
+    throw new Error(`unhandled access type for messages: ${args.accessType}`);
+  }
 };

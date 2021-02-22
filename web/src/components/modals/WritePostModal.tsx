@@ -31,9 +31,10 @@ import isDebug from 'utils/mode';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { getAPIURL } from 'utils/axios';
 import Editor from 'components/markdown/Editor';
+import { postTypeLabelMap } from 'utils/variables';
 
 interface ModalArgs {
-  defaultPostType: PostType;
+  postType: PostType;
   toggleModal: () => void;
   onSubmit: () => Promise<void>;
   updateID?: string;
@@ -55,9 +56,6 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
       FormikState<AddPostMutationVariables> &
       FormikHandlers
   >();
-  useEffect(() => {
-    formRef.current.setFieldValue('type', args.defaultPostType);
-  }, [args.defaultPostType]);
 
   const [imageInputElem, setImageInputElem] = useState<
     HTMLInputElement | undefined
@@ -190,7 +188,9 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                     className="text-lg leading-6 font-medium text-gray-900 p-4"
                     id="modal-headline"
                   >
-                    {!args.updateID ? 'Create' : 'Update'}
+                    {!args.updateID
+                      ? `New ${postTypeLabelMap[args.postType]} Post`
+                      : 'Update'}
                   </h3>
                   <hr className="mb-2" />
                   <div className="ml-6 flex items-center text-left">
@@ -198,19 +198,17 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                     <p className="inline-block ml-2 font-bold">{user.name}</p>
                   </div>
                 </div>
-                <div className="px-6 py-2 mb-2 text-center sm:mt-0 sm:text-left">
+                <div className="px-6 py-2 mb-2 sm:mt-0 text-left">
                   <Formik
                     innerRef={(formRef as unknown) as (instance: any) => void}
                     initialValues={{
                       title: '',
                       content: '',
-                      type: args.defaultPostType,
                       link: '',
                     }}
                     validationSchema={yup.object({
                       title: yup.string().required('required'),
                       content: yup.string().required('required'),
-                      type: yup.string().required('required'),
                       link: yup.string().url(),
                     })}
                     onSubmit={async (
@@ -277,6 +275,7 @@ const WritePostModal = (args: ModalArgs): JSX.Element => {
                         } else {
                           const variables: AddPostMutationVariables = {
                             ...formData,
+                            type: args.postType,
                             link:
                               formData.link.length === 0
                                 ? undefined

@@ -5,12 +5,12 @@ import { Column } from 'typeorm';
 @ObjectType({ description : 'timestamp base class', isAbstract: true })
 export class BaseTimestamp {
   @Field({ description: 'date created' })
-  @Column({ type: 'int' })
+  @Column({ type: 'bigint' })
   @IsDefined()
   created: number;
 
   @Field({ description: 'date updated' })
-  @Column({ type: 'int' })
+  @Column({ type: 'bigint' })
   @IsDefined()
   updated: number;
 }

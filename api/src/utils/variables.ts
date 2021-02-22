@@ -1,6 +1,19 @@
+import { PostType } from '../schema/posts/post.entity';
+import { UserType } from '../schema/users/user.entity';
+
 export const maxFileUploadSize = 15 * 1e6; // bytes
 export const blurredWidth = 20;
-export const validHex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
-// mqtt
-export const commandTopic = 'commands';
+export const postViewMap: Record<UserType, PostType[]> = {
+  [UserType.admin]: Object.values(PostType),
+  [UserType.user]: Object.values(PostType),
+  [UserType.mentor]: [PostType.mentorNews, PostType.community],
+  [UserType.visitor]: [],
+};
+
+export const postWriteMap: Record<UserType, PostType[]> = {
+  [UserType.admin]: Object.values(PostType),
+  [UserType.user]: [PostType.community],
+  [UserType.mentor]: [PostType.mentorNews],
+  [UserType.visitor]: [],
+};

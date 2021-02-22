@@ -6,9 +6,9 @@ import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import Post, { PostType, SearchPost } from '../schema/posts/post.entity';
 import { postMediaWidth, strMinLen } from '../shared/variables';
-import { verifyLoggedIn } from '../auth/checkAuth';
+import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import User, { UserType } from '../schema/users/user.entity';
+import User from '../schema/users/user.entity';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { blurredWidth, maxFileUploadSize } from '../utils/variables';
 import Media, { MediaParentType, MediaType } from '../schema/media/media.entity';
@@ -47,13 +47,6 @@ class AddPostArgs {
   @IsOptional()
   media?: Promise<FileUpload>;
 }
-
-const userAccessMap: Record<UserType, PostType[]> = {
-  [UserType.admin]: Object.values(PostType),
-  [UserType.user]: [PostType.community],
-  [UserType.mentor]: [PostType.mentorNews],
-  [UserType.visitor]: [],
-};
 
 export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Promise<string | undefined> => {
   let numReading = 0;
@@ -131,15 +124,16 @@ export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Pr
 class AddPostResolver {
   @Mutation(_returns => String)
   async addPost(@Args() args: AddPostArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
-    if (!verifyLoggedIn(ctx) || !ctx.auth) {
-      throw new Error('user not logged in');
-    }
-    if (!userAccessMap[ctx.auth.type].includes(args.type)) {
-      throw new Error(`user of type ${ctx.auth.type} not authorized to post ${args.type}`);
+    if (!await checkPostAccess({
+      ctx,
+      accessType: AuthAccessType.add,
+      postType: args.type
+    })) {
+      throw new Error(`user of type ${ctx.auth!.type} not authorized to post ${args.type}`);
     }
 
     const UserModel = getRepository(User);
-    const currentUser = await UserModel.findOne(ctx.auth.id, {
+    const currentUser = await UserModel.findOne(ctx.auth!.id, {
       select: ['name', 'avatar']
     });
     if (!currentUser) {

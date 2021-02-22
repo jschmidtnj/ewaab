@@ -2,6 +2,7 @@ import {
   DeletePostMutationVariables,
   MediaType,
   PostSearchFieldsFragment,
+  UserType,
 } from 'lib/generated/datamodel';
 import Avatar from 'components/Avatar';
 import { formatDistanceToNow } from 'date-fns';
@@ -17,6 +18,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { postMediaWidth } from 'shared/variables';
 import { FiFileText } from 'react-icons/fi';
 import Markdown from './markdown/Markdown';
+import { Picker } from 'emoji-mart';
 
 interface MediaViewArgs {
   id: string;
@@ -64,11 +66,15 @@ const PostView = (args: PostViewArgs): JSX.Element => {
   const userID = useSelector<RootState, string | undefined>(
     (state) => state.authReducer.user?.id
   );
+  const userType = useSelector<RootState, UserType | undefined>(
+    (state) => state.authReducer.user?.type as UserType | undefined
+  );
 
   return (
     <div className="bg-white rounded-lg text-left overflow-hidden shadow-sm mb-4">
       <div className="sm:p-4 p-2">
-        {args.data.publisher !== userID ? null : (
+        {userType !== UserType.Admin &&
+        args.data.publisher !== userID ? null : (
           <div className="flex justify-end text-2xl text-gray-800">
             <button
               className="focus:outline-none mr-8 p-2 absolute z-10 hover:text-gray-600"
@@ -120,7 +126,7 @@ const PostView = (args: PostViewArgs): JSX.Element => {
                     {args.data.publisherData.description}
                   </p>
                   <p className="text-xs">
-                    {formatDistanceToNow(args.data.created * 1000, {
+                    {formatDistanceToNow(args.data.created, {
                       addSuffix: true,
                     })}
                   </p>
@@ -163,6 +169,10 @@ const PostView = (args: PostViewArgs): JSX.Element => {
           )}
         </>
       )}
+      <div>
+        <Picker />
+        {/* TODO - add reactions, fix emoji picker */}
+      </div>
     </div>
   );
 };

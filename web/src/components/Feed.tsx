@@ -5,6 +5,7 @@ import {
   PostsQuery,
   PostsQueryVariables,
   PostType,
+  UserType,
 } from 'lib/generated/datamodel';
 import { useEffect, useState } from 'react';
 import { ApolloError, ApolloQueryResult } from 'apollo-client';
@@ -16,6 +17,9 @@ import PostView from 'components/PostView';
 import DeletePostModal from 'components/modals/DeletePostModal';
 import sleep from 'shared/sleep';
 import { FiEdit } from 'react-icons/fi';
+import { postWriteMap } from 'utils/variables';
+import { useSelector } from 'react-redux';
+import { RootState } from 'state';
 
 const numPerPage = 10;
 
@@ -27,7 +31,11 @@ const Feed = (args: FeedArgs): JSX.Element => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
     undefined
   );
+  const userType = useSelector<RootState, UserType | undefined>(
+    (state) => state.authReducer.user?.type as UserType | undefined
+  );
   const [currentPage, setCurrentPage] = useState<number>(0);
+  const [useCache, setUseCache] = useState<boolean>(!isDebug());
 
   const runQuery = async (): Promise<void> => {
     const res = await client.query<PostsQuery, PostsQueryVariables>({
@@ -39,8 +47,9 @@ const Feed = (args: FeedArgs): JSX.Element => {
         page: currentPage,
         type: args.postType,
       },
-      fetchPolicy: isDebug() ? 'no-cache' : 'cache-first', // disable cache if in debug
+      fetchPolicy: !useCache ? 'no-cache' : 'cache-first', // disable cache if in debug
     });
+    setUseCache(!isDebug());
     if (res.errors) {
       throw new Error(res.errors.join(', '));
     }
@@ -85,10 +94,11 @@ const Feed = (args: FeedArgs): JSX.Element => {
       {!writePostModalIsOpen ? null : (
         <WritePostModal
           toggleModal={toggleWritePost}
-          defaultPostType={args.postType}
+          postType={args.postType}
           onSubmit={async () => {
             // wait for elasticsearch to update
             await sleep(1000);
+            setUseCache(false);
             await runQuery();
           }}
           updateID={updatePostID}
@@ -102,6 +112,7 @@ const Feed = (args: FeedArgs): JSX.Element => {
             onSubmit={async () => {
               // wait for elasticsearch to update
               await sleep(1000);
+              setUseCache(false);
               await runQuery();
             }}
             variables={deletePostVariables}
@@ -109,18 +120,21 @@ const Feed = (args: FeedArgs): JSX.Element => {
         )}
 
         <div className="col-span-3 lg:mx-4">
-          <div className="bg-white px-4 sm:px-16 py-4 flex items-center justify-center mt-4 mb-8 rounded-md">
-            <button
-              className="focus:outline-none flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
-              onClick={(evt) => {
-                evt.preventDefault();
-                toggleWritePost();
-              }}
-            >
-              <FiEdit className="inline-block mr-2 text-md" />
-              <span className="text-sm">Start a post</span>
-            </button>
-          </div>
+          {!userType ||
+          !postWriteMap[userType].includes(args.postType) ? null : (
+            <div className="bg-white px-4 sm:px-16 py-4 flex items-center justify-center mt-4 mb-8 rounded-md">
+              <button
+                className="focus:outline-none flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
+                onClick={(evt) => {
+                  evt.preventDefault();
+                  toggleWritePost();
+                }}
+              >
+                <FiEdit className="inline-block mr-2 text-md" />
+                <span className="text-sm">Start a post</span>
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center justify-center">
             {!posts || posts.loading ? (
