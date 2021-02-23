@@ -34,7 +34,7 @@ export const configData: ConfigType = {
   PORT: 8080,
   JWT_ISSUER: 'EWAAB',
   API_HOST: 'api.ewaab.org',
-  WEBSITE_URL: 'https://ewaab.org',
+  WEBSITE_URL: 'https://network.ewaab.org',
   DEBUG: false,
   PRODUCTION: true,
   JWT_SECRET: '',

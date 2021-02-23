@@ -47,7 +47,7 @@ jobs:
           NEXT_PUBLIC_API_URL: api.ewaab.org
           NEXT_PUBLIC_USE_SECURE: "true"
           NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
-          NEXT_PUBLIC_SITE_URL: https://ewaab.org
+          NEXT_PUBLIC_SITE_URL: https://network.ewaab.org
           NEXT_PUBLIC_MODE: production
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID }}
       - name: Docker
