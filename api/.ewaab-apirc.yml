@@ -1,4 +1,4 @@
 JWT_ISSUER: EWAAB
 PORT: 8080
-WEBSITE_URL: https://ewaabweb.org
+WEBSITE_URL: https://ewaab.org
 DEBUG: false

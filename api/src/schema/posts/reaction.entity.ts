@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryColumn, Index } from 'typeorm';
-import { ObjectType, Field } from 'type-graphql';
+import { ObjectType, Field, registerEnumType } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 
 export enum ReactionParentType {
@@ -7,6 +7,11 @@ export enum ReactionParentType {
   comment = 'comment',
   message = 'message',
 }
+
+registerEnumType(ReactionParentType, {
+  name: 'ReactionParentType',
+  description: 'reaction parent type'
+});
 
 @ObjectType({ description: 'reaction data' })
 @Entity({ name: 'reactions' })

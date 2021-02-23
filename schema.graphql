@@ -14,8 +14,14 @@ type Comment {
   """comment id"""
   id: String!
 
+  """comment post"""
+  post: String!
+
   """comment publisher"""
   publisher: String!
+
+  """publisher user data"""
+  publisherData: PublisherData
 
   """date updated"""
   updated: Float!
@@ -89,6 +95,12 @@ type Message {
   updated: Float!
 }
 
+"""message sort options"""
+enum MessageSortOption {
+  created
+  updated
+}
+
 type Mutation {
   addComment(
     """comment content"""
@@ -113,6 +125,16 @@ type Mutation {
     """post type"""
     type: PostType!
   ): String!
+  addReaction(
+    """parent id"""
+    parent: String!
+
+    """parent type"""
+    parentType: ReactionParentType!
+
+    """reaction"""
+    reaction: String!
+  ): String!
   deleteAccount(
     """email"""
     email: String
@@ -125,8 +147,16 @@ type Mutation {
     """message id"""
     id: String!
   ): String!
+  deleteMessages(
+    """receiver id"""
+    receiver: String!
+  ): String!
   deletePost(
     """post id"""
+    id: String!
+  ): String!
+  deleteReaction(
+    """reaction id"""
     id: String!
   ): String!
   inviteUser(
@@ -221,6 +251,9 @@ type Mutation {
     subject: String
   ): String!
   updateAccount(
+    """active message id"""
+    activeMessage: String
+
     """alumni year"""
     alumniYear: Int
 
@@ -229,6 +262,9 @@ type Mutation {
 
     """short bio"""
     bio: String
+
+    """delete active message"""
+    deleteActiveMessage: Boolean = false
 
     """description"""
     description: String
@@ -390,30 +426,6 @@ type PostCount {
   type: PostType!
 }
 
-"""user data that you can get from post search"""
-type PublisherData {
-  """avatar id"""
-  avatar: String
-
-  """date created"""
-  created: Float!
-
-  """short user description"""
-  description: String!
-
-  """user id"""
-  id: String!
-
-  """name"""
-  name: String!
-
-  """date updated"""
-  updated: Float!
-
-  """username"""
-  username: String!
-}
-
 """post sort options"""
 enum PostSortOption {
   created
@@ -501,6 +513,30 @@ type PublicUser {
   username: String!
 }
 
+"""user data that you can get from post / comment search"""
+type PublisherData {
+  """avatar id"""
+  avatar: String
+
+  """date created"""
+  created: Float!
+
+  """short user description"""
+  description: String!
+
+  """user id"""
+  id: String!
+
+  """name"""
+  name: String!
+
+  """date updated"""
+  updated: Float!
+
+  """username"""
+  username: String!
+}
+
 type Query {
   comments(
     """sort direction"""
@@ -526,6 +562,25 @@ type Query {
     """media id"""
     id: String!
   ): Media!
+  messages(
+    """sort direction"""
+    ascending: Boolean = true
+
+    """page number"""
+    page: Int = 0
+
+    """participant"""
+    participant: [String!]!
+
+    """number per page"""
+    perpage: Int = 10
+
+    """search query"""
+    query: String
+
+    """sort by this field"""
+    sortBy: MessageSortOption
+  ): SearchMessagesResult!
 
   """post data"""
   post(
@@ -602,6 +657,52 @@ type Query {
   ): SearchUsersResult!
 }
 
+"""reaction data"""
+type Reaction {
+  """date created"""
+  created: Float!
+
+  """reaction id"""
+  id: String!
+
+  """parent"""
+  parent: String!
+
+  """reaction type"""
+  reaction: String!
+
+  """reaction publisher"""
+  user: String!
+}
+
+"""reaction count"""
+type ReactionCount {
+  """count for reaction type"""
+  count: Int!
+
+  """parent"""
+  parent: String!
+
+  """type of reaction"""
+  type: String!
+}
+
+"""reaction parent type"""
+enum ReactionParentType {
+  comment
+  message
+  post
+}
+
+"""reactions data"""
+type ReactionsData {
+  """counts for all given reactions"""
+  counts: [ReactionCount!]!
+
+  """reactions a given user made"""
+  reactions: [String!]!
+}
+
 """comment data, indexed in elasticsearch"""
 type SearchComment {
   """comment content"""
@@ -613,8 +714,14 @@ type SearchComment {
   """comment id"""
   id: String!
 
+  """comment post"""
+  post: String!
+
   """comment publisher"""
   publisher: String!
+
+  """publisher user data"""
+  publisherData: PublisherData
 
   """date updated"""
   updated: Float!
@@ -784,6 +891,9 @@ scalar Upload
 
 """user account"""
 type User {
+  """active direct messages"""
+  activeMessages: [String!]!
+
   """alumni year"""
   alumniYear: Int
 
