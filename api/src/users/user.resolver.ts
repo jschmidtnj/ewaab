@@ -1,5 +1,5 @@
 import { verifyLoggedIn } from '../auth/checkAuth';
-import { Resolver, Ctx, Query, ResolverInterface, FieldResolver, Root } from 'type-graphql';
+import { Resolver, Ctx, Query, ResolverInterface, FieldResolver, Root, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
 import User, { UserType } from '../schema/users/user.entity';
 import { getRepository } from 'typeorm';
@@ -7,6 +7,8 @@ import { sign } from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
 import { getSecret, getJWTIssuer, mediaJWTExpiration, MediaAccessType } from '../utils/jwt';
+import MessageGroup from '../schema/users/messageGroup.entity';
+import { getMessageGroups, MessageGroupsArgs } from '../messages/messageGroups.resolver';
 
 export interface MediaAccessTokenData {
   id: string;
@@ -65,6 +67,11 @@ class UserResolvers implements ResolverInterface<User> {
   @FieldResolver()
   async mediaAuth(@Root() user: User): Promise<string> {
     return await generateJWTMediaAccess(user);
+  }
+
+  @FieldResolver()
+  async activeMessageGroups(@Root() user: User, @Args() args: MessageGroupsArgs): Promise<MessageGroup[]> {
+    return await getMessageGroups(args, user.id);
   }
 }
 

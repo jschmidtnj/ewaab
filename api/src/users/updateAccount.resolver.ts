@@ -38,17 +38,6 @@ class UpdateArgs {
   })
   id?: string;
 
-  @Field(_type => String, { description: 'active message id', nullable: true })
-  @IsOptional()
-  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
-  @Matches(uuidRegex, {
-    message: 'invalid active message user id provided, must be uuid v4'
-  })
-  activeMessage?: string;
-
-  @Field(_type => Boolean, { description: 'delete active message', nullable: true, defaultValue: false })
-  deleteActiveMessage: boolean;
-
   @Field(_type => String, { description: 'name', nullable: true })
   @IsOptional()
   @MinLength(strMinLen, {
@@ -209,7 +198,7 @@ class UpdateAccountResolver {
     const UserModel = getRepository(User);
 
     const currentUser = await UserModel.findOne(id, {
-      select: ['name', 'avatar', 'activeMessages']
+      select: ['name', 'avatar']
     });
     if (!currentUser) {
       throw new ApolloError('could not get current user', `${statusCodes.INTERNAL_SERVER_ERROR}`);
@@ -251,23 +240,6 @@ class UpdateAccountResolver {
     if (args.location !== undefined) {
       userUpdateData.location = args.location;
       userUpdateData.locationName = args.locationName;
-    }
-    if (args.activeMessage !== undefined) {
-      if (await UserModel.count({
-        id: args.activeMessage
-      }) === 0) {
-        throw new Error(`cannot find user with id ${args.activeMessage}`);
-      }
-      if (args.deleteActiveMessage) {
-        if (currentUser.activeMessages.includes(args.activeMessage)) {
-          userUpdateData.activeMessages = currentUser.activeMessages.filter(
-            receiverID => receiverID !== args.activeMessage);
-        }
-      } else {
-        if (!currentUser.activeMessages.includes(args.activeMessage)) {
-          userUpdateData.activeMessages = [...currentUser.activeMessages, args.activeMessage];
-        }
-      }
     }
 
     const now = getTime();

@@ -29,8 +29,8 @@ export default class ReactionCount {
 @ObjectType({ description: 'reactions data' })
 export class ReactionsData {
   @Field(_type => [ReactionCount], { description: 'counts for all given reactions' })
-  counts: ReactionCount[];
+  counts?: ReactionCount[];
 
   @Field(_type => [String], { description: 'reactions a given user made' })
-  reactions: string[];
+  reactions?: string[];
 }

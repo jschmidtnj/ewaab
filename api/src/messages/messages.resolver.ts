@@ -1,17 +1,16 @@
-import { Resolver, Query, ArgsType, Field, Int, Args, Ctx } from 'type-graphql';
+import { Resolver, Query, ArgsType, Field, Args, Ctx } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { messageIndexName } from '../elastic/settings';
-import { Min, Max, Matches, IsOptional } from 'class-validator';
+import { Matches, IsOptional } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
 import esb from 'elastic-builder';
 import { MessageSortOption, SearchMessage, SearchMessagesResult } from '../schema/users/message.entity';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-
-const maxPerPage = 20;
+import { PaginationArgs } from '../schema/utils/pagination';
 
 @ArgsType()
-export class MessagesArgs {
+export class MessagesArgs extends PaginationArgs {
   // TODO - eventually support group messaging
   @Field(_type => [String], { description: 'participant' })
   @Matches(uuidRegex, {
@@ -29,29 +28,6 @@ export class MessagesArgs {
 
   @Field(_type => Boolean, { description: 'sort direction', nullable: true, defaultValue: true })
   ascending: boolean;
-
-  @Min(0, {
-    message: 'page number must be greater than or equal to 0'
-  })
-  @Field(_type => Int, {
-    description: 'page number',
-    nullable: true,
-    defaultValue: 0
-  })
-  page: number;
-
-  @Min(1, {
-    message: 'per page must be greater than or equal to 1'
-  })
-  @Max(maxPerPage, {
-    message: `per page must be less than or equal to ${maxPerPage}`
-  })
-  @Field(_type => Int, {
-    description: 'number per page',
-    nullable: true,
-    defaultValue: 10
-  })
-  perpage: number;
 }
 
 export const searchMessages = async (ctx: GraphQLContext, args: MessagesArgs): Promise<SearchMessagesResult> => {
@@ -69,12 +45,12 @@ export const searchMessages = async (ctx: GraphQLContext, args: MessagesArgs): P
     esb.boolQuery()
       .should([
         esb.termQuery('publisher', ctx.auth!.id),
-        esb.termQuery('receiver', args.participant),
+        esb.termQuery('group', args.participant),
       ]),
     esb.boolQuery()
       .should([
         esb.termQuery('publisher', args.participant),
-        esb.termQuery('receiver', ctx.auth!.id),
+        esb.termQuery('group', ctx.auth!.id),
       ]),
   ];
 

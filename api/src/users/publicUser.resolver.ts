@@ -15,27 +15,35 @@ class PublicUserArgs {
   username?: string;
 }
 
+export const publicUserSelect: (keyof PublicUser)[] = Object.keys(PublicUser) as (keyof PublicUser)[];
+
 @Resolver()
 class PublicUserResolver {
   @Query(_type => PublicUser, { description: 'public user data' })
   async publicUser(@Args() args: PublicUserArgs, @Ctx() ctx: GraphQLContext): Promise<PublicUser> {
-    let user: User | undefined;
+    let user: PublicUser | undefined;
     const UserModel = getRepository(User);
     if (args.id) {
-      user = await UserModel.findOne(args.id);
+      user = await UserModel.findOne(args.id, {
+        select: publicUserSelect
+      });
     } else if (args.username) {
       user = await UserModel.findOne({
-        username: args.username
+        username: args.username,
+      }, {
+        select: publicUserSelect
       });
     } else if (verifyLoggedIn(ctx) && ctx.auth) {
-      user = await UserModel.findOne(ctx.auth.id);
+      user = await UserModel.findOne(ctx.auth.id, {
+        select: publicUserSelect
+      });
     } else {
       throw new ApolloError('no username or id provided, and not logged in', `${statusCodes.NOT_FOUND}`);
     }
     if (!user) {
       throw new ApolloError('cannot find user', `${statusCodes.NOT_FOUND}`);
     }
-    return user as PublicUser;
+    return user;
   }
 }
 

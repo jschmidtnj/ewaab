@@ -8,7 +8,7 @@ const messageMappings = {
   publisher: {
     type: 'keyword'
   },
-  receiver: {
+  group: {
     type: 'keyword'
   }
 };

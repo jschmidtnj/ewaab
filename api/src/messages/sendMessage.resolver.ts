@@ -13,11 +13,11 @@ import User from '../schema/users/user.entity';
 
 @ArgsType()
 class SendMessageArgs {
-  @Field(_type => String, { description: 'receiver id' })
+  @Field(_type => String, { description: 'group id' })
   @Matches(uuidRegex, {
     message: 'invalid user id provided, must be uuid v4'
   })
-  receiver: string;
+  group: string;
 
   @Field(_type => String, { description: 'message content' })
   @MinLength(strMinLen, {
@@ -34,15 +34,15 @@ class SendMessageResolver {
       throw new Error('user not logged in');
     }
 
-    if (args.receiver === ctx.auth!.id) {
+    if (args.group === ctx.auth!.id) {
       throw new Error('user cannot message themselves');
     }
 
     const UserModel = getRepository(User);
     if (await UserModel.count({
-      id: args.receiver
+      id: args.group
     }) === 0) {
-      throw new Error(`no user found with id ${args.receiver}`);
+      throw new Error(`no user found with id ${args.group}`);
     }
 
     const MessageModel = getRepository(Message);
@@ -52,7 +52,7 @@ class SendMessageResolver {
       created: now,
       updated: now,
       publisher: ctx.auth.id,
-      receiver: args.receiver
+      group: args.group
     };
 
     const id = uuidv4();

@@ -5,6 +5,8 @@ import { BaseTimestamp } from '../utils/baseTimestamp';
 import { PublisherData } from '../users/user.entity';
 import { MediaData } from '../media/media.entity';
 import { SearchCommentsResult } from './comment.entity';
+import ReactionCount from '../reactions/reactionCount.entity';
+import Reaction from '../reactions/reaction.entity';
 
 export enum PostType {
   ehParticipantNews = 'ehParticipantNews',
@@ -59,6 +61,12 @@ export class SearchPost extends BaseTimestamp {
 
   @Field(_type => SearchCommentsResult, { description: 'comments', nullable: true })
   comments?: SearchCommentsResult;
+
+  @Field(_type => [ReactionCount], { description: 'reactions', nullable: true })
+  reactions?: ReactionCount[];
+
+  @Field(_type => [Reaction], { description: 'user reactions', nullable: true })
+  userReactions?: Reaction[];
 }
 
 export enum PostSortOption {

@@ -29,11 +29,11 @@ export class SearchMessage extends BaseTimestamp {
   @IsDefined()
   publisher: string;
 
-  @Field({ description: 'message recipient' })
+  @Field({ description: 'group message recipient' })
   @Column({ type: 'uuid' })
   @Index()
   @IsDefined()
-  receiver: string;
+  group: string;
 }
 
 @ObjectType({ description: 'message data search results' })

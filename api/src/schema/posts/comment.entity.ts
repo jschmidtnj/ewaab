@@ -3,6 +3,8 @@ import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { BaseTimestamp } from '../utils/baseTimestamp';
 import { PublisherData } from '../users/user.entity';
+import Reaction from '../reactions/reaction.entity';
+import ReactionCount from '../reactions/reactionCount.entity';
 
 export enum CommentSortOption {
   created = 'created',
@@ -46,6 +48,12 @@ export class SearchCommentsResult {
 
   @Field(_type => Int, { description: 'total comments count' })
   count: number;
+
+  @Field(_type => [ReactionCount], { description: 'reactions', nullable: true })
+  reactions?: ReactionCount[];
+
+  @Field(_type => [Reaction], { description: 'user reactions', nullable: true })
+  userReactions?: Reaction[];
 }
 
 @ObjectType({ description: 'comment data' })

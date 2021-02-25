@@ -2,6 +2,7 @@ import { Entity, Column, Index, PrimaryColumn } from 'typeorm';
 import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { BaseTimestamp } from '../utils/baseTimestamp';
+import MessageGroup from './messageGroup.entity';
 
 export enum UserType {
   user = 'user',
@@ -166,13 +167,11 @@ export default class User extends PublicUser {
 
   @Field({ description: 'media auth token' })
   mediaAuth?: string;
- 
-  @Field(_type => [String], { description: 'active direct messages' })
-  @Column({ type: 'text', array: true })
-  @IsDefined()
-  activeMessages: string[];
 
   @Column({ type: 'text' })
   @IsDefined()
   password: string;
+
+  @Field(_type => [MessageGroup], { description: 'active message groups' })
+  activeMessageGroups?: MessageGroup[];
 }

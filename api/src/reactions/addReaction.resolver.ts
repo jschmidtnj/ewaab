@@ -5,7 +5,7 @@ import { strMinLen, uuidRegex } from '../shared/variables';
 import { AuthAccessType, checkMessageAccess, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import { getTime } from '../shared/time';
-import Reaction, { ReactionParentType } from '../schema/posts/reaction.entity';
+import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
 import { nanoid } from 'nanoid';
 
 @ArgsType()

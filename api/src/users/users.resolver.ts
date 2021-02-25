@@ -1,16 +1,15 @@
-import { Resolver, Query, ArgsType, Field, Int, Float, Args } from 'type-graphql';
+import { Resolver, Query, ArgsType, Field, Float, Args } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
-import { Min, Max, isEmail, Matches, IsOptional, IsIn } from 'class-validator';
+import { Min, isEmail, Matches, IsOptional, IsIn } from 'class-validator';
 import { SearchUser, SearchUsersResult, UserSortOption, UserType } from '../schema/users/user.entity';
 import { locationRegex } from '../shared/variables';
 import majors from '../shared/majors';
 import esb from 'elastic-builder';
-
-const maxPerPage = 20;
+import { PaginationArgs } from '../schema/utils/pagination';
 
 @ArgsType()
-class UsersArgs {
+class UsersArgs extends PaginationArgs {
   @Field(_type => String, { description: 'search query', nullable: true })
   @IsOptional()
   query?: string;
@@ -50,29 +49,6 @@ class UsersArgs {
 
   @Field(_type => Boolean, { description: 'sort direction', nullable: true, defaultValue: true })
   ascending: boolean;
-
-  @Min(0, {
-    message: 'page number must be greater than or equal to 0'
-  })
-  @Field(_type => Int, {
-    description: 'page number',
-    nullable: true,
-    defaultValue: 0
-  })
-  page: number;
-
-  @Min(1, {
-    message: 'per page must be greater than or equal to 1'
-  })
-  @Max(maxPerPage, {
-    message: `per page must be less than or equal to ${maxPerPage}`
-  })
-  @Field(_type => Int, {
-    description: 'number per page',
-    nullable: true,
-    defaultValue: 10
-  })
-  perpage: number;
 }
 
 @Resolver()

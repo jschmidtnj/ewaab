@@ -6,6 +6,9 @@ import User, { PublisherData } from '../schema/users/user.entity';
 import Media from '../schema/media/media.entity';
 import { SearchCommentsResult } from '../schema/posts/comment.entity';
 import { PostCommentsArgs, searchComments } from '../comments/comments.resolver';
+import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
+import { CountReactionsArgs, getReactionCounts, getUserReactions, UserReactionsArgs } from '../reactions/reactions.resolver';
+import ReactionCount from '../schema/reactions/reactionCount.entity';
 
 export const getPublisherData = async (publisher: string): Promise<PublisherData | undefined> => {
   const UserModel = getRepository(User);
@@ -52,6 +55,16 @@ class SearchResultsResolver implements ResolverInterface<SearchPost> {
   @FieldResolver(_returns => SearchCommentsResult)
   async comments(@Root() searchResult: SearchPost, @Args() args: PostCommentsArgs): Promise<SearchCommentsResult> {
     return await searchComments(args, searchResult.id as string);
+  }
+
+  @FieldResolver(_returns => [Reaction])
+  async userReactions(@Root() searchResult: SearchPost, @Args() args: UserReactionsArgs): Promise<Reaction[]> {
+    return await getUserReactions(args, searchResult.id as string, ReactionParentType.post);
+  }
+
+  @FieldResolver(_returns => [ReactionCount])
+  async reactions(@Root() searchResult: SearchPost, @Args() args: CountReactionsArgs): Promise<ReactionCount[]> {
+    return await getReactionCounts(args, searchResult.id as string, ReactionParentType.post);
   }
 }
 

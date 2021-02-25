@@ -1,17 +1,16 @@
-import { Resolver, Query, ArgsType, Field, Int, Args, Ctx } from 'type-graphql';
+import { Resolver, Query, ArgsType, Field, Args, Ctx } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { commentIndexName } from '../elastic/settings';
-import { Min, Max, Matches, IsOptional } from 'class-validator';
+import { Matches, IsOptional } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
 import esb from 'elastic-builder';
 import { CommentSortOption, SearchComment, SearchCommentsResult } from '../schema/posts/comment.entity';
 import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-
-const maxPerPage = 20;
+import { PaginationArgs } from '../schema/utils/pagination';
 
 @ArgsType()
-export class PostCommentsArgs {
+export class PostCommentsArgs extends PaginationArgs {
   @Field(_type => String, { description: 'search query', nullable: true })
   @IsOptional()
   query?: string;
@@ -22,29 +21,6 @@ export class PostCommentsArgs {
 
   @Field(_type => Boolean, { description: 'sort direction', nullable: true, defaultValue: true })
   ascending: boolean;
-
-  @Min(0, {
-    message: 'page number must be greater than or equal to 0'
-  })
-  @Field(_type => Int, {
-    description: 'page number',
-    nullable: true,
-    defaultValue: 0
-  })
-  page: number;
-
-  @Min(1, {
-    message: 'per page must be greater than or equal to 1'
-  })
-  @Max(maxPerPage, {
-    message: `per page must be less than or equal to ${maxPerPage}`
-  })
-  @Field(_type => Int, {
-    description: 'number per page',
-    nullable: true,
-    defaultValue: 10
-  })
-  perpage: number;
 }
 
 @ArgsType()

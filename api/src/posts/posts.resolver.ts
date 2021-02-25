@@ -4,16 +4,15 @@ import { postIndexName } from '../elastic/settings';
 import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
-import { Min, Max, IsOptional, Matches, ValidateIf } from 'class-validator';
+import { IsOptional, Matches, ValidateIf } from 'class-validator';
 import { PostCount, PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import esb from 'elastic-builder';
 import { uuidRegex } from '../shared/variables';
 import { postViewMap } from '../utils/variables';
-
-const maxPerPage = 20;
+import { PaginationArgs } from '../schema/utils/pagination';
 
 @ArgsType()
-class PostsArgs {
+class PostsArgs extends PaginationArgs {
   @Field(_type => String, { description: 'search query', nullable: true })
   @IsOptional()
   query?: string;
@@ -42,29 +41,6 @@ class PostsArgs {
     message: 'invalid user id provided, must be uuid v4'
   })
   publisher?: string;
-
-  @Min(0, {
-    message: 'page number must be greater than or equal to 0'
-  })
-  @Field(_type => Int, {
-    description: 'page number',
-    nullable: true,
-    defaultValue: 0
-  })
-  page: number;
-
-  @Min(1, {
-    message: 'per page must be greater than or equal to 1'
-  })
-  @Max(maxPerPage, {
-    message: `per page must be less than or equal to ${maxPerPage}`
-  })
-  @Field(_type => Int, {
-    description: 'number per page',
-    nullable: true,
-    defaultValue: 10
-  })
-  perpage: number;
 }
 
 const buildFilters = (mustShouldParams: esb.Query[], filterMustParams: esb.Query[],

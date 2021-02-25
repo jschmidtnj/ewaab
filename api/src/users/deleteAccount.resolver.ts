@@ -4,11 +4,12 @@ import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { IsEmail, IsOptional } from 'class-validator';
 import User from '../schema/users/user.entity';
-import { FindOneOptions, getRepository } from 'typeorm';
+import { Any, FindOneOptions, getRepository } from 'typeorm';
 import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import { deleteMessages } from '../messages/deleteMessages.resolver';
+import MessageGroup from '../schema/users/messageGroup.entity';
 
 @ArgsType()
 class DeleteArgs {
@@ -40,7 +41,7 @@ class DeleteResolver {
     const UserModel = getRepository(User);
     let userFindRes: User | undefined;
     const findOptions: FindOneOptions<User> = {
-      select: ['id', 'activeMessages']
+      select: ['id']
     };
     if (!isAdmin) {
       userFindRes = await UserModel.findOne(ctx.auth.id, findOptions);
@@ -53,10 +54,19 @@ class DeleteResolver {
       throw new Error('no user found');
     }
 
-    for (const receiver of userFindRes.activeMessages) {
-      await deleteMessages({
-        receiver
-      }, userFindRes.id);
+    const MessageGroupModel = getRepository(MessageGroup);
+    const messageGroups = await MessageGroupModel.find({
+      where: {
+        userIDs: Any([userFindRes.id])
+      },
+      select: ['id', 'userCount']
+    });
+    for (const messageGroup of messageGroups) {
+      if (messageGroup.userCount === 2) {
+        await deleteMessages({
+          group: messageGroup.id
+        }, userFindRes.id);
+      }
     }
 
     const userData = userFindRes as User;

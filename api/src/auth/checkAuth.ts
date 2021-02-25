@@ -80,7 +80,7 @@ interface CheckMessageAccessArgs {
   accessType: AuthAccessType;
   messageID?: string;
   publisher?: string;
-  receiver?: string;
+  group?: string;
 }
 
 export const checkMessageAccess = async (args: CheckMessageAccessArgs): Promise<boolean> => {
@@ -97,20 +97,20 @@ export const checkMessageAccess = async (args: CheckMessageAccessArgs): Promise<
     // admin can do anything
     return true;
   }
-  if (!args.publisher || !args.receiver) {
+  if (!args.publisher || !args.group) {
     const MessageModel = getRepository(Message);
     const message = await MessageModel.findOne(args.messageID, {
-      select: ['publisher', 'receiver']
+      select: ['publisher', 'group']
     });
     if (!message) {
       throw new Error(`cannot find message with id ${args.messageID}`);
     }
     args.publisher = message.publisher;
-    args.receiver = message.receiver;
+    args.group = message.group;
   }
   if (args.accessType === AuthAccessType.view) {
-    // publisher and receiver can view messages
-    return [args.publisher, args.receiver].includes(args.ctx.auth.id);
+    // publisher and group can view messages
+    return [args.publisher, args.group].includes(args.ctx.auth.id);
   } else if (args.accessType === AuthAccessType.modify) {
     return args.publisher === args.ctx.auth.id;
   } else {
