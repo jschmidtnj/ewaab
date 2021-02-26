@@ -38,7 +38,7 @@ class AddCommentResolver {
     }
 
     const CommentModel = getRepository(Comment);
-    const now = getTime();
+    const now = new Date().getTime();
     const searchComment: SearchComment = {
       content: args.content,
       created: now,

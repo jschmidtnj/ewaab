@@ -3,6 +3,9 @@ import { UserType } from '../schema/users/user.entity';
 
 export const maxFileUploadSize = 15 * 1e6; // bytes
 export const blurredWidth = 20;
+export const defaultDBCache = 200; // ms
+
+export const notificationTopic = 'notifications';
 
 export const postViewMap: Record<UserType, PostType[]> = {
   [UserType.admin]: Object.values(PostType),

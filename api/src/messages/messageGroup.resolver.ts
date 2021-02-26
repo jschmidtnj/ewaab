@@ -3,6 +3,7 @@ import { Any, getRepository } from 'typeorm';
 import MessageGroup from '../schema/users/messageGroup.entity';
 import User, { PublicUser } from '../schema/users/user.entity';
 import { publicUserSelect } from '../users/publicUser.resolver';
+import { defaultDBCache } from '../utils/variables';
 
 @Resolver(_of => MessageGroup)
 class MessageGroupsResolver implements ResolverInterface<MessageGroup> {
@@ -13,7 +14,8 @@ class MessageGroupsResolver implements ResolverInterface<MessageGroup> {
       where: {
         id: Any(messageGroup.userIDs)
       },
-      select: publicUserSelect
+      select: publicUserSelect,
+      cache: defaultDBCache
     })).map(user => user as PublicUser);
 
     return data;

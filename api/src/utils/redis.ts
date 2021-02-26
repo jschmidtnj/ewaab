@@ -2,6 +2,7 @@ import { getLogger } from 'log4js';
 import { configData } from './config';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
+import BullQueue, { Queue } from 'bull';
 import exitHook from 'exit-hook';
 
 const logger = getLogger();
@@ -9,6 +10,8 @@ const logger = getLogger();
 export let pubSub: RedisPubSub;
 
 export let cache: Redis.Redis;
+
+export let deleteNotificationQueue: Queue<string>;
 
 export interface RedisKey {
   path: string;
@@ -49,9 +52,13 @@ export const initializeRedis = async (): Promise<void> => {
     publisher,
     subscriber
   });
+  deleteNotificationQueue = new BullQueue('delete notifications', {
+    redis: redisOptions
+  });
   const closeRedis = (): void => {
     logger.info('close pub-sub');
     pubSub.close();
+    deleteNotificationQueue.close();
   };
   publisher.on('error', (err: Error) => {
     closeRedis();

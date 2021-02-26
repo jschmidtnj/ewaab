@@ -46,7 +46,7 @@ class SendMessageResolver {
     }
 
     const MessageModel = getRepository(Message);
-    const now = getTime();
+    const now = new Date().getTime();
     const searchMessage: SearchMessage = {
       content: args.content,
       created: now,

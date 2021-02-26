@@ -92,7 +92,7 @@ class UpdatePostResolver {
     if (args.deleteMedia) {
       postUpdateData.media = null;
     }
-    const now = getTime();
+    const now = new Date().getTime();
     postUpdateData.updated = now;
 
     const mediaID = await handlePostMedia(args.id, args.media);

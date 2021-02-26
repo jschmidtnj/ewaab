@@ -57,7 +57,7 @@ class UpdateMessageResolver {
     if (args.content !== undefined) {
       messageUpdateData.content = args.content;
     }
-    const now = getTime();
+    const now = new Date().getTime();
     messageUpdateData.updated = now;
 
     await MessageModel.update(args.id, messageUpdateData);

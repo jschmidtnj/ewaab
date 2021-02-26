@@ -5,6 +5,7 @@ import Post, { PostType } from '../schema/posts/post.entity';
 import { UserType } from '../schema/users/user.entity';
 import { postViewMap, postWriteMap } from '../utils/variables';
 import Message from '../schema/users/message.entity';
+import Notification from '../schema/users/notification.entity';
 
 export const verifyGuest = (ctx: GraphQLContext): boolean => {
   return ctx.auth !== undefined;
@@ -117,3 +118,24 @@ export const checkMessageAccess = async (args: CheckMessageAccessArgs): Promise<
     throw new Error(`unhandled access type for messages: ${args.accessType}`);
   }
 };
+
+interface CheckNotificationAccessArgs {
+  ctx: GraphQLContext;
+  id: string;
+}
+
+export const checkNotificationAccess = async (args: CheckNotificationAccessArgs): Promise<boolean> => {
+  if (!verifyLoggedIn(args.ctx) || !args.ctx.auth) {
+    return false;
+  }
+  if (args.ctx.auth.type === UserType.admin) {
+    // admin can do anything
+    return true;
+  }
+  const NotificationModel = getRepository(Notification);
+  const notification = await NotificationModel.findOne(args.id);
+  if (!notification) {
+    throw new Error(`cannot find notification with id ${args.id}`);
+  }
+  return notification.user !== args.id;
+}

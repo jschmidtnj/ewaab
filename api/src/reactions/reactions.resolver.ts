@@ -3,6 +3,7 @@ import ReactionCount from '../schema/reactions/reactionCount.entity';
 import { getRepository } from 'typeorm';
 import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
 import { PaginationArgs } from '../schema/utils/pagination';
+import { defaultDBCache } from '../utils/variables';
 
 @ArgsType()
 export class UserReactionsArgs extends PaginationArgs {
@@ -18,7 +19,8 @@ export const getUserReactions = async (args: UserReactionsArgs, parent: string,
       parentType
     },
     take: args.perpage,
-    skip: args.page * args.perpage
+    skip: args.page * args.perpage,
+    cache: defaultDBCache
   });
   return data;
 };
@@ -37,7 +39,8 @@ export const getReactionCounts = async (args: CountReactionsArgs, parent: string
       parentType
     },
     take: args.perpage,
-    skip: args.page * args.perpage
+    skip: args.page * args.perpage,
+    cache: defaultDBCache
   });
   return data;
 };

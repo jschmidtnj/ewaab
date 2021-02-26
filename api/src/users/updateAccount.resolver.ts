@@ -242,7 +242,7 @@ class UpdateAccountResolver {
       userUpdateData.locationName = args.locationName;
     }
 
-    const now = getTime();
+    const now = new Date().getTime();
     userUpdateData.updated = now;
 
     // other fields

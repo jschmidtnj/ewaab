@@ -4,6 +4,7 @@ import { verifyLoggedIn } from '../auth/checkAuth';
 import MessageGroup from '../schema/users/messageGroup.entity';
 import { PaginationArgs } from '../schema/utils/pagination';
 import { GraphQLContext } from '../utils/context';
+import { defaultDBCache } from '../utils/variables';
 
 @ArgsType()
 export class MessageGroupsArgs extends PaginationArgs {
@@ -17,7 +18,8 @@ export const getMessageGroups = async (args: MessageGroupsArgs, userID: string):
       userIDs: Any([userID])
     },
     take: args.perpage,
-    skip: args.page * args.perpage
+    skip: args.page * args.perpage,
+    cache: defaultDBCache
   });
   return data;
 };

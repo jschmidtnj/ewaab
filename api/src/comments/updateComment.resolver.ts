@@ -57,7 +57,7 @@ class UpdateCommentResolver {
     if (args.content !== undefined) {
       commentUpdateData.content = args.content;
     }
-    const now = getTime();
+    const now = new Date().getTime();
     commentUpdateData.updated = now;
 
     await CommentModel.update(args.id, commentUpdateData);

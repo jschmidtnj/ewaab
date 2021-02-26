@@ -157,7 +157,7 @@ class RegisterResolver {
     }
     const hashedPassword = await argon2.hash(args.password);
     const UserModel = getRepository(User);
-    const now = getTime();
+    const now = new Date().getTime();
     const searchUser: SearchUser = {
       created: now,
       updated: now,

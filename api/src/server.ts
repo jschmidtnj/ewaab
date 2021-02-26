@@ -13,10 +13,11 @@ import { getContext, GraphQLContext, onSubscription, SubscriptionContextParams, 
 import { createServer } from 'http';
 import { buildSchema } from 'type-graphql';
 import { join } from 'path';
-import { pubSub } from './utils/redis';
+import { deleteNotificationQueue, pubSub } from './utils/redis';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { configData } from './utils/config';
 import { isProduction } from './utils/mode';
+import { deleteNotification } from './users/notifications';
 
 const maxDepth = 7;
 const logger = getLogger();
@@ -53,7 +54,7 @@ export const initializeServer = async (): Promise<void> => {
     },
     context: async (req): Promise<GraphQLContext> => getContext(req),
     uploads: false,
-    introspection: true
+    introspection: true,
   });
   app.use(server.graphqlPath, compression());
   // api status monitor page
@@ -92,7 +93,12 @@ export const initializeServer = async (): Promise<void> => {
     schemes: swaggerSchemes
   });
 
+  // consumers
+  deleteNotificationQueue.process(async job => await deleteNotification({
+    id: job.data
+  }));
+
   const httpServer = createServer(app);
   server.installSubscriptionHandlers(httpServer);
-  httpServer.listen(configData.PORT, () => logger.info(`API started: http://localhost:${configData.PORT}/graphql 🚀`));
+  httpServer.listen(configData.PORT, '0.0.0.0', () => logger.info(`API started: http://localhost:${configData.PORT}/graphql 🚀`));
 };

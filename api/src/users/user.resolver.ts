@@ -9,6 +9,8 @@ import { loginType } from '../auth/shared';
 import { getSecret, getJWTIssuer, mediaJWTExpiration, MediaAccessType } from '../utils/jwt';
 import MessageGroup from '../schema/users/messageGroup.entity';
 import { getMessageGroups, MessageGroupsArgs } from '../messages/messageGroups.resolver';
+import Notification from '../schema/users/notification.entity';
+import { getNotifications, NotificationsArgs } from './notifications';
 
 export interface MediaAccessTokenData {
   id: string;
@@ -72,6 +74,11 @@ class UserResolvers implements ResolverInterface<User> {
   @FieldResolver()
   async activeMessageGroups(@Root() user: User, @Args() args: MessageGroupsArgs): Promise<MessageGroup[]> {
     return await getMessageGroups(args, user.id);
+  }
+
+  @FieldResolver()
+  async notifications(@Root() user: User, @Args() args: NotificationsArgs): Promise<Notification[]> {
+    return await getNotifications(args, user.id);
   }
 }
 

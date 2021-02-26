@@ -3,6 +3,7 @@ import { ObjectType, Field, registerEnumType, Int } from 'type-graphql';
 import { IsDefined } from 'class-validator';
 import { BaseTimestamp } from '../utils/baseTimestamp';
 import MessageGroup from './messageGroup.entity';
+import Notification from './notification.entity';
 
 export enum UserType {
   user = 'user',
@@ -174,4 +175,7 @@ export default class User extends PublicUser {
 
   @Field(_type => [MessageGroup], { description: 'active message groups' })
   activeMessageGroups?: MessageGroup[];
+
+  @Field(_type => [Notification], { description: 'current user notifications' })
+  notifications?: Notification[];
 }

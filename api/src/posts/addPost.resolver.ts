@@ -144,7 +144,7 @@ class AddPostResolver {
     const mediaID = await handlePostMedia(id, args.media);
 
     const PostModel = getRepository(Post);
-    const now = getTime();
+    const now = new Date().getTime();
     const searchPost: SearchPost = {
       title: args.title,
       content: args.content,
