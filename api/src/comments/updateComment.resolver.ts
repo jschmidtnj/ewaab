@@ -6,7 +6,6 @@ import { commentIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import { getTime } from '../shared/time';
 import Comment from '../schema/posts/comment.entity';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';

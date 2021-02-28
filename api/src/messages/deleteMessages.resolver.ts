@@ -1,7 +1,7 @@
-import { verifyLoggedIn } from '../auth/checkAuth';
+import { checkMessageGroupAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { Any, getRepository } from 'typeorm';
+import { getRepository } from 'typeorm';
 import Message from '../schema/users/message.entity';
 import { messageIndexName } from '../elastic/settings';
 import { Matches } from 'class-validator';
@@ -9,6 +9,7 @@ import { uuidRegex } from '../shared/variables';
 import { bulkWriteToElastic } from '../elastic/elastic';
 import { WriteType } from '../elastic/writeType';
 import MessageGroup from '../schema/users/messageGroup.entity';
+import { arrayHash } from '../utils/misc';
 
 @ArgsType()
 export class DeleteArgs {
@@ -41,8 +42,12 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
   for (const messageData of messages) {
     await MessageModel.delete(messageData.id);
   }
+
+  const MessageGroupModel = getRepository(MessageGroup);
   if (!sender) {
-    const MessageGroupModel = getRepository(MessageGroup);
+    // if there's no sender, the whole group gets deleted
+    await MessageGroupModel.delete(args.group);
+  } else {
     const messageGroup = await MessageGroupModel.findOne(args.group, {
       select: ['id', 'userCount']
     });
@@ -51,6 +56,17 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
     }
     if (messageGroup.userCount === 2) {
       await MessageGroupModel.delete(args.group);
+    } else {
+      const userIDs = messageGroup.userIDs.filter(id => id !== sender);
+      const usersHash = arrayHash(userIDs);
+      await MessageGroupModel.update({
+        id: args.group
+      }, {
+        userIDs,
+        usersHash,
+        updated: new Date().getTime(),
+        userCount: messageGroup.userCount - 1
+      });
     }
   }
 };
@@ -59,34 +75,24 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
 class DeleteMessagesResolver {
   @Mutation(_returns => String)
   async deleteMessages(@Args() args: DeleteArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
-    if (!verifyLoggedIn(ctx) || !ctx.auth) {
-      throw new Error('cannot find auth data');
-    }
-    const MessageGroupModel = getRepository(MessageGroup);
-    if ((await MessageGroupModel.count({
-      where: {
-        userIDs: Any([ctx.auth!.id])
-      }
-    })) === 0) {
-      throw new Error(`user not part of group ${args.group}`);
+    if (!await checkMessageGroupAccess({
+      ctx,
+      id: args.group
+    })) {
+      throw new Error(`user does not have access to group ${args.group}`);
     }
 
-    await deleteMessages(args, ctx.auth.id);
+    await deleteMessages(args, ctx.auth!.id);
 
-    return `deleted user messages in group ${args.group}`;
+    return `left message group ${args.group}`;
   }
 
   async deleteGroup(@Args() args: DeleteArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
-    if (!verifyLoggedIn(ctx) || !ctx.auth) {
-      throw new Error('cannot find auth data');
-    }
-    const MessageGroupModel = getRepository(MessageGroup);
-    if ((await MessageGroupModel.count({
-      where: {
-        userIDs: Any([ctx.auth!.id])
-      }
-    })) === 0) {
-      throw new Error(`user not part of group ${args.group}`);
+    if (!await checkMessageGroupAccess({
+      ctx,
+      id: args.group
+    })) {
+      throw new Error(`user does not have access to group ${args.group}`);
     }
 
     await deleteMessages(args);

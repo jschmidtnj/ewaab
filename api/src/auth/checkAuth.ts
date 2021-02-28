@@ -6,6 +6,7 @@ import { UserType } from '../schema/users/user.entity';
 import { postViewMap, postWriteMap } from '../utils/variables';
 import Message from '../schema/users/message.entity';
 import Notification from '../schema/users/notification.entity';
+import MessageGroup from '../schema/users/messageGroup.entity';
 
 export const verifyGuest = (ctx: GraphQLContext): boolean => {
   return ctx.auth !== undefined;
@@ -119,9 +120,33 @@ export const checkMessageAccess = async (args: CheckMessageAccessArgs): Promise<
   }
 };
 
-interface CheckNotificationAccessArgs {
+interface CheckMessageGroupAccessArgs {
   ctx: GraphQLContext;
   id: string;
+}
+
+export const checkMessageGroupAccess = async (args: CheckMessageGroupAccessArgs): Promise<boolean> => {
+  if (!verifyLoggedIn(args.ctx) || !args.ctx.auth) {
+    return false;
+  }
+  if (args.ctx.auth.type === UserType.admin) {
+    // admin can do anything
+    return true;
+  }
+  const MessageGroupModel = getRepository(MessageGroup);
+  const messageGroup = await MessageGroupModel.findOne(args.id, {
+    select: ['id', 'userIDs']
+  });
+  if (!messageGroup) {
+    throw new Error(`cannot find message group with id ${args.id}`);
+  }
+  return !messageGroup.userIDs.includes(args.ctx.auth!.id);
+};
+
+interface CheckNotificationAccessArgs {
+  ctx: GraphQLContext;
+  id?: string;
+  accessType: AuthAccessType;
 }
 
 export const checkNotificationAccess = async (args: CheckNotificationAccessArgs): Promise<boolean> => {
@@ -132,10 +157,16 @@ export const checkNotificationAccess = async (args: CheckNotificationAccessArgs)
     // admin can do anything
     return true;
   }
+  if (args.accessType === AuthAccessType.add) {
+    return false;
+  }
+  if (!args.id) {
+    throw new Error('notification id must be provided to check access');
+  }
   const NotificationModel = getRepository(Notification);
   const notification = await NotificationModel.findOne(args.id);
   if (!notification) {
     throw new Error(`cannot find notification with id ${args.id}`);
   }
   return notification.user !== args.id;
-}
+};

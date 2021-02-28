@@ -6,6 +6,7 @@ export const blurredWidth = 20;
 export const defaultDBCache = 200; // ms
 
 export const notificationTopic = 'notifications';
+export const messagesTopic = 'messages';
 
 export const postViewMap: Record<UserType, PostType[]> = {
   [UserType.admin]: Object.values(PostType),

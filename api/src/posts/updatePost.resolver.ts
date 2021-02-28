@@ -13,7 +13,6 @@ import Post from '../schema/posts/post.entity';
 import { UserType } from '../schema/users/user.entity';
 import { ApolloError } from 'apollo-server-express';
 import { deleteMedia } from '../users/media.resolver';
-import { getTime } from '../shared/time';
 import { handlePostMedia } from './addPost.resolver';
 
 @ArgsType()

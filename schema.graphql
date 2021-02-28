@@ -144,6 +144,10 @@ type Mutation {
     """post id"""
     post: String!
   ): String!
+  addMessageGroup(
+    """user ids"""
+    members: [String!]!
+  ): String!
   addPost(
     """post content"""
     content: String!
@@ -186,6 +190,10 @@ type Mutation {
     """group id"""
     group: String!
   ): String!
+  deleteNotification(
+    """notification id"""
+    id: String!
+  ): String!
   deletePost(
     """post id"""
     id: String!
@@ -209,6 +217,10 @@ type Mutation {
 
     """user type"""
     type: UserType = user
+  ): String!
+  leaveMessageGroup(
+    """message id"""
+    id: String!
   ): String!
   login(
     """password"""
@@ -257,6 +269,10 @@ type Mutation {
   revokeRefresh(
     """email"""
     email: String
+  ): String!
+  sendGlobalNotification(
+    """message content"""
+    message: String!
   ): String!
   sendMessage(
     """message content"""
@@ -390,6 +406,35 @@ type Mutation {
     """name"""
     token: String!
   ): String!
+}
+
+"""notification"""
+type Notification {
+  """date created"""
+  created: Float!
+
+  """date expires"""
+  expires: Float!
+
+  """notification id"""
+  id: String!
+
+  """notification message"""
+  message: String!
+
+  """notification type"""
+  type: NotificationType!
+
+  """reaction publisher"""
+  user: String!
+
+  """notification viewed"""
+  viewed: Boolean!
+}
+
+"""notification type"""
+enum NotificationType {
+  admin
 }
 
 """post data"""
@@ -616,25 +661,6 @@ type Query {
     """number per page"""
     perpage: Int = 10
   ): [MessageGroup!]!
-  messages(
-    """sort direction"""
-    ascending: Boolean = true
-
-    """page number"""
-    page: Int = 0
-
-    """participant"""
-    participant: [String!]!
-
-    """number per page"""
-    perpage: Int = 10
-
-    """search query"""
-    query: String
-
-    """sort by this field"""
-    sortBy: MessageSortOption
-  ): SearchMessagesResult!
 
   """post data"""
   post(
@@ -678,6 +704,25 @@ type Query {
     """user name"""
     username: String
   ): PublicUser!
+  searchMessages(
+    """sort direction"""
+    ascending: Boolean = true
+
+    """group id"""
+    group: String!
+
+    """page number"""
+    page: Int = 0
+
+    """number per page"""
+    perpage: Int = 10
+
+    """search query"""
+    query: String
+
+    """sort by this field"""
+    sortBy: MessageSortOption
+  ): SearchMessagesResult!
 
   """user data"""
   user: User!
@@ -978,6 +1023,14 @@ type SearchUsersResult {
   results: [SearchUser!]!
 }
 
+type Subscription {
+  messages(
+    """group id"""
+    groups: [String!]!
+  ): Message!
+  notifications: Notification!
+}
+
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
@@ -1042,6 +1095,15 @@ type User {
 
   """name"""
   name: String!
+
+  """current user notifications"""
+  notifications(
+    """page number"""
+    page: Int = 0
+
+    """number per page"""
+    perpage: Int = 10
+  ): [Notification!]!
 
   """user pronouns"""
   pronouns: String!

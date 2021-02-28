@@ -9,7 +9,7 @@ import { Server } from 'typescript-rest';
 import { connectLogger, getLogger } from 'log4js';
 import statusMonitor from 'express-status-monitor';
 import cookieParser from 'cookie-parser';
-import { getContext, GraphQLContext, onSubscription, SubscriptionContextParams, SubscriptionContext } from './utils/context';
+import { BaseSubscriptionContext, getContext, GraphQLContext, onSubscription } from './utils/context';
 import { createServer } from 'http';
 import { buildSchema } from 'type-graphql';
 import { join } from 'path';
@@ -50,9 +50,9 @@ export const initializeServer = async (): Promise<void> => {
     schema,
     validationRules: [depthLimit(maxDepth)],
     subscriptions: {
-      onConnect: (connectionParams: SubscriptionContextParams): Promise<SubscriptionContext> => onSubscription(connectionParams),
+      onConnect: (connectionParams): Promise<BaseSubscriptionContext> => onSubscription(connectionParams),
     },
-    context: async (req): Promise<GraphQLContext> => getContext(req),
+    context: async (data): Promise<GraphQLContext> => getContext(data),
     uploads: false,
     introspection: true,
   });

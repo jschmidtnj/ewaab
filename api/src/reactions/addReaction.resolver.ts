@@ -4,7 +4,6 @@ import { getRepository } from 'typeorm';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { AuthAccessType, checkMessageAccess, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import { getTime } from '../shared/time';
 import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
 import { nanoid } from 'nanoid';
 
@@ -53,7 +52,7 @@ class AddReactionResolver {
     const ReactionModel = getRepository(Reaction);
     const newReaction = await ReactionModel.save({
       id: nanoid(),
-      created: getTime(),
+      created: new Date().getTime(),
       parent: args.parent,
       parentType: args.parentType,
       reaction: args.reaction,

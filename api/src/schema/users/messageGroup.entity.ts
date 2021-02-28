@@ -16,6 +16,9 @@ export default class MessageGroup extends BaseTimestamp {
   @IsDefined()
   userIDs: string[];
 
+  @Column({ type: 'text', comment: 'hash of user ids' })
+  usersHash: string;
+
   @Field(_type => Int, { description: 'number of users in group' })
   @Column({ type: 'int' })
   @IsDefined()

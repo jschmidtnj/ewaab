@@ -1,10 +1,9 @@
-import { IsDefined } from "class-validator";
-import { Field, ObjectType, registerEnumType } from "type-graphql";
-import { PrimaryColumn, Column, Index, Entity } from "typeorm";
+import { IsDefined } from 'class-validator';
+import { Field, ObjectType, registerEnumType } from 'type-graphql';
+import { PrimaryColumn, Column, Index, Entity } from 'typeorm';
 
 export enum NotificationType {
   admin = 'admin', // global notification
-  message = 'message', // received new message
 }
 
 registerEnumType(NotificationType, {
@@ -47,9 +46,5 @@ export default class Notification {
 
   @Field(_type => NotificationType, { description: 'notification type' })
   @Column({ type: 'enum', enum: NotificationType })
-  type: string;
-
-  @Field({ description: 'parent id' })
-  @Column({ type: 'uuid' })
-  parent: string;
+  type: NotificationType;
 }

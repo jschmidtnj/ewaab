@@ -7,7 +7,6 @@ import { messageIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import { getTime } from '../shared/time';
 import Message, { SearchMessage } from '../schema/users/message.entity';
 import User from '../schema/users/user.entity';
 
@@ -15,7 +14,7 @@ import User from '../schema/users/user.entity';
 class SendMessageArgs {
   @Field(_type => String, { description: 'group id' })
   @Matches(uuidRegex, {
-    message: 'invalid user id provided, must be uuid v4'
+    message: 'invalid message group id provided, must be uuid v4'
   })
   group: string;
 

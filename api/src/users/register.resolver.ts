@@ -20,7 +20,6 @@ import { defaultMajor } from '../shared/majors';
 import { defaultUniversity } from '../shared/universities';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
-import { getTime } from '../shared/time';
 
 @ArgsType()
 class RegisterArgs {

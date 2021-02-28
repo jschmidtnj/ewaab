@@ -7,7 +7,6 @@ import { commentIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import { getTime } from '../shared/time';
 import Comment, { SearchComment } from '../schema/posts/comment.entity';
 
 @ArgsType()

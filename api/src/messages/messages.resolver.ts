@@ -1,22 +1,22 @@
-import { Resolver, Query, ArgsType, Field, Args, Ctx } from 'type-graphql';
+import { Resolver, Query, ArgsType, Field, Args, Ctx, ResolverFilterData, Subscription, Root } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { messageIndexName } from '../elastic/settings';
 import { Matches, IsOptional } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
 import esb from 'elastic-builder';
-import { MessageSortOption, SearchMessage, SearchMessagesResult } from '../schema/users/message.entity';
-import { verifyLoggedIn } from '../auth/checkAuth';
-import { GraphQLContext } from '../utils/context';
+import Message, { MessageSortOption, SearchMessage, SearchMessagesResult } from '../schema/users/message.entity';
+import { checkMessageGroupAccess } from '../auth/checkAuth';
+import { GraphQLContext, SubscriptionContext } from '../utils/context';
 import { PaginationArgs } from '../schema/utils/pagination';
+import { messagesTopic } from '../utils/variables';
 
 @ArgsType()
-export class MessagesArgs extends PaginationArgs {
-  // TODO - eventually support group messaging
-  @Field(_type => [String], { description: 'participant' })
+export class SearchMessagesArgs extends PaginationArgs {
+  @Field(_type => String, { description: 'group id' })
   @Matches(uuidRegex, {
-    message: 'invalid user id provided, must be uuid v4'
+    message: 'invalid group id provided, must be uuid v4'
   })
-  participant: string;
+  group: string;
 
   @Field(_type => String, { description: 'search query', nullable: true })
   @IsOptional()
@@ -30,11 +30,7 @@ export class MessagesArgs extends PaginationArgs {
   ascending: boolean;
 }
 
-export const searchMessages = async (ctx: GraphQLContext, args: MessagesArgs): Promise<SearchMessagesResult> => {
-  if (args.participant === ctx.auth!.id) {
-    throw new Error('user cannot message themselves');
-  }
-
+export const searchMessages = async (args: SearchMessagesArgs): Promise<SearchMessagesResult> => {
   const mustShouldParams: esb.Query[] = [];
   if (args.query) {
     args.query = args.query.toLowerCase();
@@ -42,16 +38,7 @@ export const searchMessages = async (ctx: GraphQLContext, args: MessagesArgs): P
   }
 
   const filterShouldParams: esb.Query[] = [
-    esb.boolQuery()
-      .should([
-        esb.termQuery('publisher', ctx.auth!.id),
-        esb.termQuery('group', args.participant),
-      ]),
-    esb.boolQuery()
-      .should([
-        esb.termQuery('publisher', args.participant),
-        esb.termQuery('group', ctx.auth!.id),
-      ]),
+    esb.termQuery('group', args.group),
   ];
 
   let requestBody = esb.requestBodySearch().query(
@@ -89,14 +76,39 @@ export const searchMessages = async (ctx: GraphQLContext, args: MessagesArgs): P
   };
 };
 
+@ArgsType()
+export class MessagesArgs {
+  @Field(_type => [String], { description: 'group id' })
+  @Matches(uuidRegex, {
+    message: 'invalid group id provided, must be uuid v4',
+    each: true
+  })
+  groups: string[];
+}
+
 @Resolver()
 class MessagesResolver {
   @Query(_returns => SearchMessagesResult)
-  async messages(@Args() args: MessagesArgs, @Ctx() ctx: GraphQLContext): Promise<SearchMessagesResult> {
-    if (!verifyLoggedIn(ctx)) {
-      throw new Error('user not logged in to view messages');
+  async searchMessages(@Args() args: SearchMessagesArgs, @Ctx() ctx: GraphQLContext): Promise<SearchMessagesResult> {
+    if (!await checkMessageGroupAccess({
+      ctx,
+      id: args.group
+    })) {
+      throw new Error(`user does not have access to group ${args.group}`);
     }
-    return await searchMessages(ctx, args);
+    return await searchMessages(args);
+  }
+
+  @Subscription(_returns => Message, {
+    topics: messagesTopic,
+    filter: ({ payload, context, args }: ResolverFilterData<Message, MessagesArgs, SubscriptionContext>): boolean => {
+      return args.groups.includes(payload.group) && context.auth !== undefined && context.groups.includes(payload.group);
+    },
+  })
+  messages(@Root() message: Message, @Args() _args: MessagesArgs): Message {
+    // note - if group id is not found or user does not have access, the subscription doesn't return anything
+    // no error message, but also no output
+    return message;
   }
 }
 

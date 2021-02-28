@@ -1,16 +1,14 @@
-// TODO - create and delete notifications (after elapsed time)
-// create subscription to notifications
-
-import { Matches } from "class-validator";
-import { ArgsType, ResolverFilterData, Root, Subscription, Resolver, Field, Mutation, Args, Ctx } from "type-graphql";
-import { getRepository } from "typeorm";
-import { checkNotificationAccess, verifyLoggedIn } from "../auth/checkAuth";
-import Notification from "../schema/users/notification.entity";
-import { PaginationArgs } from "../schema/utils/pagination";
-import { uuidRegex } from "../shared/variables";
-import { GraphQLContext } from "../utils/context";
-import { deleteNotificationQueue } from "../utils/redis";
-import { defaultDBCache, notificationTopic } from "../utils/variables";
+import { Matches } from 'class-validator';
+import { ArgsType, ResolverFilterData, Root, Subscription, Resolver, Field, Mutation, Args, Ctx } from 'type-graphql';
+import { getRepository } from 'typeorm';
+import { AuthAccessType, checkNotificationAccess } from '../auth/checkAuth';
+import Notification, { NotificationType } from '../schema/users/notification.entity';
+import User from '../schema/users/user.entity';
+import { PaginationArgs } from '../schema/utils/pagination';
+import { uuidRegex } from '../shared/variables';
+import { GraphQLContext, SubscriptionContext } from '../utils/context';
+import { deleteNotificationQueue } from '../utils/redis';
+import { defaultDBCache, notificationTopic } from '../utils/variables';
 
 const expiresIn = 7; // days
 
@@ -33,21 +31,28 @@ export const getNotifications = async (args: NotificationsArgs, userID: string):
   return data;
 };
 
-export const addNotification = async (message: string): Promise<void> => {
+@ArgsType()
+class AddNotificationArgs {
+  @Field(_type => String, { description: 'message content' })
+  message: string;
+}
+
+export const addNotification = async (args: AddNotificationArgs, user: string, type: NotificationType): Promise<void> => {
   const NotificationModel = getRepository(Notification);
   const now = new Date();
-  const expires = new Date()
+  const expires = new Date();
   expires.setDate(now.getDate() + expiresIn);
-  const notificationData = await NotificationModel.create({
+  const notificationData = await NotificationModel.save({
     created: now.getTime(),
     expires: expires.getTime(),
-    message,
+    message: args.message,
     viewed: false,
-    // TODO - finish this
+    user,
+    type
   });
   deleteNotificationQueue.add(notificationData.id, {
     delay: expires.getTime()
-  })
+  });
 };
 
 @ArgsType()
@@ -77,7 +82,7 @@ class MarkReadArgs {
 class NotificationsResolver {
   @Subscription(_returns => Notification, {
     topics: notificationTopic,
-    filter: ({ payload, context }: ResolverFilterData<Notification, any, GraphQLContext>): boolean => {
+    filter: ({ payload, context }: ResolverFilterData<Notification, undefined, SubscriptionContext>): boolean => {
       return context.auth !== undefined && payload.user === context.auth.id;
     }
   })
@@ -86,17 +91,30 @@ class NotificationsResolver {
   }
 
   @Mutation(_returns => String)
+  async sendGlobalNotification(@Args() args: AddNotificationArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
+    if (!(await checkNotificationAccess({
+      ctx,
+      accessType: AuthAccessType.modify
+    }))) {
+      throw new Error('current user does not have access to send new global notification');
+    }
+    const UserModel = getRepository(User);
+    for (const user of await UserModel.find({
+      select: ['id']
+    })) {
+      await addNotification(args, user.id, NotificationType.admin);
+    }
+    return 'sent global notification';
+  }
+
+  @Mutation(_returns => String)
   async deleteNotification(@Args() args: DeleteArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
-    if (!verifyLoggedIn(ctx) || !ctx.auth) {
-      throw new Error('cannot find auth data');
-    }
-    const NotificationModel = getRepository(Notification);
-    const notification = await NotificationModel.findOne(args.id);
-    if (!notification) {
-      throw new Error(`cannot find notification with id ${args.id}`);
-    }
-    if (notification.user !== args.id) {
-      throw new Error(`notification with id ${args.id} is not for current user`);
+    if (!(await checkNotificationAccess({
+      ctx,
+      id: args.id,
+      accessType: AuthAccessType.modify
+    }))) {
+      throw new Error(`current user does not have access to delete notification ${args.id}`);
     }
     await deleteNotification(args);
 
@@ -106,9 +124,10 @@ class NotificationsResolver {
   async markNotificationRead(@Args() args: MarkReadArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
     if (!(await checkNotificationAccess({
       ctx,
-      id: args.id
+      id: args.id,
+      accessType: AuthAccessType.view
     }))) {
-      throw new Error(`current user ${ctx.auth!.id} does not have access to mark notification as read`);
+      throw new Error(`current user does not have access to mark notification ${args.id} as read`);
     }
     const NotificationModel = getRepository(Notification);
     await NotificationModel.update({
@@ -116,7 +135,7 @@ class NotificationsResolver {
     }, {
       viewed: true
     });
-    return `marked notification ${args.id} as read`
+    return `marked notification ${args.id} as read`;
   }
 }
 

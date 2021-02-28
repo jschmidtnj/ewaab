@@ -2,43 +2,63 @@ import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { decodeAuth, AuthData } from './jwt';
 import { Request, Response } from 'express';
 import { loginType } from '../auth/shared';
+import { Any, getRepository } from 'typeorm';
+import MessageGroup from '../schema/users/messageGroup.entity';
 
-export interface SubscriptionContext {
+export interface BaseSubscriptionContext {
   auth?: AuthData;
+  groups: string[];
 }
 
-export interface GraphQLContext extends SubscriptionContext {
+export interface GraphQLContext {
+  auth?: AuthData;
   req: Request;
   res: Response;
 }
 
-export interface SubscriptionContextParams {
-  authToken?: string;
-}
+export type SubscriptionContext = BaseSubscriptionContext & GraphQLContext;
 
-export const onSubscription = async (params: SubscriptionContextParams): Promise<SubscriptionContext> => {
-  if (!params.authToken) {
-    // require at least guest login
-    throw new Error('auth token must be provided');
+const extractBearerToken = (data: string): string => {
+  if (!(data.split(' ')[0] === 'Bearer')) {
+    return '';
   }
-
-  return {
-    auth: await decodeAuth(loginType.LOCAL, params.authToken)
-  };
+  return data.split(' ')[1];
 };
 
 export const getToken = (req: Request): string => {
-  if (!(req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer')) {
-    // no authorization found
+  if (!(req.headers.authorization)) {
     return '';
   }
-  return req.headers.authorization.split(' ')[1];
+  return extractBearerToken(req.headers.authorization);
 };
 
-export const getContext = async ({ req, res, connection }: ExpressContext): Promise<GraphQLContext> => {
+export const onSubscription = async (params: Record<string, unknown>): Promise<BaseSubscriptionContext> => {
+  if (!('Authorization' in params)) {
+    // require at least guest login
+    throw new Error('auth token must be provided');
+  }
+  const token = extractBearerToken(params['Authorization'] as string);
+  const auth = await decodeAuth(loginType.LOCAL, token);
+
+  const MessageGroupModel = getRepository(MessageGroup);
+  const groupData = await MessageGroupModel.find({
+    where: {
+      userIDs: Any([auth.id]),
+    },
+    select: ['id']
+  });
+  const groups = groupData.map(groupObj => groupObj.id);
+
+  return {
+    auth,
+    groups
+  };
+};
+
+export const getContext = async ({ req, res, connection }: ExpressContext): Promise<GraphQLContext | SubscriptionContext> => {
   if (connection) {
     return {
-      ...(connection.context as SubscriptionContext),
+      ...(connection.context as BaseSubscriptionContext),
       req,
       res
     };

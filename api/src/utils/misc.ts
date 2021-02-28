@@ -1,4 +1,5 @@
 import internal from 'stream';
+import { BinaryLike, createHash } from 'crypto';
 
 export const streamToString = (stream: internal.Readable): Promise<string> => {
   const chunks: Uint8Array[] = [];
@@ -29,4 +30,12 @@ const textFileMimes = new Set<string>(['application/pdf', 'application/msword'])
 
 export const checkTextFile = (mime: string): boolean => {
   return checkText(mime) || textFileMimes.has(mime);
+};
+
+export const arrayHash = (elements: BinaryLike[]): string => {
+  const hash = createHash('md5');
+  for (const element in elements) {
+    hash.update(element);
+  }
+  return hash.digest('hex');
 };

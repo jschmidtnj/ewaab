@@ -17,7 +17,6 @@ import { s3Client, fileBucket, getMediaKey } from '../utils/aws';
 import { imageMime } from '../utils/misc';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
-import { getTime } from '../shared/time';
 
 @ArgsType()
 class AddPostArgs {

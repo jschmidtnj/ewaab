@@ -33,8 +33,22 @@ export type Comment = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
+  reactions: Array<ReactionCount>;
   /** date updated */
   updated: Scalars['Float'];
+  userReactions: Array<Reaction>;
+};
+
+/** comment data */
+export type CommentReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
+};
+
+/** comment data */
+export type CommentUserReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
 };
 
 /** comment sort options */
@@ -86,14 +100,31 @@ export type Message = {
   content: Scalars['String'];
   /** date created */
   created: Scalars['Float'];
+  /** group message recipient */
+  group: Scalars['String'];
   /** message id */
   id: Scalars['String'];
   /** message publisher */
   publisher: Scalars['String'];
-  /** message recipient */
-  group: Scalars['String'];
   /** date updated */
   updated: Scalars['Float'];
+};
+
+/** message group data */
+export type MessageGroup = {
+  __typename?: 'MessageGroup';
+  /** date created */
+  created: Scalars['Float'];
+  /** group id */
+  id: Scalars['String'];
+  /** date updated */
+  updated: Scalars['Float'];
+  /** number of users in group */
+  userCount: Scalars['Int'];
+  /** group users */
+  userIDs: Array<Scalars['String']>;
+  /** users in active message */
+  users: Array<PublicUser>;
 };
 
 /** message sort options */
@@ -105,21 +136,25 @@ export enum MessageSortOption {
 export type Mutation = {
   __typename?: 'Mutation';
   addComment: Scalars['String'];
+  addMessageGroup: Scalars['String'];
   addPost: Scalars['String'];
   addReaction: Scalars['String'];
   deleteAccount: Scalars['String'];
   deleteComment: Scalars['String'];
   deleteMessage: Scalars['String'];
   deleteMessages: Scalars['String'];
+  deleteNotification: Scalars['String'];
   deletePost: Scalars['String'];
   deleteReaction: Scalars['String'];
   inviteUser: Scalars['String'];
+  leaveMessageGroup: Scalars['String'];
   login: Scalars['String'];
   loginGuest: Scalars['String'];
   logout: Scalars['String'];
   passwordReset: Scalars['String'];
   register: Scalars['String'];
   revokeRefresh: Scalars['String'];
+  sendGlobalNotification: Scalars['String'];
   sendMessage: Scalars['String'];
   sendPasswordReset: Scalars['String'];
   sendTestEmail: Scalars['String'];
@@ -134,6 +169,10 @@ export type Mutation = {
 export type MutationAddCommentArgs = {
   content: Scalars['String'];
   post: Scalars['String'];
+};
+
+export type MutationAddMessageGroupArgs = {
+  members: Array<Scalars['String']>;
 };
 
 export type MutationAddPostArgs = {
@@ -166,6 +205,10 @@ export type MutationDeleteMessagesArgs = {
   group: Scalars['String'];
 };
 
+export type MutationDeleteNotificationArgs = {
+  id: Scalars['String'];
+};
+
 export type MutationDeletePostArgs = {
   id: Scalars['String'];
 };
@@ -180,6 +223,10 @@ export type MutationInviteUserArgs = {
   executeAdmin?: Maybe<Scalars['Boolean']>;
   name: Scalars['String'];
   type?: Maybe<UserType>;
+};
+
+export type MutationLeaveMessageGroupArgs = {
+  id: Scalars['String'];
 };
 
 export type MutationLoginArgs = {
@@ -208,6 +255,10 @@ export type MutationRevokeRefreshArgs = {
   email?: Maybe<Scalars['String']>;
 };
 
+export type MutationSendGlobalNotificationArgs = {
+  message: Scalars['String'];
+};
+
 export type MutationSendMessageArgs = {
   content: Scalars['String'];
   group: Scalars['String'];
@@ -226,11 +277,9 @@ export type MutationSendTestEmailArgs = {
 };
 
 export type MutationUpdateAccountArgs = {
-  activeMessage?: Maybe<Scalars['String']>;
   alumniYear?: Maybe<Scalars['Int']>;
   avatar?: Maybe<Scalars['Upload']>;
   bio?: Maybe<Scalars['String']>;
-  deleteActiveMessage?: Maybe<Scalars['Boolean']>;
   description?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   facebook?: Maybe<Scalars['String']>;
@@ -278,6 +327,30 @@ export type MutationVerifyEmailArgs = {
   token: Scalars['String'];
 };
 
+/** notification */
+export type Notification = {
+  __typename?: 'Notification';
+  /** date created */
+  created: Scalars['Float'];
+  /** date expires */
+  expires: Scalars['Float'];
+  /** notification id */
+  id: Scalars['String'];
+  /** notification message */
+  message: Scalars['String'];
+  /** notification type */
+  type: NotificationType;
+  /** reaction publisher */
+  user: Scalars['String'];
+  /** notification viewed */
+  viewed: Scalars['Boolean'];
+};
+
+/** notification type */
+export enum NotificationType {
+  Admin = 'admin',
+}
+
 /** post data */
 export type Post = {
   __typename?: 'Post';
@@ -299,12 +372,16 @@ export type Post = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
+  /** reactions */
+  reactions?: Maybe<Array<ReactionCount>>;
   /** title */
   title: Scalars['String'];
   /** post type */
   type: Scalars['String'];
   /** date updated */
   updated: Scalars['Float'];
+  /** user reactions */
+  userReactions?: Maybe<Array<Reaction>>;
 };
 
 /** post data */
@@ -314,6 +391,18 @@ export type PostCommentsArgs = {
   perpage?: Maybe<Scalars['Int']>;
   query?: Maybe<Scalars['String']>;
   sortBy?: Maybe<CommentSortOption>;
+};
+
+/** post data */
+export type PostReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
+};
+
+/** post data */
+export type PostUserReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
 };
 
 /** post count data */
@@ -415,12 +504,13 @@ export type Query = {
   comments: SearchCommentsResult;
   hello: Scalars['String'];
   media: Media;
-  messages: SearchMessagesResult;
+  messageGroups: Array<MessageGroup>;
   /** post data */
   post: Post;
   posts: SearchPostsResult;
   /** public user data */
   publicUser: PublicUser;
+  searchMessages: SearchMessagesResult;
   /** user data */
   user: User;
   users: SearchUsersResult;
@@ -439,13 +529,9 @@ export type QueryMediaArgs = {
   id: Scalars['String'];
 };
 
-export type QueryMessagesArgs = {
-  ascending?: Maybe<Scalars['Boolean']>;
+export type QueryMessageGroupsArgs = {
   page?: Maybe<Scalars['Int']>;
-  participant: Array<Scalars['String']>;
   perpage?: Maybe<Scalars['Int']>;
-  query?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<MessageSortOption>;
 };
 
 export type QueryPostArgs = {
@@ -467,6 +553,15 @@ export type QueryPostsArgs = {
 export type QueryPublicUserArgs = {
   id?: Maybe<Scalars['Float']>;
   username?: Maybe<Scalars['String']>;
+};
+
+export type QuerySearchMessagesArgs = {
+  ascending?: Maybe<Scalars['Boolean']>;
+  group: Scalars['String'];
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
+  query?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<MessageSortOption>;
 };
 
 export type QueryUsersArgs = {
@@ -538,8 +633,22 @@ export type SearchComment = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
+  reactions: Array<ReactionCount>;
   /** date updated */
   updated: Scalars['Float'];
+  userReactions: Array<Reaction>;
+};
+
+/** comment data, indexed in elasticsearch */
+export type SearchCommentReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
+};
+
+/** comment data, indexed in elasticsearch */
+export type SearchCommentUserReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
 };
 
 /** comment data search results */
@@ -547,8 +656,12 @@ export type SearchCommentsResult = {
   __typename?: 'SearchCommentsResult';
   /** total comments count */
   count: Scalars['Int'];
+  /** reactions */
+  reactions?: Maybe<Array<ReactionCount>>;
   /** results */
   results: Array<SearchComment>;
+  /** user reactions */
+  userReactions?: Maybe<Array<Reaction>>;
 };
 
 /** message data, indexed in elasticsearch */
@@ -558,12 +671,12 @@ export type SearchMessage = {
   content: Scalars['String'];
   /** date created */
   created: Scalars['Float'];
+  /** group message recipient */
+  group: Scalars['String'];
   /** message id */
   id: Scalars['String'];
   /** message publisher */
   publisher: Scalars['String'];
-  /** message recipient */
-  group: Scalars['String'];
   /** date updated */
   updated: Scalars['Float'];
 };
@@ -598,12 +711,16 @@ export type SearchPost = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
+  /** reactions */
+  reactions?: Maybe<Array<ReactionCount>>;
   /** title */
   title: Scalars['String'];
   /** post type */
   type: Scalars['String'];
   /** date updated */
   updated: Scalars['Float'];
+  /** user reactions */
+  userReactions?: Maybe<Array<Reaction>>;
 };
 
 /** post data, indexed in elasticsearch */
@@ -613,6 +730,18 @@ export type SearchPostCommentsArgs = {
   perpage?: Maybe<Scalars['Int']>;
   query?: Maybe<Scalars['String']>;
   sortBy?: Maybe<CommentSortOption>;
+};
+
+/** post data, indexed in elasticsearch */
+export type SearchPostReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
+};
+
+/** post data, indexed in elasticsearch */
+export type SearchPostUserReactionsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
 };
 
 /** post data search results */
@@ -668,11 +797,21 @@ export type SearchUsersResult = {
   results: Array<SearchUser>;
 };
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  messages: Message;
+  notifications: Notification;
+};
+
+export type SubscriptionMessagesArgs = {
+  groups: Array<Scalars['String']>;
+};
+
 /** user account */
 export type User = {
   __typename?: 'User';
-  /** active direct messages */
-  activeMessages: Array<Scalars['String']>;
+  /** active message groups */
+  activeMessageGroups: Array<MessageGroup>;
   /** alumni year */
   alumniYear?: Maybe<Scalars['Int']>;
   /** avatar id */
@@ -707,6 +846,8 @@ export type User = {
   mentor?: Maybe<Scalars['String']>;
   /** name */
   name: Scalars['String'];
+  /** current user notifications */
+  notifications: Array<Notification>;
   /** user pronouns */
   pronouns: Scalars['String'];
   /** resume id */
@@ -725,6 +866,18 @@ export type User = {
   url: Scalars['String'];
   /** username */
   username: Scalars['String'];
+};
+
+/** user account */
+export type UserActiveMessageGroupsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
+};
+
+/** user account */
+export type UserNotificationsArgs = {
+  page?: Maybe<Scalars['Int']>;
+  perpage?: Maybe<Scalars['Int']>;
 };
 
 /** user sort options */

@@ -25,7 +25,6 @@ import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import majors from '../shared/majors';
-import { getTime } from '../shared/time';
 import universities from '../shared/universities';
 
 @ArgsType()
