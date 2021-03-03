@@ -50,7 +50,7 @@ export const initializeServer = async (): Promise<void> => {
     schema,
     validationRules: [depthLimit(maxDepth)],
     subscriptions: {
-      onConnect: (connectionParams): Promise<BaseSubscriptionContext> => onSubscription(connectionParams),
+      onConnect: (connectionParams): Promise<BaseSubscriptionContext> => onSubscription(connectionParams as Record<string, unknown>),
     },
     context: async (data): Promise<GraphQLContext> => getContext(data),
     uploads: false,

@@ -5,7 +5,7 @@ export default interface Messages {
   profile: string;
   reset: string;
   'sign out': string;
-  users: string;
+  'student profiles': string;
   search: string;
   account: string;
   community: string;
