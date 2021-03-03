@@ -8,7 +8,7 @@ import {
   UserType,
 } from 'lib/generated/datamodel';
 import { useEffect, useState } from 'react';
-import { ApolloError, ApolloQueryResult } from 'apollo-client';
+import { ApolloError, ApolloQueryResult } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 import isDebug from 'utils/mode';

@@ -24,7 +24,7 @@ interface LayoutArgs {
 const EmptyLayout = (args: LayoutArgs): JSX.Element => {
   const router = useRouter();
 
-  const currentTheme = Theme.dark;
+  const currentTheme = Theme.light;
   const [messages, setMessages] = useState<Messages | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {

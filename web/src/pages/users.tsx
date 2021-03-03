@@ -11,7 +11,7 @@ import {
 } from 'lib/generated/datamodel';
 import Select, { ValueType } from 'react-select';
 import { useEffect, useRef, useState } from 'react';
-import { ApolloError, ApolloQueryResult } from 'apollo-client';
+import { ApolloError, ApolloQueryResult } from '@apollo/client';
 import * as yup from 'yup';
 import { Formik, FormikHandlers, FormikHelpers, FormikState } from 'formik';
 import {

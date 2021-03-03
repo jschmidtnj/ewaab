@@ -1,7 +1,7 @@
 import Layout from 'layouts/main';
 import SEO from 'components/SEO';
 import React, { useEffect, useState } from 'react';
-import { ApolloError } from 'apollo-client';
+import { ApolloError } from '@apollo/client';
 import { capitalizeFirstLetter, getErrorCode } from 'utils/misc';
 import statusCodes from 'http-status-codes';
 import {

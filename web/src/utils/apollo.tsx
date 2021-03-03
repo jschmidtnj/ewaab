@@ -1,12 +1,9 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { ApolloProvider } from '@apollo/react-hooks';
-import ApolloClient from 'apollo-client';
+import { ApolloClient, InMemoryCache, split, from } from '@apollo/client';
 import fetch from 'isomorphic-fetch';
-import { split, from } from 'apollo-link';
-import { WebSocketLink } from 'apollo-link-ws';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { WebSocketLink } from '@apollo/client/link/ws';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
-import { getMainDefinition } from 'apollo-utilities';
 import { setContext } from 'apollo-link-context';
 import ws from 'ws';
 import { getAuthToken, isLoggedIn } from 'state/auth/getters';
@@ -15,6 +12,7 @@ import { useSecure } from './useSecure';
 import { toast } from 'react-toastify';
 import { getAPIURL } from './axios';
 import { createUploadLink } from 'apollo-upload-client';
+import { getMainDefinition } from '@apollo/client/utilities';
 
 export let client: ApolloClient<any>;
 

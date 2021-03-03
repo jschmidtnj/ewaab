@@ -3,7 +3,7 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx}',
     './src/pages/**/*.{js,ts,jsx,tsx}',
   ],
-  darkMode: 'media', // 'media' or 'class'
+  darkMode: 'class', // change to media to set based on device
   theme: {},
   variants: {
     extend: {
