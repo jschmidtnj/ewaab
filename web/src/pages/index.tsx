@@ -15,6 +15,7 @@ const Index = (): JSX.Element => {
           src="/assets/img/homepage_background.png"
           layout="fill"
           objectFit="cover"
+          alt="ewaab-home"
         />
         <div className="z-10 absolute inset-0">
           <div className="relative bg-gray-900 opacity-20 h-full" />

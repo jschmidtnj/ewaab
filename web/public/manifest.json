@@ -1,12 +1,12 @@
 {
-  "app_name": "ewaab",
+  "name": "ewaab",
   "short_name": "ewaab",
   "description": "Encouraging Women Across All Borders",
   "theme_color": "#830dc9",
   "background_color": "#6d8ff8",
   "display": "standalone",
   "scope": "/",
-  "start_url": "/",
+  "start_url": ".",
   "icons": [
     {
       "src": "pwa/manifest-icon-192.png",

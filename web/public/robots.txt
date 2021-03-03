@@ -1,0 +1,4 @@
+User-agent: * 
+Disallow: /admin/*
+Disallow: /callback/*
+# Sitemap: https://network.ewaab.org/sitemap.xml

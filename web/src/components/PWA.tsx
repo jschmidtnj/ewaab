@@ -1,6 +1,8 @@
+import Head from 'next/head';
+
 const PWATags = (): JSX.Element => {
   return (
-    <>
+    <Head>
       <link rel="apple-touch-icon" href="pwa/apple-icon-180.png" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <link
@@ -133,7 +135,7 @@ const PWATags = (): JSX.Element => {
         href="pwa/apple-splash-1136-640.jpg"
         media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
       />
-    </>
+    </Head>
   );
 };
 
