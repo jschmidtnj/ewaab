@@ -218,10 +218,6 @@ type Mutation {
     """user type"""
     type: UserType = user
   ): String!
-  leaveMessageGroup(
-    """message id"""
-    id: String!
-  ): String!
   login(
     """password"""
     password: String!

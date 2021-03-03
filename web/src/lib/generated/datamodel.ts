@@ -147,7 +147,6 @@ export type Mutation = {
   deletePost: Scalars['String'];
   deleteReaction: Scalars['String'];
   inviteUser: Scalars['String'];
-  leaveMessageGroup: Scalars['String'];
   login: Scalars['String'];
   loginGuest: Scalars['String'];
   logout: Scalars['String'];
@@ -223,10 +222,6 @@ export type MutationInviteUserArgs = {
   executeAdmin?: Maybe<Scalars['Boolean']>;
   name: Scalars['String'];
   type?: Maybe<UserType>;
-};
-
-export type MutationLeaveMessageGroupArgs = {
-  id: Scalars['String'];
 };
 
 export type MutationLoginArgs = {

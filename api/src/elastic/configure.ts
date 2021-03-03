@@ -24,7 +24,7 @@ const initializeMapping = async (indexName: string, indexSettings: Record<string
     ignore_unavailable: true
   });
   logger.info(`deleted ${indexName} from elasticsearch: ${deleteRes.body.acknowledged as boolean}`);
-  await sleep(6000);
+  await sleep(15000);
   try {
     const createIndexRes = await elasticClient.indices.create({
       index: indexName,
