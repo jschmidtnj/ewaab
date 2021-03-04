@@ -1,4 +1,4 @@
-import { UserFieldsFragment } from 'lib/generated/datamodel';
+import { UserFieldsFragment, UserType } from 'lib/generated/datamodel';
 
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
@@ -8,6 +8,7 @@ export const SET_USER = 'SET_USER';
 export interface Login {
   authToken: string;
   loggedIn: boolean;
+  isVisitor: boolean;
 }
 
 export interface AuthState {
@@ -15,6 +16,7 @@ export interface AuthState {
   username: string;
   user: UserFieldsFragment | undefined;
   loggedIn: boolean;
+  userType: UserType | undefined;
 }
 
 interface LoginAction {

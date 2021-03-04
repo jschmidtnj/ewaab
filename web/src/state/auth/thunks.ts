@@ -12,6 +12,8 @@ import {
   UserQuery,
   UserQueryVariables,
   UserFieldsFragment,
+  LoginVisitorMutation,
+  LoginVisitorMutationVariables,
 } from 'lib/generated/datamodel';
 
 const loginMutation = async (args: LoginMutationVariables): Promise<string> => {
@@ -34,6 +36,37 @@ export const thunkLogin = (
     login({
       authToken,
       loggedIn: true,
+      isVisitor: false,
+    })
+  );
+};
+
+const loginVisitorMutation = async (
+  args: LoginVisitorMutationVariables
+): Promise<string> => {
+  const apolloRes = await client.mutate<
+    LoginVisitorMutation,
+    LoginVisitorMutationVariables
+  >({
+    mutation: Login,
+    variables: args,
+  });
+  if (apolloRes.data) {
+    return apolloRes.data.loginVisitor;
+  } else {
+    throw new Error('cannot find apollo data');
+  }
+};
+
+export const thunkLoginVisitor = (
+  args: LoginVisitorMutationVariables
+): AppThunkAction<Promise<void>> => async (dispatch) => {
+  const authToken = await loginVisitorMutation(args);
+  dispatch(
+    login({
+      authToken,
+      loggedIn: true,
+      isVisitor: true,
     })
   );
 };

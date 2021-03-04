@@ -4,7 +4,6 @@ import User, { UserType } from '../schema/users/user.entity';
 import { configData } from './config';
 import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
-import { nanoid } from 'nanoid';
 
 export const verifyJWTExpiration = '1h';
 
@@ -61,37 +60,13 @@ export const getJWTIssuer = (): string => {
   return jwtIssuer;
 };
 
-export const generateJWTGuest = (): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    let secret: string;
-    let jwtIssuer: string;
-    try {
-      secret = getSecret(loginType.LOCAL);
-      jwtIssuer = getJWTIssuer();
-    } catch (err) {
-      reject(err as Error);
-      return;
-    }
-    const authData: JWTAuthData = {
-      id: nanoid(),
-      type: UserType.visitor,
-      emailVerified: false,
-    };
-    const signOptions: SignOptions = {
-      issuer: jwtIssuer,
-      expiresIn: accessJWTExpiration
-    };
-    sign(authData, secret, signOptions, (err, token) => {
-      if (err) {
-        reject(err as Error);
-      } else {
-        resolve(token as string);
-      }
-    });
-  });
-};
+interface GenerateJWTArgs {
+  id: string;
+  type: UserType;
+  emailVerified: boolean;
+}
 
-export const generateJWTAccess = (user: User): Promise<string> => {
+export const generateJWTAccess = (args: GenerateJWTArgs): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -103,9 +78,9 @@ export const generateJWTAccess = (user: User): Promise<string> => {
       return;
     }
     const authData: JWTAuthData = {
-      id: user.id,
-      type: user.type,
-      emailVerified: user.emailVerified
+      id: args.id,
+      type: args.type,
+      emailVerified: args.emailVerified
     };
     const signOptions: SignOptions = {
       issuer: jwtIssuer,
@@ -121,7 +96,53 @@ export const generateJWTAccess = (user: User): Promise<string> => {
   });
 };
 
-export const generateJWTRefresh = (user: User): Promise<string> => {
+export interface MediaAccessTokenData {
+  id: string;
+  userType: UserType;
+  type: MediaAccessType.media;
+}
+
+interface GenerateJWTMediaArgs {
+  id: string;
+  type: UserType;
+}
+
+export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    let secret: string;
+    let jwtIssuer: string;
+    try {
+      secret = getSecret(loginType.LOCAL);
+      jwtIssuer = getJWTIssuer();
+    } catch (err) {
+      reject(err as Error);
+      return;
+    }
+    const authData: MediaAccessTokenData = {
+      id: args.id,
+      userType: args.type,
+      type: MediaAccessType.media
+    };
+    const signOptions: SignOptions = {
+      issuer: jwtIssuer,
+      expiresIn: mediaJWTExpiration
+    };
+    sign(authData, secret, signOptions, (err, token) => {
+      if (err) {
+        reject(err as Error);
+      } else {
+        resolve(token as string);
+      }
+    });
+  });
+};
+
+interface GenerateJWTRefreshArgs {
+  id: string;
+  tokenVersion: number;
+}
+
+export const generateJWTRefresh = (args: GenerateJWTRefreshArgs): Promise<string> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -133,8 +154,8 @@ export const generateJWTRefresh = (user: User): Promise<string> => {
       return;
     }
     const authData: RefreshTokenData = {
-      id: user.id,
-      tokenVersion: user.tokenVersion
+      id: args.id,
+      tokenVersion: args.tokenVersion
     };
     const signOptions: SignOptions = {
       issuer: jwtIssuer,

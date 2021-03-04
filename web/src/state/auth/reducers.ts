@@ -12,6 +12,7 @@ const initialState: AuthState = {
   username: '',
   user: undefined,
   loggedIn: false,
+  userType: undefined,
 };
 
 export const authReducer = (

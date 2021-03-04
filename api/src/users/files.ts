@@ -4,14 +4,14 @@ import { InternalServerError, NotFoundError } from 'typescript-rest/dist/server/
 import { getMediaKey, getS3FileData, S3Data } from '../utils/aws';
 import { getContext } from '../utils/context';
 import { getMediaAuthenticated } from './media.resolver';
-import { MediaAccessTokenData } from './user.resolver';
 import { ApolloError } from 'apollo-server-express';
 import { verify } from 'jsonwebtoken';
 import { VerifyOptions } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
-import { getSecret, MediaAccessType } from '../utils/jwt';
+import { getSecret, MediaAccessTokenData, MediaAccessType } from '../utils/jwt';
 import statusCodes from 'http-status-codes';
 import Media from '../schema/media/media.entity';
+import { mediaCookieName } from '../utils/cookies';
 
 export const decodeMediaAuth = (token: string): Promise<MediaAccessTokenData> => {
   return new Promise((resolve, reject) => {
@@ -72,10 +72,10 @@ export const getFile = async (args: {
       req: args.req,
       res: args.res
     });
-    if ('auth' in args.req.query) {
+    if (mediaCookieName in args.req.cookies) {
       mediaData = await getMediaAuthenticated({
         id: mediaID
-      }, ctx, await decodeMediaAuth(args.req.query['auth'] as string));
+      }, ctx, await decodeMediaAuth(args.req.cookies[mediaCookieName]));
     } else {
       mediaData = await getMediaAuthenticated({
         id: mediaID,

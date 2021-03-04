@@ -7,7 +7,6 @@ fragment userFields on User {
   resume
   type
   avatar
-  mediaAuth
   jobTitle
   location
   locationName

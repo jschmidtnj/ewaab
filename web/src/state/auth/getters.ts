@@ -40,6 +40,14 @@ export const getUsername = (): string => {
   return state.username;
 };
 
+export const getUserType = (): UserType | undefined => {
+  const state = (store.getState() as RootState).authReducer;
+  if (!state.loggedIn) {
+    return undefined;
+  }
+  return state.userType;
+};
+
 export const isLoggedIn = async (): Promise<boolean> => {
   const state = (store.getState() as RootState).authReducer;
   if (!state.loggedIn) {

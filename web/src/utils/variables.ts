@@ -6,6 +6,7 @@ export interface SelectNumberObject {
 }
 
 export const defaultLoggedInPage = '/community';
+export const defaultLoggedInPageVisitor = '/users';
 
 export const defaultPerPage = 10;
 

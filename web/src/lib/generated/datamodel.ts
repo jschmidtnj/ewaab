@@ -158,6 +158,7 @@ export type Mutation = {
   addMessageGroup: Scalars['String'];
   addPost: Scalars['String'];
   addReaction: Scalars['String'];
+  addUserCode: Scalars['String'];
   deleteAccount: Scalars['String'];
   deleteComment: Scalars['String'];
   deleteMessage: Scalars['String'];
@@ -165,9 +166,10 @@ export type Mutation = {
   deleteNotification: Scalars['String'];
   deletePost: Scalars['String'];
   deleteReaction: Scalars['String'];
+  deleteUserCode: Scalars['String'];
   inviteUser: Scalars['String'];
   login: Scalars['String'];
-  loginGuest: Scalars['String'];
+  loginVisitor: Scalars['String'];
   logout: Scalars['String'];
   passwordReset: Scalars['String'];
   register: Scalars['String'];
@@ -207,6 +209,10 @@ export type MutationAddReactionArgs = {
   reaction: Scalars['String'];
 };
 
+export type MutationAddUserCodeArgs = {
+  name: Scalars['String'];
+};
+
 export type MutationDeleteAccountArgs = {
   email?: Maybe<Scalars['String']>;
 };
@@ -235,6 +241,10 @@ export type MutationDeleteReactionArgs = {
   id: Scalars['String'];
 };
 
+export type MutationDeleteUserCodeArgs = {
+  id: Scalars['String'];
+};
+
 export type MutationInviteUserArgs = {
   alumniYear: Scalars['Int'];
   email: Scalars['String'];
@@ -247,6 +257,11 @@ export type MutationLoginArgs = {
   password: Scalars['String'];
   recaptchaToken: Scalars['String'];
   usernameEmail: Scalars['String'];
+};
+
+export type MutationLoginVisitorArgs = {
+  code: Scalars['String'];
+  recaptchaToken: Scalars['String'];
 };
 
 export type MutationPasswordResetArgs = {
@@ -527,6 +542,7 @@ export type Query = {
   searchMessages: SearchMessagesResult;
   /** user data */
   user: User;
+  userCodes: Array<UserCode>;
   users: SearchUsersResult;
 };
 
@@ -854,8 +870,6 @@ export type User = {
   locationName: Scalars['String'];
   /** major */
   major: Scalars['String'];
-  /** media auth token */
-  mediaAuth: Scalars['String'];
   /** mentor */
   mentor?: Maybe<Scalars['String']>;
   /** name */
@@ -892,6 +906,19 @@ export type UserActiveMessageGroupsArgs = {
 export type UserNotificationsArgs = {
   page?: Maybe<Scalars['Int']>;
   perpage?: Maybe<Scalars['Int']>;
+};
+
+/** user codes element */
+export type UserCode = {
+  __typename?: 'UserCode';
+  /** date created */
+  created: Scalars['Float'];
+  /** user id */
+  id: Scalars['String'];
+  /** name */
+  name: Scalars['String'];
+  /** current token version */
+  tokenVersion: Scalars['Float'];
 };
 
 /** user sort options */
@@ -1023,11 +1050,14 @@ export type LoginMutation = { __typename?: 'Mutation' } & Pick<
   'login'
 >;
 
-export type LoginGuestMutationVariables = Exact<{ [key: string]: never }>;
+export type LoginVisitorMutationVariables = Exact<{
+  code: Scalars['String'];
+  recaptchaToken: Scalars['String'];
+}>;
 
-export type LoginGuestMutation = { __typename?: 'Mutation' } & Pick<
+export type LoginVisitorMutation = { __typename?: 'Mutation' } & Pick<
   Mutation,
-  'loginGuest'
+  'loginVisitor'
 >;
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
@@ -1138,7 +1168,6 @@ export type UserFieldsFragment = { __typename?: 'User' } & Pick<
   | 'resume'
   | 'type'
   | 'avatar'
-  | 'mediaAuth'
   | 'jobTitle'
   | 'location'
   | 'locationName'
@@ -1259,7 +1288,6 @@ export const UserFields = gql`
     resume
     type
     avatar
-    mediaAuth
     jobTitle
     location
     locationName
@@ -1377,9 +1405,9 @@ export const Login = gql`
     )
   }
 `;
-export const LoginGuest = gql`
-  mutation loginGuest {
-    loginGuest
+export const LoginVisitor = gql`
+  mutation loginVisitor($code: String!, $recaptchaToken: String!) {
+    loginVisitor(code: $code, recaptchaToken: $recaptchaToken)
   }
 `;
 export const Logout = gql`

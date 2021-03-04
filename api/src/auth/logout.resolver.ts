@@ -1,10 +1,11 @@
-import User from '../schema/users/user.entity';
+import User, { UserType } from '../schema/users/user.entity';
 import { Ctx, Mutation, Resolver, ArgsType, Field, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
-import { verifyLoggedIn, verifyAdmin } from './checkAuth';
+import { verifyAdmin, verifyVisitor } from './checkAuth';
 import { IsEmail, IsOptional } from 'class-validator';
-import { clearRefreshToken } from '../utils/refreshToken';
+import { clearCookies } from '../utils/cookies';
 import { FindOneOptions, getRepository } from 'typeorm';
+import UserCode from '../schema/users/userCode.entity';
 
 @ArgsType()
 class RevokeArgs {
@@ -20,7 +21,7 @@ class RevokeArgs {
 export class UserResolver {
   @Mutation(_returns => String)
   logout(@Ctx() { res }: GraphQLContext): string {
-    clearRefreshToken(res);
+    clearCookies(res);
     return 'logged out';
   }
 
@@ -32,13 +33,28 @@ export class UserResolver {
         throw new Error('user not admin');
       }
     } else {
-      if (!verifyLoggedIn(ctx, false)) {
+      if (!verifyVisitor(ctx, false)) {
         throw new Error('user not logged in');
       }
     }
     if (!ctx.auth) {
       throw new Error('cannot find auth data');
     }
+
+    if (ctx.auth.type === UserType.visitor) {
+      const UserCodeModel = getRepository(UserCode);
+      const userCodeData = await UserCodeModel.findOne(ctx.auth.id, {
+        select: ['id']
+      });
+      if (!userCodeData) {
+        throw new Error(`cannot find user code with id ${ctx.auth.id}`);
+      }
+      await UserCodeModel.increment({
+        id: userCodeData.id
+      }, 'tokenVersion', 1);
+      return `revoked token for ${userCodeData.id}`;
+    }
+
     const UserModel = getRepository(User);
     let user: User | undefined;
     const findOptions: FindOneOptions<User> = {

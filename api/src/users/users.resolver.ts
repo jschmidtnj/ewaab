@@ -1,4 +1,4 @@
-import { Resolver, Query, ArgsType, Field, Float, Args } from 'type-graphql';
+import { Resolver, Query, ArgsType, Field, Float, Args, Ctx } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import { Min, isEmail, Matches, IsOptional, IsIn } from 'class-validator';
@@ -7,6 +7,8 @@ import { locationRegex } from '../shared/variables';
 import majors from '../shared/majors';
 import esb from 'elastic-builder';
 import { PaginationArgs } from '../schema/utils/pagination';
+import { verifyLoggedIn } from '../auth/checkAuth';
+import { GraphQLContext } from '../utils/context';
 
 @ArgsType()
 class UsersArgs extends PaginationArgs {
@@ -54,7 +56,11 @@ class UsersArgs extends PaginationArgs {
 @Resolver()
 class UsersResolver {
   @Query(_returns => SearchUsersResult)
-  async users(@Args() args: UsersArgs): Promise<SearchUsersResult> {
+  async users(@Args() args: UsersArgs, @Ctx() ctx: GraphQLContext): Promise<SearchUsersResult> {
+    if (!verifyLoggedIn(ctx) || !ctx.auth) {
+      throw new Error('user not logged in');
+    }
+
     const mustShouldParams: esb.Query[] = [];
     const filterMustParams: esb.Query[] = [];
 

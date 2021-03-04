@@ -1,11 +1,11 @@
 import { GraphQLContext } from '../utils/context';
 import argon2 from 'argon2';
-import { generateJWTAccess, generateJWTGuest, generateJWTRefresh } from '../utils/jwt';
+import { generateJWTAccess, generateJWTMediaAccess, generateJWTRefresh } from '../utils/jwt';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { MinLength, Matches } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, capitalLetterRegex, lowercaseLetterRegex } from '../shared/variables';
 import User from '../schema/users/user.entity';
-import { setRefreshToken } from '../utils/refreshToken';
+import { setCookies } from '../utils/cookies';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { FindOneOptions, getRepository } from 'typeorm';
 
@@ -72,13 +72,8 @@ class LoginResolvers {
       throw new Error('password is invalid');
     }
     const token = await generateJWTAccess(user);
-    setRefreshToken(ctx.res, await generateJWTRefresh(user));
+    setCookies(ctx.res, await generateJWTRefresh(user), await generateJWTMediaAccess(user));
     return token;
-  }
-
-  @Mutation(_returns => String)
-  async loginGuest(): Promise<string> {
-    return await generateJWTGuest();
   }
 }
 

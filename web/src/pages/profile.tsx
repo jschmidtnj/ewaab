@@ -889,7 +889,7 @@ const ProfilePage: FunctionComponent = () => {
                                   href={
                                     previewResume
                                       ? previewResume
-                                      : `${apiURL}/media/${user.resume}?auth=${user.mediaAuth}`
+                                      : `${apiURL}/media/${user.resume}`
                                   }
                                   target="_blank"
                                   rel="noreferrer"

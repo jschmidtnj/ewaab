@@ -28,16 +28,13 @@ interface MediaViewArgs {
 
 const MediaView: FunctionComponent<MediaViewArgs> = (args: MediaViewArgs) => {
   const apiURL = getAPIURL();
-  const mediaAuth = useSelector<RootState, string | undefined>(
-    (state) => state.authReducer.user?.mediaAuth
-  );
 
   if (args.type === MediaType.Image) {
     return (
       <div className="flex text-center justify-center mt-4">
         <LazyLoadImage
-          alt={`${apiURL}/media/${args.id}/blur?auth=${mediaAuth}`}
-          src={`${apiURL}/media/${args.id}?auth=${mediaAuth}`}
+          alt={`${apiURL}/media/${args.id}/blur`}
+          src={`${apiURL}/media/${args.id}`}
           width={postMediaWidth}
         />
       </div>

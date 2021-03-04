@@ -1,7 +1,7 @@
 import { Resolver, Ctx, Query, ArgsType, Field, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
 import User, { PublicUser } from '../schema/users/user.entity';
-import { verifyLoggedIn } from '../auth/checkAuth';
+import { verifyVisitor } from '../auth/checkAuth';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { getRepository } from 'typeorm';
@@ -21,6 +21,9 @@ export const publicUserSelect: (keyof PublicUser)[] = Object.keys(PublicUser) as
 class PublicUserResolver {
   @Query(_type => PublicUser, { description: 'public user data' })
   async publicUser(@Args() args: PublicUserArgs, @Ctx() ctx: GraphQLContext): Promise<PublicUser> {
+    if (!verifyVisitor(ctx) || !ctx.auth) {
+      throw new Error('user must be logged in to view public user data');
+    }
     let user: PublicUser | undefined;
     const UserModel = getRepository(User);
     if (args.id) {
@@ -33,12 +36,10 @@ class PublicUserResolver {
       }, {
         select: publicUserSelect
       });
-    } else if (verifyLoggedIn(ctx) && ctx.auth) {
+    } else {
       user = await UserModel.findOne(ctx.auth.id, {
         select: publicUserSelect
       });
-    } else {
-      throw new ApolloError('no username or id provided, and not logged in', `${statusCodes.NOT_FOUND}`);
     }
     if (!user) {
       throw new ApolloError('cannot find user', `${statusCodes.NOT_FOUND}`);

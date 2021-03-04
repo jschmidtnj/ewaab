@@ -1,52 +1,12 @@
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { Resolver, Ctx, Query, ResolverInterface, FieldResolver, Root, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
-import User, { UserType } from '../schema/users/user.entity';
+import User from '../schema/users/user.entity';
 import { getRepository } from 'typeorm';
-import { sign } from 'jsonwebtoken';
-import { SignOptions } from 'jsonwebtoken';
-import { loginType } from '../auth/shared';
-import { getSecret, getJWTIssuer, mediaJWTExpiration, MediaAccessType } from '../utils/jwt';
 import MessageGroup from '../schema/users/messageGroup.entity';
 import { getMessageGroups, MessageGroupsArgs } from '../messages/messageGroups.resolver';
 import Notification from '../schema/users/notification.entity';
 import { getNotifications, NotificationsArgs } from './notifications';
-
-export interface MediaAccessTokenData {
-  id: string;
-  userType: UserType;
-  type: MediaAccessType.media;
-}
-
-const generateJWTMediaAccess = (user: User): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    let secret: string;
-    let jwtIssuer: string;
-    try {
-      secret = getSecret(loginType.LOCAL);
-      jwtIssuer = getJWTIssuer();
-    } catch (err) {
-      reject(err as Error);
-      return;
-    }
-    const authData: MediaAccessTokenData = {
-      id: user.id,
-      userType: user.type,
-      type: MediaAccessType.media
-    };
-    const signOptions: SignOptions = {
-      issuer: jwtIssuer,
-      expiresIn: mediaJWTExpiration
-    };
-    sign(authData, secret, signOptions, (err, token) => {
-      if (err) {
-        reject(err as Error);
-      } else {
-        resolve(token as string);
-      }
-    });
-  });
-};
 
 @Resolver(_of => User)
 class UserResolvers implements ResolverInterface<User> {
@@ -64,11 +24,6 @@ class UserResolvers implements ResolverInterface<User> {
       throw new Error(`cannot find user with id ${ctx.auth.id}`);
     }
     return user;
-  }
-
-  @FieldResolver()
-  async mediaAuth(@Root() user: User): Promise<string> {
-    return await generateJWTMediaAccess(user);
   }
 
   @FieldResolver()

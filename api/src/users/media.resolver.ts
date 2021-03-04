@@ -1,11 +1,11 @@
 import { Resolver, ArgsType, Field, Args, Ctx, Query } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
-import { AuthAccessType, checkPostAccess, verifyLoggedIn } from '../auth/checkAuth';
+import { AuthAccessType, checkPostAccess, verifyVisitor } from '../auth/checkAuth';
 import Media, { MediaParentType } from '../schema/media/media.entity';
 import { getRepository } from 'typeorm';
 import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
-import { MediaAccessTokenData } from './user.resolver';
 import { loginType } from '../auth/shared';
+import { MediaAccessTokenData } from '../utils/jwt';
 
 @ArgsType()
 class MediaArgs {
@@ -46,7 +46,7 @@ export const getMediaAuthenticated = async (args: MediaArgs, ctx: GraphQLContext
     return media;
   }
 
-  if (tokenData === undefined && !verifyLoggedIn(ctx) || !ctx.auth) {
+  if (tokenData === undefined && !verifyVisitor(ctx) || !ctx.auth) {
     throw new Error('user not logged in');
   }
   if (media.parentType === MediaParentType.post) {

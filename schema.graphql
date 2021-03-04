@@ -198,6 +198,10 @@ type Mutation {
     """reaction"""
     reaction: String!
   ): String!
+  addUserCode(
+    """name"""
+    name: String!
+  ): String!
   deleteAccount(
     """email"""
     email: String
@@ -226,6 +230,10 @@ type Mutation {
     """reaction id"""
     id: String!
   ): String!
+  deleteUserCode(
+    """user code id"""
+    id: String!
+  ): String!
   inviteUser(
     """alumni year"""
     alumniYear: Int!
@@ -252,7 +260,13 @@ type Mutation {
     """username or email"""
     usernameEmail: String!
   ): String!
-  loginGuest: String!
+  loginVisitor(
+    """code"""
+    code: String!
+
+    """recaptcha token"""
+    recaptchaToken: String!
+  ): String!
   logout: String!
   passwordReset(
     """password"""
@@ -746,6 +760,7 @@ type Query {
 
   """user data"""
   user: User!
+  userCodes: [UserCode!]!
   users(
     """sort direction"""
     ascending: Boolean = true
@@ -1107,9 +1122,6 @@ type User {
   """major"""
   major: String!
 
-  """media auth token"""
-  mediaAuth: String!
-
   """mentor"""
   mentor: String
 
@@ -1151,6 +1163,21 @@ type User {
 
   """username"""
   username: String!
+}
+
+"""user codes element"""
+type UserCode {
+  """date created"""
+  created: Float!
+
+  """user id"""
+  id: String!
+
+  """name"""
+  name: String!
+
+  """current token version"""
+  tokenVersion: Float!
 }
 
 """user sort options"""

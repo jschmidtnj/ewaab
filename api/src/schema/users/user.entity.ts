@@ -166,9 +166,6 @@ export default class User extends PublicUser {
   @IsDefined()
   tokenVersion: number;
 
-  @Field({ description: 'media auth token' })
-  mediaAuth?: string;
-
   @Column({ type: 'text' })
   @IsDefined()
   password: string;

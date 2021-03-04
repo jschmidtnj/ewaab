@@ -1,0 +1,3 @@
+mutation loginVisitor($code: String!, $recaptchaToken: String!) {
+  loginVisitor(code: $code, recaptchaToken: $recaptchaToken)
+}

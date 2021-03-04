@@ -8,15 +8,32 @@ import Message from '../schema/users/message.entity';
 import Notification from '../schema/users/notification.entity';
 import MessageGroup from '../schema/users/messageGroup.entity';
 
-export const verifyGuest = (ctx: GraphQLContext): boolean => {
-  return ctx.auth !== undefined;
+/**
+ * checks if user is logged in as a visitor (at least)
+ * 
+ * @param {GraphQLContext} ctx context
+ * @param {boolean} checkEmailVerified check if email verified
+ */
+export const verifyVisitor = (ctx: GraphQLContext, checkEmailVerified = true): boolean => {
+  return ctx.auth !== undefined && (checkEmailVerified ? ctx.auth.emailVerified : true);
 };
 
+/**
+ * checks if user is logged in and not a visitor
+ * 
+ * @param {GraphQLContext} ctx context
+ * @param {boolean} checkEmailVerified check if email verified
+ */
 export const verifyLoggedIn = (ctx: GraphQLContext, checkEmailVerified = true): boolean => {
-  return verifyGuest(ctx) && ctx.auth !== undefined && ctx.auth.type !== UserType.visitor &&
-    (checkEmailVerified ? ctx.auth.emailVerified : true);
+  return verifyVisitor(ctx, checkEmailVerified) && ctx.auth!.type !== UserType.visitor;
 };
 
+/**
+ * verify user is admin type
+ * 
+ * @param {GraphQLContext} ctx context
+ * @param {boolean} executeAdmin ignores the verification (for initialization purposes)
+ */
 export const verifyAdmin = (ctx: GraphQLContext, executeAdmin?: boolean): boolean => {
   if (executeAdmin) {
     if (!configData.ENABLE_INITIALIZATION) {
@@ -24,7 +41,7 @@ export const verifyAdmin = (ctx: GraphQLContext, executeAdmin?: boolean): boolea
     }
     return true;
   }
-  return verifyLoggedIn(ctx) && ctx.auth?.type === UserType.admin;
+  return verifyLoggedIn(ctx) && ctx.auth!.type === UserType.admin;
 };
 
 export enum AuthAccessType {

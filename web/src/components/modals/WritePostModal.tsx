@@ -453,8 +453,8 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args: ModalArgs) => {
                         />
                       ) : (
                         <LazyLoadImage
-                          alt={`${apiURL}/media/${currentMedia.id}/blur?auth=${user.mediaAuth}`}
-                          src={`${apiURL}/media/${currentMedia.id}?auth=${user.mediaAuth}`}
+                          alt={`${apiURL}/media/${currentMedia.id}/blur`}
+                          src={`${apiURL}/media/${currentMedia.id}`}
                           width={postMediaWidth}
                         />
                       )}
@@ -502,7 +502,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args: ModalArgs) => {
                       href={
                         previewFile
                           ? previewFile
-                          : `${apiURL}/media/${currentMedia.id}?auth=${user.mediaAuth}`
+                          : `${apiURL}/media/${currentMedia.id}`
                       }
                       target="_blank"
                       rel="noreferrer"
