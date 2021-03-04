@@ -1,6 +1,7 @@
 import Head from 'next/head';
+import { FunctionComponent } from 'react';
 
-const PWATags = (): JSX.Element => {
+const PWATags: FunctionComponent = () => {
   return (
     <Head>
       <link rel="apple-touch-icon" href="pwa/apple-icon-180.png" />

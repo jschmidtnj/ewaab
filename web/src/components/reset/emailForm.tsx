@@ -8,8 +8,9 @@ import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { client } from 'utils/apollo';
+import { FunctionComponent } from 'react';
 
-const EmailForm = (): JSX.Element => {
+const EmailForm: FunctionComponent = () => {
   const router = useRouter();
   return (
     <Formik

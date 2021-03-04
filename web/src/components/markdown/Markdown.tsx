@@ -2,13 +2,14 @@ import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 import { LightAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
+import { FunctionComponent } from 'react';
 
 interface CodeArgs {
   language: string | null;
   value: string;
 }
 
-const CodeBlock = (args: CodeArgs): JSX.Element => {
+const CodeBlock: FunctionComponent<CodeArgs> = (args: CodeArgs) => {
   return (
     <SyntaxHighlighter
       language={args.language ? args.language : null}
@@ -23,7 +24,7 @@ interface MarkdownArgs {
   content: string;
 }
 
-const Markdown = (args: MarkdownArgs): JSX.Element => {
+const Markdown: FunctionComponent<MarkdownArgs> = (args: MarkdownArgs) => {
   return (
     <ReactMarkdown
       className="markdown"

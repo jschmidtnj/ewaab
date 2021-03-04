@@ -1,13 +1,13 @@
 import Layout from 'layouts/main';
 import { useRouter } from 'next/dist/client/router';
-import { useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import SEO from 'components/SEO';
 import { minJWTLen } from 'shared/variables';
 import EmailForm from 'components/reset/emailForm';
 import PasswordForm from 'components/reset/passwordForm';
 
-const ResetPage = (): JSX.Element => {
+const ResetPage: FunctionComponent = () => {
   const router = useRouter();
   const [resetToken, setResetToken] = useState<string>('');
   useEffect(() => {

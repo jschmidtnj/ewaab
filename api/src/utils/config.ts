@@ -22,7 +22,6 @@ interface ConfigType {
   AWS_REGION: string;
   DISABLE_CACHE: boolean;
   ENABLE_INITIALIZATION: boolean;
-  SENDGRID_API_KEY: string;
   NOREPLY_EMAIL: string,
   NOREPLY_EMAIL_NAME: string,
   RECAPTCHA_SECRET: string;
@@ -49,7 +48,6 @@ export const configData: ConfigType = {
   AWS_REGION: 'us-east-1',
   DISABLE_CACHE: false,
   ENABLE_INITIALIZATION: false,
-  SENDGRID_API_KEY: '',
   NOREPLY_EMAIL: 'noreply@ewaab.org',
   NOREPLY_EMAIL_NAME: 'no reply',
   RECAPTCHA_SECRET: '',

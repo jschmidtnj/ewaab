@@ -1,6 +1,6 @@
 import { useRouter } from 'next/dist/client/router';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import Image from 'next/image';
 import { capitalizeFirstLetter } from 'utils/misc';
@@ -43,7 +43,7 @@ const linkMap: Record<PostType, LinkData> = {
   },
 };
 
-const Header = (): JSX.Element => {
+const Header: FunctionComponent = () => {
   const dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
   const [userMenuOpen, setUserMenuOpen] = useState<boolean>(false);
   const userMenuRef = useOnClickOutside(async (_evt) => {
@@ -75,7 +75,7 @@ const Header = (): JSX.Element => {
             href: '/login',
           },
           {
-            name: 'student profiles',
+            name: 'students',
             href: '/users',
           },
         ]);
@@ -97,7 +97,7 @@ const Header = (): JSX.Element => {
         setPaths([
           ...feedPaths,
           {
-            name: 'student profiles',
+            name: 'students',
             href: '/users',
           },
           {

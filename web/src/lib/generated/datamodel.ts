@@ -115,6 +115,8 @@ export type MessageGroup = {
   __typename?: 'MessageGroup';
   /** date created */
   created: Scalars['Float'];
+  /** user message group data */
+  groupData: MessageGroupUser;
   /** group id */
   id: Scalars['String'];
   /** date updated */
@@ -125,6 +127,23 @@ export type MessageGroup = {
   userIDs: Array<Scalars['String']>;
   /** users in active message */
   users: Array<PublicUser>;
+};
+
+/** message group user data */
+export type MessageGroupUser = {
+  __typename?: 'MessageGroupUser';
+  /** group id */
+  groupID: Scalars['String'];
+  /** message group read id */
+  id: Scalars['String'];
+  /** message id */
+  messageID?: Maybe<Scalars['String']>;
+  /** date read */
+  time: Scalars['Float'];
+  /** unread message count */
+  unreadCount?: Maybe<Scalars['Int']>;
+  /** user id */
+  userID: Scalars['String'];
 };
 
 /** message sort options */

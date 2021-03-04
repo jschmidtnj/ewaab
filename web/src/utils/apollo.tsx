@@ -1,4 +1,9 @@
-import React, { useState, useEffect, ReactNode } from 'react';
+import React, {
+  useState,
+  useEffect,
+  ReactNode,
+  FunctionComponent,
+} from 'react';
 import { ApolloProvider } from '@apollo/react-hooks';
 import { ApolloClient, InMemoryCache, split, from } from '@apollo/client';
 import fetch from 'isomorphic-fetch';
@@ -78,7 +83,9 @@ interface WrapApolloArgs {
   children?: ReactNode;
 }
 
-export const WrapApollo = (args: WrapApolloArgs): JSX.Element => {
+export const WrapApollo: FunctionComponent<WrapApolloArgs> = (
+  args: WrapApolloArgs
+) => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {

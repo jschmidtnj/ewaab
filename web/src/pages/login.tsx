@@ -5,7 +5,7 @@ import {
   VerifyEmail,
 } from 'lib/generated/datamodel';
 import { useRouter } from 'next/dist/client/router';
-import { useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
@@ -33,7 +33,7 @@ declare global {
   }
 }
 
-const Login = (): JSX.Element => {
+const Login: FunctionComponent = () => {
   const dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
 
   const [redirect, setRedirect] = useState<string | null>(null);

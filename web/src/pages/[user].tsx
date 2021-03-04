@@ -1,6 +1,6 @@
 import Layout from 'layouts/main';
 import SEO from 'components/SEO';
-import React, { useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { ApolloError } from '@apollo/client';
 import { capitalizeFirstLetter, getErrorCode } from 'utils/misc';
 import statusCodes from 'http-status-codes';
@@ -38,7 +38,7 @@ import { defaultUniversity } from 'shared/universities';
 
 const avatarWidth = 40;
 
-const UserPage = (): JSX.Element => {
+const UserPage: FunctionComponent = () => {
   const currentUser = isSSR
     ? undefined
     : useSelector<RootState, UserFieldsFragment | undefined>(

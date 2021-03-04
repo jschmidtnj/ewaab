@@ -4,7 +4,6 @@ import { initializeLogger } from './utils/logger';
 import { configData, initializeConfig } from './utils/config';
 import { initializeAWS } from './utils/aws';
 import { initializeRedis } from './utils/redis';
-import { initializeSendgrid } from './emails/sendgrid';
 import compileEmailTemplates from './emails/compileEmailTemplates';
 import { initializeElastic } from './elastic/init';
 
@@ -27,9 +26,6 @@ const runAPI = async (): Promise<void> => {
     logger.info('start redis initialize');
     await initializeRedis();
     logger.info('connected to redis');
-    logger.info('start sendgrid initialize');
-    await initializeSendgrid();
-    logger.info('sendgrid connection initialized');
     logger.info('start email templates initialize');
     await compileEmailTemplates();
     logger.info('email templates compiled');

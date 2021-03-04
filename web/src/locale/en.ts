@@ -7,7 +7,7 @@ const englishMessages: Messages = {
   reset: 'reset',
   profile: 'profile',
   'sign out': 'sign out',
-  'student profiles': 'student profiles',
+  students: 'students',
   search: 'search',
   account: 'account',
   community: 'community',

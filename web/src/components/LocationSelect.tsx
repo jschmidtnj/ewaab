@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify';
-import React, { useEffect, useRef } from 'react';
+import React, { FunctionComponent, useEffect, useRef } from 'react';
 import { useRouter } from 'next/dist/client/router';
 import places from 'places.js';
 
@@ -9,7 +9,9 @@ interface LocationSelectArgs {
   disabled: boolean;
 }
 
-const LocationSelect = (args: LocationSelectArgs): JSX.Element => {
+const LocationSelect: FunctionComponent<LocationSelectArgs> = (
+  args: LocationSelectArgs
+) => {
   const locationRef = useRef(null);
   const router = useRouter();
 

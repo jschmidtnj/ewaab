@@ -10,6 +10,7 @@ import { HeadObjectOutput } from 'aws-sdk/clients/s3';
 const logger = getLogger();
 
 export let s3Client: AWS.S3;
+export let sesClient: AWS.SES;
 
 export let fileBucket: string;
 export let emailBucket: string;
@@ -73,7 +74,7 @@ export const initializeAWS = async (): Promise<void> => {
   emailBucket = configData.AWS_S3_BUCKET_EMAILS;
 
   AWS.config = new AWS.Config();
-  
+
   let setCredentials = false;
   if (configData.AWS_ACCESS_KEY_ID.length === 0 && !isProduction()) {
     throw new Error('no aws access key id provided');
@@ -105,4 +106,9 @@ export const initializeAWS = async (): Promise<void> => {
   const locationConstraintString = locationConstraint && locationConstraint.length > 0
     ? locationConstraint as string : 'none';
   logger.info(`s3 bucket ${fileBucket} location constraint: ${locationConstraintString}`);
+
+  sesClient = new AWS.SES();
+
+  const numEmailsSent = (await sesClient.getSendQuota().promise()).SentLast24Hours;
+  logger.info(`sent ${numEmailsSent} email(s) over the last 24 hrs`);
 };

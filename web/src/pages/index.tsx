@@ -4,8 +4,9 @@ import Link from 'next/link';
 import Header from 'components/Header';
 import EmptyLayout from 'layouts/empty';
 import Footer from 'components/Footer';
+import { FunctionComponent } from 'react';
 
-const Index = (): JSX.Element => {
+const Index: FunctionComponent = () => {
   return (
     <EmptyLayout>
       <SEO page="home" />

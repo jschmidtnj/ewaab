@@ -1,13 +1,12 @@
 import { Resolver, ArgsType, Field, Args, Mutation, Ctx } from 'type-graphql';
 import { IsEmail } from 'class-validator';
-import sendgridClient from '@sendgrid/client';
 import { configData } from '../utils/config';
-import { sendgridAPIVersion } from './sendgrid';
 import { verifyAdmin } from '../auth/checkAuth';
 import { isProduction } from '../utils/mode';
 import { emailTemplateFiles } from './compileEmailTemplates';
 import { GraphQLContext } from '../utils/context';
-import { ClientRequest } from '@sendgrid/client/src/request';
+import { sesClient } from '../utils/aws';
+import { SendEmailRequest } from 'aws-sdk/clients/ses';
 
 @ArgsType()
 class SendTestEmailArgs {
@@ -32,7 +31,6 @@ interface SendEmailUtilArgs {
   email: string;
   content: string;
   subject: string;
-  unsubscribeGroupID?: number;
   sendByEmail?: string;
   sendByName?: string;
 }
@@ -44,42 +42,25 @@ export const sendEmailUtil = async (args: SendEmailUtilArgs): Promise<void> => {
   if (!args.sendByName) {
     args.sendByName = configData.NOREPLY_EMAIL_NAME;
   }
-  const sendgridRequest: ClientRequest = {
-    body: {
-      personalizations: [
-        {
-          to: [
-            {
-              email: args.email,
-              name: args.name
-            }
-          ],
-          subject: args.subject
-        }
-      ],
-      from: {
-        email: args.sendByEmail,
-        name: args.sendByName
-      },
-      subject: args.subject,
-      content: [
-        {
-          type: 'text/html',
-          value: args.content
-        }
+  const sesEmail: SendEmailRequest = {
+    Destination: {
+      ToAddresses: [
+        args.email
       ]
     },
-    method: 'POST',
-    url: `${sendgridAPIVersion}/mail/send`,
+    Source: `${args.sendByName} <${args.sendByEmail}>`,
+    Message: {
+      Body: {
+        Html: {
+          Data: args.content
+        }
+      },
+      Subject: {
+        Data: args.subject
+      }
+    }
   };
-  // https://stackoverflow.com/a/62088449/8623391
-  if (args.unsubscribeGroupID) {
-    sendgridRequest.body['asm'] = {
-      group_id: args.unsubscribeGroupID,
-      groups_to_display: [args.unsubscribeGroupID],
-    };
-  }
-  await sendgridClient.request(sendgridRequest);
+  await sesClient.sendEmail(sesEmail).promise();
 };
 
 @Resolver()

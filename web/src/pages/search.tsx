@@ -10,7 +10,7 @@ import {
   UserType,
 } from 'lib/generated/datamodel';
 import Select, { ValueType } from 'react-select';
-import { useEffect, useRef, useState } from 'react';
+import { FunctionComponent, useEffect, useRef, useState } from 'react';
 import { ApolloError, ApolloQueryResult } from '@apollo/client';
 import * as yup from 'yup';
 import { Formik, FormikHandlers, FormikHelpers, FormikState } from 'formik';
@@ -31,7 +31,7 @@ import sleep from 'shared/sleep';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 
-const SearchPage = (): JSX.Element => {
+const SearchPage: FunctionComponent = () => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
     undefined
   );

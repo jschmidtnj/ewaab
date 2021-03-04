@@ -1,5 +1,10 @@
 import { isLoggedIn } from 'state/auth/getters';
-import React, { useState, ReactNode, useEffect } from 'react';
+import React, {
+  useState,
+  ReactNode,
+  useEffect,
+  FunctionComponent,
+} from 'react';
 import { useRouter } from 'next/dist/client/router';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
@@ -11,7 +16,9 @@ interface PrivateRouteData {
   children?: ReactNode;
 }
 
-const PrivateRoute = (args: PrivateRouteData): JSX.Element => {
+const PrivateRoute: FunctionComponent<PrivateRouteData> = (
+  args: PrivateRouteData
+) => {
   const [isLoading, setLoading] = useState(true);
   const router = useRouter();
 

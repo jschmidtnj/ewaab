@@ -15,7 +15,7 @@ import {
   UpdatePostMutationVariables,
   UserFieldsFragment,
 } from 'lib/generated/datamodel';
-import { useEffect, useRef, useState } from 'react';
+import { FunctionComponent, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 import * as yup from 'yup';
@@ -46,7 +46,7 @@ interface PreviewImageData {
   height: number;
 }
 
-const WritePostModal = (args: ModalArgs): JSX.Element => {
+const WritePostModal: FunctionComponent<ModalArgs> = (args: ModalArgs) => {
   const user = useSelector<RootState, UserFieldsFragment | undefined>(
     (state) => state.authReducer.user
   );

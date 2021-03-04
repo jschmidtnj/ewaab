@@ -114,6 +114,9 @@ type MessageGroup {
   """date created"""
   created: Float!
 
+  """user message group data"""
+  groupData: MessageGroupUser!
+
   """group id"""
   id: String!
 
@@ -128,6 +131,27 @@ type MessageGroup {
 
   """users in active message"""
   users: [PublicUser!]!
+}
+
+"""message group user data"""
+type MessageGroupUser {
+  """group id"""
+  groupID: String!
+
+  """message group read id"""
+  id: String!
+
+  """message id"""
+  messageID: String
+
+  """date read"""
+  time: Float!
+
+  """unread message count"""
+  unreadCount: Int
+
+  """user id"""
+  userID: String!
 }
 
 """message sort options"""

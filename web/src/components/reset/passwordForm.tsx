@@ -15,12 +15,15 @@ import {
   numberRegex,
   specialCharacterRegex,
 } from 'shared/variables';
+import { FunctionComponent } from 'react';
 
 interface PasswordFormArgs {
   resetToken: string;
 }
 
-const PasswordForm = (args: PasswordFormArgs): JSX.Element => {
+const PasswordForm: FunctionComponent<PasswordFormArgs> = (
+  args: PasswordFormArgs
+) => {
   const router = useRouter();
   return (
     <Formik

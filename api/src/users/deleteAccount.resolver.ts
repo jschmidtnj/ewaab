@@ -9,7 +9,7 @@ import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import { deleteMessages } from '../messages/deleteMessages.resolver';
-import MessageGroup from '../schema/users/messageGroup.entity';
+import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
 
 @ArgsType()
 class DeleteArgs {
@@ -67,6 +67,16 @@ class DeleteResolver {
           group: messageGroup.id
         }, userFindRes.id);
       }
+    }
+
+    const MessageGroupUserModel = getRepository(MessageGroupUser);
+    for (const messageGroupUserData of await MessageGroupUserModel.find({
+      where: {
+        userID: userFindRes.id
+      },
+      select: ['id']
+    })) {
+      await MessageGroupUserModel.delete(messageGroupUserData.id);
     }
 
     const userData = userFindRes as User;

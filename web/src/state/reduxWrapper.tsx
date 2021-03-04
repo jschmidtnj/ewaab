@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware, compose } from 'redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -50,7 +50,9 @@ interface WrapReduxArgs {
   children?: ReactNode;
 }
 
-export const WrapRedux = (args: WrapReduxArgs): JSX.Element => (
+export const WrapRedux: FunctionComponent<WrapReduxArgs> = (
+  args: WrapReduxArgs
+) => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       {args.children}

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
 import Header from 'components/Header';
 import Footer from 'components/Footer';
 import EmptyLayout from './empty';
@@ -7,7 +7,7 @@ interface LayoutArgs {
   children: ReactNode;
 }
 
-const Layout = (args: LayoutArgs): JSX.Element => {
+const Layout: FunctionComponent<LayoutArgs> = (args: LayoutArgs) => {
   return (
     <EmptyLayout>
       <Header />

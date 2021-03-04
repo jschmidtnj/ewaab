@@ -3,7 +3,7 @@ import { Args, ArgsType, Ctx, Field, Mutation, Resolver } from 'type-graphql';
 import { getRepository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyLoggedIn } from '../auth/checkAuth';
-import MessageGroup from '../schema/users/messageGroup.entity';
+import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
 import { uuidRegex } from '../shared/variables';
 import { GraphQLContext } from '../utils/context';
 import { arrayHash } from '../utils/misc';
@@ -48,6 +48,15 @@ class AddMessageGroupResolver {
       userIDs: args.members,
       usersHash: memberHash
     });
+
+    const MessageGroupUserModel = getRepository(MessageGroupUser);
+    for (const userID of args.members) {
+      await MessageGroupUserModel.save({
+        groupID: newMessageGroup.id,
+        time: now,
+        userID,
+      });
+    }
 
     return `created message group with id ${newMessageGroup.id}`;
   }

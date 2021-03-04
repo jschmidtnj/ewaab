@@ -8,7 +8,7 @@ import { Matches } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
 import { bulkWriteToElastic } from '../elastic/elastic';
 import { WriteType } from '../elastic/writeType';
-import MessageGroup from '../schema/users/messageGroup.entity';
+import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
 import { arrayHash } from '../utils/misc';
 
 @ArgsType()
@@ -44,10 +44,11 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
   }
 
   const MessageGroupModel = getRepository(MessageGroup);
-  if (!sender) {
-    // if there's no sender, the whole group gets deleted
-    await MessageGroupModel.delete(args.group);
-  } else {
+
+  // if there's no sender, the whole group gets deleted
+  let deleteMessageGroup = !sender;
+
+  if (sender) {
     const messageGroup = await MessageGroupModel.findOne(args.group, {
       select: ['id', 'userCount']
     });
@@ -55,7 +56,7 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
       throw new Error('cannot find message group');
     }
     if (messageGroup.userCount === 2) {
-      await MessageGroupModel.delete(args.group);
+      deleteMessageGroup = true;
     } else {
       const userIDs = messageGroup.userIDs.filter(id => id !== sender);
       const usersHash = arrayHash(userIDs);
@@ -68,6 +69,19 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
         userCount: messageGroup.userCount - 1
       });
     }
+  }
+
+  if (deleteMessageGroup) {
+    const MessageGroupUserModel = getRepository(MessageGroupUser);
+    for (const messageGroupUserData of await MessageGroupUserModel.find({
+      where: {
+        groupID: args.group
+      },
+      select: ['id']
+    })) {
+      await MessageGroupUserModel.delete(messageGroupUserData.id);
+    }
+    await MessageGroupModel.delete(args.group);
   }
 };
 

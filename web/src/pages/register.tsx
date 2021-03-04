@@ -5,7 +5,7 @@ import {
   Register,
 } from 'lib/generated/datamodel';
 import { useRouter } from 'next/dist/client/router';
-import { useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
@@ -27,7 +27,7 @@ import {
 import { isSSR } from 'utils/checkSSR';
 import { defaultLoggedInPage } from 'utils/variables';
 
-const RegisterPage = (): JSX.Element => {
+const RegisterPage: FunctionComponent = () => {
   const router = useRouter();
   const [registrationToken, setRegistrationToken] = useState<
     string | undefined

@@ -1,4 +1,4 @@
-import React from 'react';
+import { FunctionComponent } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { getAPIURL } from 'utils/axios';
 import Image from 'next/image';
@@ -8,7 +8,7 @@ interface AvatarArgs {
   avatarWidth: number;
 }
 
-const Avatar = (args: AvatarArgs): JSX.Element => {
+const Avatar: FunctionComponent<AvatarArgs> = (args: AvatarArgs) => {
   const apiURL = getAPIURL();
   return args.avatar ? (
     <LazyLoadImage

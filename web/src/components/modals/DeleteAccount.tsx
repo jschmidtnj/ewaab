@@ -1,9 +1,11 @@
+import { FunctionComponent } from 'react';
+
 interface ModalArgs {
   toggleModal: () => void;
   onSubmit: () => Promise<void>;
 }
 
-const DeleteAccount = (args: ModalArgs): JSX.Element => {
+const DeleteAccount: FunctionComponent<ModalArgs> = (args: ModalArgs) => {
   return (
     <div className="fixed z-50 inset-0 overflow-y-auto">
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">

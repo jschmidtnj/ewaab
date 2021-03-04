@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { IntlProvider } from 'react-intl';
 import { useRouter } from 'next/dist/client/router';
@@ -21,7 +21,7 @@ interface LayoutArgs {
 // TODO - see https://github.com/staylor/react-helmet-async/issues/26
 // try adding react-helmet-async to this
 
-const EmptyLayout = (args: LayoutArgs): JSX.Element => {
+const EmptyLayout: FunctionComponent<LayoutArgs> = (args: LayoutArgs) => {
   const router = useRouter();
 
   const currentTheme = Theme.light;

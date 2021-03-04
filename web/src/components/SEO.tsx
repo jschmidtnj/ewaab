@@ -1,11 +1,12 @@
 import Head from 'next/head';
+import { FunctionComponent } from 'react';
 import PWATags from './PWA';
 
 interface SEOArgs {
   page: string;
 }
 
-const SEO = (args: SEOArgs): JSX.Element => {
+const SEO: FunctionComponent<SEOArgs> = (args: SEOArgs) => {
   return (
     <>
       <Head>
@@ -16,10 +17,7 @@ const SEO = (args: SEOArgs): JSX.Element => {
         />
         <meta name="keywords" content="lamp" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <meta
-          name="viewport"
-          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"
-        />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="manifest" href="/manifest.json" />
         <link href="/favicon.ico" rel="icon" type="image/png" sizes="16x16" />
         <link

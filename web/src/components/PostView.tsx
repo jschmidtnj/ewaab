@@ -18,7 +18,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { postMediaWidth } from 'shared/variables';
 import { FiFileText } from 'react-icons/fi';
 import Markdown from './markdown/Markdown';
-import { Picker } from 'emoji-mart';
+import { FunctionComponent } from 'react';
 
 interface MediaViewArgs {
   id: string;
@@ -26,7 +26,7 @@ interface MediaViewArgs {
   type: MediaType;
 }
 
-const MediaView = (args: MediaViewArgs): JSX.Element => {
+const MediaView: FunctionComponent<MediaViewArgs> = (args: MediaViewArgs) => {
   const apiURL = getAPIURL();
   const mediaAuth = useSelector<RootState, string | undefined>(
     (state) => state.authReducer.user?.mediaAuth
@@ -60,7 +60,7 @@ interface PostViewArgs {
   onUpdatePost: (id: string) => void;
 }
 
-const PostView = (args: PostViewArgs): JSX.Element => {
+const PostView: FunctionComponent<PostViewArgs> = (args: PostViewArgs) => {
   const router = useRouter();
 
   const userID = useSelector<RootState, string | undefined>(
@@ -169,10 +169,7 @@ const PostView = (args: PostViewArgs): JSX.Element => {
           )}
         </>
       )}
-      <div>
-        <Picker />
-        {/* TODO - add reactions, fix emoji picker */}
-      </div>
+      <div>{/* TODO - add reactions, fix emoji picker */}</div>
     </div>
   );
 };

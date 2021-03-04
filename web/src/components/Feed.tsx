@@ -7,7 +7,7 @@ import {
   PostType,
   UserType,
 } from 'lib/generated/datamodel';
-import { useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { ApolloError, ApolloQueryResult } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
@@ -27,7 +27,7 @@ interface FeedArgs {
   postType: PostType;
 }
 
-const Feed = (args: FeedArgs): JSX.Element => {
+const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
     undefined
   );

@@ -7,7 +7,7 @@ interface EditorArgs {
   value: string;
 }
 
-const Editor = (args: EditorArgs): JSX.Element => {
+const Editor: FunctionComponent<EditorArgs> = (args: EditorArgs) => {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   return (
     <div className="flex flex-col w-full">

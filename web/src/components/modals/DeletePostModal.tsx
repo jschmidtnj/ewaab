@@ -3,6 +3,7 @@ import {
   DeletePostMutationVariables,
   DeletePost,
 } from 'lib/generated/datamodel';
+import { FunctionComponent } from 'react';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
 
@@ -12,7 +13,7 @@ interface ModalArgs {
   variables: DeletePostMutationVariables;
 }
 
-const DeletePostModal = (args: ModalArgs): JSX.Element => {
+const DeletePostModal: FunctionComponent<ModalArgs> = (args: ModalArgs) => {
   return (
     <div className="fixed z-50 inset-0 overflow-y-auto">
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">

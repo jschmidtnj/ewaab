@@ -30,7 +30,7 @@ import { thunkGetUser, thunkLogout } from 'state/auth/thunks';
 import { AuthActionTypes } from 'state/auth/types';
 import { AppThunkDispatch } from 'state/thunk';
 import { isSSR } from 'utils/checkSSR';
-import React, { useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { RootState } from 'state';
 import Image from 'next/image';
 import Avatar from 'components/Avatar';
@@ -93,7 +93,7 @@ const LinkSpan = ({ link }: LinkSpanArgs): JSX.Element => {
   );
 };
 
-const ProfilePage = (): JSX.Element => {
+const ProfilePage: FunctionComponent = () => {
   let dispatchAuthThunk: AppThunkDispatch<AuthActionTypes>;
   if (!isSSR) {
     dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
