@@ -54,19 +54,25 @@ class DeleteResolver {
       throw new Error('no user found');
     }
 
-    const MessageGroupModel = getRepository(MessageGroup);
-    const messageGroups = await MessageGroupModel.find({
-      where: {
-        userIDs: Any([userFindRes.id])
-      },
-      select: ['id', 'userCount']
-    });
-    for (const messageGroup of messageGroups) {
-      if (messageGroup.userCount === 2) {
-        await deleteMessages({
-          group: messageGroup.id
-        }, userFindRes.id);
+    try {
+      const MessageGroupModel = getRepository(MessageGroup);
+      const messageGroups = await MessageGroupModel.find({
+        where: {
+          userIDs: Any([userFindRes.id])
+        },
+        select: ['id', 'userCount']
+      });
+      for (const messageGroup of messageGroups) {
+        if (messageGroup.userCount === 2) {
+          await deleteMessages({
+            group: messageGroup.id
+          }, userFindRes.id);
+        }
       }
+    } catch (err) {
+      // TODO - fix this
+      // eslint-disable-next-line no-console
+      console.error(JSON.stringify(err));
     }
 
     const MessageGroupUserModel = getRepository(MessageGroupUser);

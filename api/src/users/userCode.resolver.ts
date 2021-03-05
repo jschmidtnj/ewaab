@@ -16,6 +16,9 @@ class NewUserCodeArgs {
     message: `name must contain at least ${strMinLen} characters`
   })
   name: string;
+
+  @Field({ description: 'execute as pseudo-admin when not in production', nullable: true })
+  executeAdmin?: boolean;
 }
 
 @ArgsType()
@@ -31,7 +34,7 @@ class DeleteUserCodeArgs {
 class UserCodeResolver {
   @Mutation(_returns => String)
   async addUserCode(@Args() args: NewUserCodeArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
-    if (!verifyAdmin(ctx) || !ctx.auth) {
+    if (!verifyAdmin(ctx, args.executeAdmin)) {
       throw new Error('user must be admin');
     }
     const UserCodeModel = getRepository(UserCode);
@@ -40,11 +43,12 @@ class UserCodeResolver {
       length: 30,
       numbers: true
     });
-    const code = await argon2.hash(`${id}:${password}`);
+    const hashed = await argon2.hash(password);
+    const code = `${id}:${password}`;
     const now = new Date().getTime();
     await UserCodeModel.save({
       id,
-      code,
+      code: hashed,
       created: now,
       name: args.name,
       tokenVersion: 0

@@ -32,7 +32,11 @@ const persistedReducer = persistReducer(
     key: 'ewaab-internal-network',
     storage,
     transforms: [
-      createWhitelistFilter('authReducer', ['loggedIn', 'username']),
+      createWhitelistFilter('authReducer', [
+        'loggedIn',
+        'username',
+        'userType',
+      ]),
     ],
     blacklist: ['searchReducer'],
   },

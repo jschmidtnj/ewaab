@@ -44,3 +44,55 @@ export const postWriteMap: Record<UserType, PostType[]> = {
   [UserType.Mentor]: [PostType.MentorNews],
   [UserType.Visitor]: [],
 };
+
+export interface LinkData {
+  name: string;
+  href: string;
+}
+
+export const linkMap: Record<PostType, LinkData> = {
+  [PostType.Community]: {
+    name: 'community',
+    href: '/community',
+  },
+  [PostType.EhParticipantNews]: {
+    name: 'participant news',
+    href: '/participant-news',
+  },
+  [PostType.EncourageHer]: {
+    name: 'encourage her',
+    href: '/encourage-her',
+  },
+  [PostType.MentorNews]: {
+    name: 'mentor news',
+    href: '/mentor-news',
+  },
+};
+
+export const profileLink: LinkData = {
+  name: 'profile',
+  href: '/profile',
+};
+export const usersLink: LinkData = {
+  name: 'students',
+  href: '/users',
+};
+export const loginLink: LinkData = {
+  name: 'login',
+  href: '/login',
+};
+export const searchLink: LinkData = {
+  name: 'search',
+  href: '/search',
+};
+
+export const feedPaths: string[] = Object.values(linkMap).map(
+  (elem) => elem.href
+);
+
+export const allDefinedPaths: string[] = [
+  ...feedPaths,
+  ...[profileLink, usersLink, loginLink, searchLink].map((elem) => elem.href),
+];
+
+export const allowedVisitorPaths: LinkData[] = [usersLink];

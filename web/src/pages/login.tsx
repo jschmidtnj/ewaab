@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { getUserType, isLoggedIn } from 'state/auth/getters';
+import { getType, isLoggedIn } from 'state/auth/getters';
 import {
   thunkGetUser,
   thunkLogin,
@@ -87,11 +87,15 @@ const Login: FunctionComponent = () => {
           });
           return;
         }
+      } else {
+        if (urlParams.has('code')) {
+          setUseCode(true);
+        }
       }
       try {
         const loggedIn = await isLoggedIn();
         if (localToken === undefined && loggedIn) {
-          const userType = getUserType();
+          const userType = getType();
           if (userType === UserType.Visitor) {
             router.replace(
               redirect !== null ? redirect : defaultLoggedInPageVisitor
@@ -118,6 +122,7 @@ const Login: FunctionComponent = () => {
           </div>
           {useCode ? (
             <Formik
+              key="loginCode"
               initialValues={{
                 code: '',
               }}
@@ -150,7 +155,7 @@ const Login: FunctionComponent = () => {
                     const recaptchaToken = await window.grecaptcha.execute(
                       process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
                       {
-                        action: 'login-code',
+                        action: 'login_code',
                       }
                     );
                     await dispatchAuthThunk(
@@ -165,7 +170,8 @@ const Login: FunctionComponent = () => {
                     );
                   } catch (err) {
                     const errObj: Error = err;
-                    toast(errObj.message, {
+                    console.error(JSON.stringify(errObj));
+                    toast('invalid code provided', {
                       type: 'error',
                     });
                     onError();
@@ -186,7 +192,7 @@ const Login: FunctionComponent = () => {
                   <input type="hidden" name="remember" value="true" />
                   <div className="rounded-md shadow-sm -space-y-px">
                     <div>
-                      <label htmlFor="password" className="sr-only">
+                      <label htmlFor="code" className="sr-only">
                         Code
                       </label>
                       <input
@@ -195,7 +201,7 @@ const Login: FunctionComponent = () => {
                         type="password"
                         autoComplete="current-code"
                         required
-                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                         placeholder="Code"
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -229,7 +235,8 @@ const Login: FunctionComponent = () => {
                     </div>
                     <div className="text-sm">
                       <button
-                        className="font-medium text-indigo-600 hover:text-indigo-500"
+                        type="button"
+                        className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
                         onClick={(evt) => {
                           evt.preventDefault();
                           setUseCode(false);
@@ -273,6 +280,7 @@ const Login: FunctionComponent = () => {
             </Formik>
           ) : (
             <Formik
+              key="login"
               initialValues={{
                 usernameEmail: '',
                 password: '',
@@ -430,13 +438,9 @@ const Login: FunctionComponent = () => {
                     </div>
 
                     <div className="text-sm">
-                      <Link href="reset">
-                        <a className="font-medium text-indigo-600 hover:text-indigo-500">
-                          Forgot your password?
-                        </a>
-                      </Link>
                       <button
-                        className="font-medium text-indigo-600 hover:text-indigo-500"
+                        type="button"
+                        className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none mr-2"
                         onClick={(evt) => {
                           evt.preventDefault();
                           setUseCode(true);
@@ -444,6 +448,11 @@ const Login: FunctionComponent = () => {
                       >
                         Code Login
                       </button>
+                      <Link href="reset">
+                        <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                          Forgot your password?
+                        </a>
+                      </Link>
                     </div>
                   </div>
 

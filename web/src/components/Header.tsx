@@ -13,35 +13,20 @@ import { AppThunkDispatch } from 'state/thunk';
 import Avatar from 'components/Avatar';
 import { RootState } from 'state';
 import { avatarWidth } from 'shared/variables';
-import { PostType, UserFieldsFragment } from 'lib/generated/datamodel';
+import { UserFieldsFragment, UserType } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
 import { getType, getUsername } from 'state/auth/getters';
-import { postViewMap } from 'utils/variables';
+import {
+  allowedVisitorPaths,
+  LinkData,
+  linkMap,
+  loginLink,
+  postViewMap,
+  profileLink,
+  searchLink,
+  usersLink,
+} from 'utils/variables';
 import VisibilitySensor from 'react-visibility-sensor';
-
-interface LinkData {
-  name: string;
-  href: string;
-}
-
-const linkMap: Record<PostType, LinkData> = {
-  [PostType.Community]: {
-    name: 'community',
-    href: '/community',
-  },
-  [PostType.EhParticipantNews]: {
-    name: 'participant news',
-    href: '/participant-news',
-  },
-  [PostType.EncourageHer]: {
-    name: 'encourage her',
-    href: '/encourage-her',
-  },
-  [PostType.MentorNews]: {
-    name: 'mentor news',
-    href: '/mentor-news',
-  },
-};
 
 const Header: FunctionComponent = () => {
   const dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
@@ -69,17 +54,13 @@ const Header: FunctionComponent = () => {
   useEffect(() => {
     (async () => {
       if (!loggedIn) {
-        setPaths([
-          {
-            name: 'login',
-            href: '/login',
-          },
-          {
-            name: 'students',
-            href: '/users',
-          },
-        ]);
+        setPaths([loginLink]);
       } else {
+        const userType = getType();
+        if (userType === UserType.Visitor) {
+          setPaths(allowedVisitorPaths);
+          return;
+        }
         if (!user) {
           try {
             await dispatchAuthThunk(thunkGetUser());
@@ -90,31 +71,17 @@ const Header: FunctionComponent = () => {
             });
           }
         }
-        const userType = getType();
         const feedPaths = postViewMap[userType].map(
           (postType) => linkMap[postType]
         );
-        setPaths([
-          ...feedPaths,
-          {
-            name: 'students',
-            href: '/users',
-          },
-          {
-            name: 'search',
-            href: '/search',
-          },
-        ]);
+        setPaths([...feedPaths, usersLink, searchLink]);
         const username = getUsername();
         setUserPaths([
           {
             name: 'account',
             href: `/${username}`,
           },
-          {
-            name: 'profile',
-            href: '/profile',
-          },
+          profileLink,
         ]);
       }
     })();
@@ -235,7 +202,10 @@ const Header: FunctionComponent = () => {
                     id="user-menu"
                     aria-haspopup="true"
                   >
-                    <Avatar avatar={user?.avatar} avatarWidth={avatarWidth} />
+                    <Avatar
+                      avatar={user ? user.avatar : undefined}
+                      avatarWidth={avatarWidth}
+                    />
                   </button>
                 </div>
                 <div

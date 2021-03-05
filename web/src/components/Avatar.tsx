@@ -12,7 +12,7 @@ const Avatar: FunctionComponent<AvatarArgs> = (args: AvatarArgs) => {
   const apiURL = getAPIURL();
   return args.avatar ? (
     <LazyLoadImage
-      className="h-5 w-5 rounded-full"
+      className="h-10 w-10 rounded-full"
       alt={`${apiURL}/media/${args.avatar}/blur`}
       src={`${apiURL}/media/${args.avatar}`}
       width={args.avatarWidth}

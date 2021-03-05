@@ -35,6 +35,7 @@ import { defaultMajor } from 'shared/majors';
 import Avatar from 'components/Avatar';
 import Markdown from 'components/markdown/Markdown';
 import { defaultUniversity } from 'shared/universities';
+import PrivateRoute from 'components/PrivateRoute';
 
 const avatarWidth = 40;
 
@@ -84,160 +85,163 @@ const UserPage: FunctionComponent = () => {
     }
   }, []);
   return (
-    <Layout>
-      <SEO page={user ? user.username : 'user'} />
-      <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
-        {!user ? (
-          <p className="text-sm">loading...</p>
-        ) : (
-          <>
-            <div className="lg:flex lg:items-center lg:justify-between">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center">
-                  <Avatar avatar={user?.avatar} avatarWidth={avatarWidth} />
-                  <h2 className="ml-3 inline-block text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    {user.name}
-                  </h2>
-                </div>
-                <div className="mt-2 ml-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3">
-                  {!user.pronouns ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <a href={user.url} target="_blank" rel="noreferrer">
-                        <IoPersonCircle className="inline-block mr-1 text-md" />
-                        <span className="text-sm">{user.pronouns}</span>
-                      </a>
-                    </div>
-                  )}
-                  {!user.locationName ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <GrLocation className="inline-block mr-1 text-md" />
-                      <span className="text-sm">{user.locationName}</span>
-                    </div>
-                  )}
-                  <div className="mt-1 flex items-center text-gray-500">
-                    <a href={`mailto:${user.email}`}>
-                      <FaEnvelope className="inline-block mr-2 text-md" />
-                      <span className="text-sm">{user.email}</span>
-                    </a>
+    <PrivateRoute>
+      <Layout>
+        <SEO page={user ? user.username : 'user'} />
+        <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
+          {!user ? (
+            <p className="text-sm">loading...</p>
+          ) : (
+            <>
+              <div className="lg:flex lg:items-center lg:justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center">
+                    <Avatar avatar={user?.avatar} avatarWidth={avatarWidth} />
+                    <h2 className="ml-3 inline-block text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                      {user.name}
+                    </h2>
                   </div>
-                  {!user.url ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <a href={user.url} target="_blank" rel="noreferrer">
-                        <BsLink45Deg className="inline-block mr-1 text-md" />
-                        <span className="text-sm">{user.url}</span>
+                  <div className="mt-2 ml-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3">
+                    {!user.pronouns ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <a href={user.url} target="_blank" rel="noreferrer">
+                          <IoPersonCircle className="inline-block mr-1 text-md" />
+                          <span className="text-sm">{user.pronouns}</span>
+                        </a>
+                      </div>
+                    )}
+                    {!user.locationName ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <GrLocation className="inline-block mr-1 text-md" />
+                        <span className="text-sm">{user.locationName}</span>
+                      </div>
+                    )}
+                    <div className="mt-1 flex items-center text-gray-500">
+                      <a href={`mailto:${user.email}`}>
+                        <FaEnvelope className="inline-block mr-2 text-md" />
+                        <span className="text-sm">{user.email}</span>
                       </a>
                     </div>
-                  )}
+                    {!user.url ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <a href={user.url} target="_blank" rel="noreferrer">
+                          <BsLink45Deg className="inline-block mr-1 text-md" />
+                          <span className="text-sm">{user.url}</span>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-1 ml-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3">
+                    {!user.resume ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <a
+                          href={`${apiURL}/media/${user.resume}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <FiFileText className="inline-block mr-1 text-md" />
+                          <span className="text-sm">resume</span>
+                        </a>
+                      </div>
+                    )}
+                    {user.university === defaultUniversity ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <FaSchool className="inline-block mr-1 text-md" />
+                        <span className="text-sm">
+                          {capitalizeFirstLetter(user.university)}
+                        </span>
+                      </div>
+                    )}
+                    {user.major === defaultMajor ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <IoMdSchool className="inline-block mr-1 text-md" />
+                        <span className="text-sm">
+                          {capitalizeFirstLetter(user.major)}
+                        </span>
+                      </div>
+                    )}
+                    {!user.mentor ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <BsPersonSquare className="inline-block mr-1 text-md" />
+                        <span className="text-sm">{user.mentor}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-1 ml-2 flex flex-row flex-wrap space-x-2">
+                    {!user.github ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <a
+                          href={`${baseGitHub}/${user.github}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <FaGithub />
+                        </a>
+                      </div>
+                    )}
+                    {!user.facebook ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <a
+                          href={`${baseFacebook}/${user.facebook}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <FaFacebook />
+                        </a>
+                      </div>
+                    )}
+                    {!user.twitter ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <a
+                          href={`${baseTwitter}/${user.twitter}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <FaTwitter />
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-1 ml-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3">
-                  {!user.resume ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <a
-                        href={`${apiURL}/media/${user.resume}`}
-                        target="_blank"
-                        rel="noreferrer"
+                {!currentUser ||
+                user.username !== currentUser.username ? null : (
+                  <div className="mt-5 flex lg:mt-0 lg:ml-4">
+                    <span className="sm:ml-3">
+                      <button
+                        type="button"
+                        onClick={(evt) => {
+                          evt.preventDefault();
+                          router.push('/profile');
+                        }}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
-                        <FiFileText className="inline-block mr-1 text-md" />
-                        <span className="text-sm">resume</span>
-                      </a>
-                    </div>
-                  )}
-                  {user.university === defaultUniversity ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <FaSchool className="inline-block mr-1 text-md" />
-                      <span className="text-sm">
-                        {capitalizeFirstLetter(user.university)}
-                      </span>
-                    </div>
-                  )}
-                  {user.major === defaultMajor ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <IoMdSchool className="inline-block mr-1 text-md" />
-                      <span className="text-sm">
-                        {capitalizeFirstLetter(user.major)}
-                      </span>
-                    </div>
-                  )}
-                  {!user.mentor ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <BsPersonSquare className="inline-block mr-1 text-md" />
-                      <span className="text-sm">{user.mentor}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-1 ml-2 flex flex-row flex-wrap space-x-2">
-                  {!user.github ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <a
-                        href={`${baseGitHub}/${user.github}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <FaGithub />
-                      </a>
-                    </div>
-                  )}
-                  {!user.facebook ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <a
-                        href={`${baseFacebook}/${user.facebook}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <FaFacebook />
-                      </a>
-                    </div>
-                  )}
-                  {!user.twitter ? null : (
-                    <div className="mt-1 flex items-center text-md text-gray-500">
-                      <a
-                        href={`${baseTwitter}/${user.twitter}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <FaTwitter />
-                      </a>
-                    </div>
-                  )}
-                </div>
+                        <svg
+                          className="-ml-1 mr-2 h-5 w-5 text-gray-500"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                        Edit
+                      </button>
+                    </span>
+                  </div>
+                )}
               </div>
-              {!currentUser || user.username !== currentUser.username ? null : (
-                <div className="mt-5 flex lg:mt-0 lg:ml-4">
-                  <span className="sm:ml-3">
-                    <button
-                      type="button"
-                      onClick={(evt) => {
-                        evt.preventDefault();
-                        router.push('/profile');
-                      }}
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      <svg
-                        className="-ml-1 mr-2 h-5 w-5 text-gray-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                      Edit
-                    </button>
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="mt-4 ml-2">
-              <p>{user.description}</p>
-            </div>
-            <div className="mt-3 ml-1">
-              <hr className="mt-2 mb-4" />
-              <Markdown content={user.bio} />
-            </div>
-          </>
-        )}
-      </div>
-    </Layout>
+              <div className="mt-4 ml-2">
+                <p>{user.description}</p>
+              </div>
+              <div className="mt-3 ml-1">
+                <hr className="mt-2 mb-4" />
+                <Markdown content={user.bio} />
+              </div>
+            </>
+          )}
+        </div>
+      </Layout>
+    </PrivateRoute>
   );
 };
 

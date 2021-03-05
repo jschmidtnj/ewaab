@@ -47,6 +47,15 @@ enum CommentSortOption {
   updated
 }
 
+"""login output"""
+type LoginOutput {
+  """token"""
+  token: String!
+
+  """user type"""
+  type: UserType!
+}
+
 """media object"""
 type Media {
   """file size"""
@@ -199,6 +208,9 @@ type Mutation {
     reaction: String!
   ): String!
   addUserCode(
+    """execute as pseudo-admin when not in production"""
+    executeAdmin: Boolean
+
     """name"""
     name: String!
   ): String!
@@ -259,7 +271,7 @@ type Mutation {
 
     """username or email"""
     usernameEmail: String!
-  ): String!
+  ): LoginOutput!
   loginVisitor(
     """code"""
     code: String!

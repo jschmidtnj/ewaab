@@ -8,7 +8,7 @@ export const SET_USER = 'SET_USER';
 export interface Login {
   authToken: string;
   loggedIn: boolean;
-  isVisitor: boolean;
+  userType: UserType;
 }
 
 export interface AuthState {

@@ -14,9 +14,14 @@ import {
   UserFieldsFragment,
   LoginVisitorMutation,
   LoginVisitorMutationVariables,
+  LoginVisitor,
+  LoginOutput,
+  UserType,
 } from 'lib/generated/datamodel';
 
-const loginMutation = async (args: LoginMutationVariables): Promise<string> => {
+const loginMutation = async (
+  args: LoginMutationVariables
+): Promise<LoginOutput> => {
   const apolloRes = await client.mutate<LoginMutation, LoginMutationVariables>({
     mutation: Login,
     variables: args,
@@ -31,12 +36,12 @@ const loginMutation = async (args: LoginMutationVariables): Promise<string> => {
 export const thunkLogin = (
   args: LoginMutationVariables
 ): AppThunkAction<Promise<void>> => async (dispatch) => {
-  const authToken = await loginMutation(args);
+  const data = await loginMutation(args);
   dispatch(
     login({
-      authToken,
+      authToken: data.token,
+      userType: data.type,
       loggedIn: true,
-      isVisitor: false,
     })
   );
 };
@@ -48,7 +53,7 @@ const loginVisitorMutation = async (
     LoginVisitorMutation,
     LoginVisitorMutationVariables
   >({
-    mutation: Login,
+    mutation: LoginVisitor,
     variables: args,
   });
   if (apolloRes.data) {
@@ -66,7 +71,7 @@ export const thunkLoginVisitor = (
     login({
       authToken,
       loggedIn: true,
-      isVisitor: true,
+      userType: UserType.Visitor,
     })
   );
 };

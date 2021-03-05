@@ -57,6 +57,15 @@ export enum CommentSortOption {
   Updated = 'updated',
 }
 
+/** login output */
+export type LoginOutput = {
+  __typename?: 'LoginOutput';
+  /** token */
+  token: Scalars['String'];
+  /** user type */
+  type: UserType;
+};
+
 /** media object */
 export type Media = {
   __typename?: 'Media';
@@ -168,7 +177,7 @@ export type Mutation = {
   deleteReaction: Scalars['String'];
   deleteUserCode: Scalars['String'];
   inviteUser: Scalars['String'];
-  login: Scalars['String'];
+  login: LoginOutput;
   loginVisitor: Scalars['String'];
   logout: Scalars['String'];
   passwordReset: Scalars['String'];
@@ -210,6 +219,7 @@ export type MutationAddReactionArgs = {
 };
 
 export type MutationAddUserCodeArgs = {
+  executeAdmin?: Maybe<Scalars['Boolean']>;
   name: Scalars['String'];
 };
 
@@ -1045,10 +1055,9 @@ export type LoginMutationVariables = Exact<{
   recaptchaToken: Scalars['String'];
 }>;
 
-export type LoginMutation = { __typename?: 'Mutation' } & Pick<
-  Mutation,
-  'login'
->;
+export type LoginMutation = { __typename?: 'Mutation' } & {
+  login: { __typename?: 'LoginOutput' } & Pick<LoginOutput, 'token' | 'type'>;
+};
 
 export type LoginVisitorMutationVariables = Exact<{
   code: Scalars['String'];
@@ -1402,7 +1411,10 @@ export const Login = gql`
       usernameEmail: $usernameEmail
       password: $password
       recaptchaToken: $recaptchaToken
-    )
+    ) {
+      token
+      type
+    }
   }
 `;
 export const LoginVisitor = gql`

@@ -162,7 +162,6 @@ const RegisterPage: FunctionComponent = () => {
                         action: 'register',
                       })
                       .then(async (recaptchaToken: string) => {
-                        console.log('run');
                         try {
                           const registerRes = await client.mutate<
                             RegisterMutation,

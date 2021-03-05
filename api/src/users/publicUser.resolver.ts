@@ -15,7 +15,9 @@ class PublicUserArgs {
   username?: string;
 }
 
-export const publicUserSelect: (keyof PublicUser)[] = Object.keys(PublicUser) as (keyof PublicUser)[];
+export const publicUserSelect: (keyof PublicUser)[] = ['alumniYear', 'avatar', 'bio', 'created', 'description', 'email', 'facebook', 'github',
+  'id', 'jobTitle', 'location', 'locationName', 'major', 'mentor', 'name', 'pronouns', 'resume',
+  'twitter', 'type', 'university', 'updated', 'url', 'username'];
 
 @Resolver()
 class PublicUserResolver {

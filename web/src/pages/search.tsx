@@ -104,7 +104,7 @@ const SearchPage: FunctionComponent = () => {
       try {
         await runQuery(initialValues);
       } catch (err) {
-        console.log(JSON.stringify(err));
+        // console.log(JSON.stringify(err));
         toast((err as ApolloError).message, {
           type: 'error',
         });

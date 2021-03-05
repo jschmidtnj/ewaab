@@ -1,5 +1,5 @@
 import SimpleMDE from 'react-simplemde-editor';
-import { useState } from 'react';
+import { FunctionComponent, useState } from 'react';
 import Markdown from './Markdown';
 
 interface EditorArgs {

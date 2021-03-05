@@ -30,10 +30,14 @@ class LoginResolvers {
       throw new Error('invalid recaptcha token');
     }
     const UserCodeModel = getRepository(UserCode);
-    const codeID = args.code;
-    const code = args.code;
+    const codeSplit = args.code.split(':');
+    if (codeSplit.length !== 2) {
+      throw new Error('invalid code provided');
+    }
+    const codeID = codeSplit[0];
+    const code = codeSplit[1];
     const userData = await UserCodeModel.findOne(codeID, {
-      select: ['id', 'tokenVersion']
+      select: ['id', 'tokenVersion', 'code']
     });
     if (!userData) {
       throw new Error(`cannot find code with id ${codeID}`);
@@ -48,7 +52,8 @@ class LoginResolvers {
     });
     setCookies(ctx.res, await generateJWTRefresh({
       id: codeID,
-      tokenVersion: userData.tokenVersion
+      tokenVersion: userData.tokenVersion,
+      type: UserType.visitor
     }), await generateJWTMediaAccess({
       id: codeID,
       type: UserType.visitor

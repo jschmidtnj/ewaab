@@ -7,7 +7,7 @@ import { locationRegex } from '../shared/variables';
 import majors from '../shared/majors';
 import esb from 'elastic-builder';
 import { PaginationArgs } from '../schema/utils/pagination';
-import { verifyLoggedIn } from '../auth/checkAuth';
+import { verifyVisitor } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 
 @ArgsType()
@@ -57,7 +57,7 @@ class UsersArgs extends PaginationArgs {
 class UsersResolver {
   @Query(_returns => SearchUsersResult)
   async users(@Args() args: UsersArgs, @Ctx() ctx: GraphQLContext): Promise<SearchUsersResult> {
-    if (!verifyLoggedIn(ctx) || !ctx.auth) {
+    if (!verifyVisitor(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
 

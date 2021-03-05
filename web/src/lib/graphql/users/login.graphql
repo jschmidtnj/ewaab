@@ -1,3 +1,6 @@
 mutation login($usernameEmail: String!, $password: String!, $recaptchaToken: String!) {
-  login(usernameEmail: $usernameEmail, password: $password, recaptchaToken: $recaptchaToken)
+  login(usernameEmail: $usernameEmail, password: $password, recaptchaToken: $recaptchaToken) {
+    token
+    type
+  }
 }

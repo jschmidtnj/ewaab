@@ -4,6 +4,7 @@ import User, { UserType } from '../schema/users/user.entity';
 import { configData } from './config';
 import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
+import UserCode from '../schema/users/userCode.entity';
 
 export const verifyJWTExpiration = '1h';
 
@@ -35,6 +36,7 @@ export interface AuthData {
 export interface RefreshTokenData {
   id: string;
   tokenVersion: number;
+  type: UserType;
 }
 
 const accessJWTExpiration = '2h';
@@ -137,12 +139,7 @@ export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs): Promise<stri
   });
 };
 
-interface GenerateJWTRefreshArgs {
-  id: string;
-  tokenVersion: number;
-}
-
-export const generateJWTRefresh = (args: GenerateJWTRefreshArgs): Promise<string> => {
+export const generateJWTRefresh = (authData: RefreshTokenData): Promise<string> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -153,15 +150,13 @@ export const generateJWTRefresh = (args: GenerateJWTRefreshArgs): Promise<string
       reject(err as Error);
       return;
     }
-    const authData: RefreshTokenData = {
-      id: args.id,
-      tokenVersion: args.tokenVersion
-    };
     const signOptions: SignOptions = {
       issuer: jwtIssuer,
       expiresIn: refreshJWTExpiration
     };
-    sign(authData, secret, signOptions, (err, token) => {
+    sign({
+      ...authData
+    }, secret, signOptions, (err, token) => {
       if (err) {
         reject(err as Error);
       } else {
@@ -190,22 +185,47 @@ export const handleRefreshToken = (req: Request): Promise<string> => {
     const jwtConfig: VerifyOptions = {
       algorithms: ['HS256']
     };
-    verify(token, secret, jwtConfig, async (err, res: any) => {
+    verify(token, secret, jwtConfig, async (err, res) => {
       try {
         if (err) {
           throw err as Error;
         }
-        const UserModel = getRepository(User);
-        const user = await UserModel.findOne(res.id, {
-          select: ['tokenVersion', 'id', 'type', 'emailVerified']
-        });
-        if (!user) {
-          throw new Error('user not found');
+        const data = res as RefreshTokenData;
+        let generateArgs: GenerateJWTArgs;
+        let tokenVersion: number;
+        if (data.type === UserType.visitor) {
+          const UserCodeModel = getRepository(UserCode);
+          const userCodeData = await UserCodeModel.findOne(data.id, {
+            select: ['tokenVersion', 'id']
+          });
+          if (!userCodeData) {
+            throw new Error(`cannot find user code data with id ${data.id}`);
+          }
+          tokenVersion = userCodeData.tokenVersion;
+          generateArgs = {
+            emailVerified: true,
+            id: userCodeData.id,
+            type: UserType.visitor
+          };
+        } else {
+          const UserModel = getRepository(User);
+          const user = await UserModel.findOne(data.id, {
+            select: ['tokenVersion', 'id', 'type', 'emailVerified']
+          });
+          if (!user) {
+            throw new Error('user not found');
+          }
+          tokenVersion = user.tokenVersion;
+          generateArgs = {
+            emailVerified: user.emailVerified,
+            id: user.id,
+            type: user.type
+          };
         }
-        if (user.tokenVersion !== res.tokenVersion) {
+        if (tokenVersion !== data.tokenVersion) {
           throw new Error('invalid token version');
         }
-        resolve(await generateJWTAccess(user));
+        resolve(await generateJWTAccess(generateArgs));
       } catch (err) {
         const errObj = err as Error;
         reject(errObj);

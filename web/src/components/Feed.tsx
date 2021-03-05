@@ -81,7 +81,7 @@ const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
       try {
         await runQuery();
       } catch (err) {
-        console.log(JSON.stringify(err));
+        // console.log(JSON.stringify(err));
         toast((err as ApolloError).message, {
           type: 'error',
         });

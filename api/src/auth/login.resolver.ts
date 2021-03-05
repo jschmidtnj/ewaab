@@ -1,10 +1,10 @@
 import { GraphQLContext } from '../utils/context';
 import argon2 from 'argon2';
 import { generateJWTAccess, generateJWTMediaAccess, generateJWTRefresh } from '../utils/jwt';
-import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
+import { Resolver, ArgsType, Field, Args, Ctx, Mutation, ObjectType } from 'type-graphql';
 import { MinLength, Matches } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, capitalLetterRegex, lowercaseLetterRegex } from '../shared/variables';
-import User from '../schema/users/user.entity';
+import User, { UserType } from '../schema/users/user.entity';
 import { setCookies } from '../utils/cookies';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { FindOneOptions, getRepository } from 'typeorm';
@@ -36,10 +36,19 @@ class LoginArgs {
   password: string;
 }
 
+@ObjectType({ description: 'login output' })
+class LoginOutput {
+  @Field(_type => String, { description: 'token' })
+  token: string;
+
+  @Field(_type => UserType, { description: 'user type' })
+  type: UserType;
+}
+
 @Resolver()
 class LoginResolvers {
-  @Mutation(_returns => String)
-  async login(@Args() args: LoginArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
+  @Mutation(_returns => LoginOutput)
+  async login(@Args() args: LoginArgs, @Ctx() ctx: GraphQLContext): Promise<LoginOutput> {
     if (!(await verifyRecaptcha(args.recaptchaToken))) {
       throw new Error('invalid recaptcha token');
     }
@@ -73,7 +82,10 @@ class LoginResolvers {
     }
     const token = await generateJWTAccess(user);
     setCookies(ctx.res, await generateJWTRefresh(user), await generateJWTMediaAccess(user));
-    return token;
+    return {
+      token,
+      type: user.type
+    };
   }
 }
 

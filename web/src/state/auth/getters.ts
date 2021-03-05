@@ -24,12 +24,12 @@ export const refreshAuth = async (): Promise<void> => {
   store.dispatch(setToken(refreshTokenRes.data.data as string));
 };
 
-export const getType = (): UserType => {
+export const getType = (): UserType | undefined => {
   const state = (store.getState() as RootState).authReducer;
-  if (!state.loggedIn || !state.user) {
-    return UserType.Visitor;
+  if (!state.loggedIn) {
+    return undefined;
   }
-  return state.user.type as UserType;
+  return state.userType;
 };
 
 export const getUsername = (): string => {
@@ -40,17 +40,9 @@ export const getUsername = (): string => {
   return state.username;
 };
 
-export const getUserType = (): UserType | undefined => {
-  const state = (store.getState() as RootState).authReducer;
-  if (!state.loggedIn) {
-    return undefined;
-  }
-  return state.userType;
-};
-
 export const isLoggedIn = async (): Promise<boolean> => {
   const state = (store.getState() as RootState).authReducer;
-  if (!state.loggedIn) {
+  if (!state.loggedIn || !state.userType) {
     return false;
   }
   const checkAuthCallback = async (): Promise<boolean> => {

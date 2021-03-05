@@ -13,6 +13,7 @@ import MessageGroup from '../schema/users/messageGroup.entity';
  * 
  * @param {GraphQLContext} ctx context
  * @param {boolean} checkEmailVerified check if email verified
+ * @returns {boolean} if visitor is logged in
  */
 export const verifyVisitor = (ctx: GraphQLContext, checkEmailVerified = true): boolean => {
   return ctx.auth !== undefined && (checkEmailVerified ? ctx.auth.emailVerified : true);
@@ -23,6 +24,7 @@ export const verifyVisitor = (ctx: GraphQLContext, checkEmailVerified = true): b
  * 
  * @param {GraphQLContext} ctx context
  * @param {boolean} checkEmailVerified check if email verified
+ * @returns {boolean} if user is logged in
  */
 export const verifyLoggedIn = (ctx: GraphQLContext, checkEmailVerified = true): boolean => {
   return verifyVisitor(ctx, checkEmailVerified) && ctx.auth!.type !== UserType.visitor;
@@ -33,6 +35,7 @@ export const verifyLoggedIn = (ctx: GraphQLContext, checkEmailVerified = true): 
  * 
  * @param {GraphQLContext} ctx context
  * @param {boolean} executeAdmin ignores the verification (for initialization purposes)
+ * @returns {boolean} if user is admin
  */
 export const verifyAdmin = (ctx: GraphQLContext, executeAdmin?: boolean): boolean => {
   if (executeAdmin) {
