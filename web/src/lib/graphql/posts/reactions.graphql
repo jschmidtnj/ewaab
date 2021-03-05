@@ -1,0 +1,7 @@
+mutation addReaction($parent: String!, $parentType: ReactionParentType!, $reaction: String!) {
+  addReaction(parent: $parent, parentType: $parentType, reaction: $reaction)
+}
+
+mutation deleteReaction($id: String!) {
+  deleteReaction(id: $id)
+}

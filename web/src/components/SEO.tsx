@@ -6,7 +6,7 @@ interface SEOArgs {
   page: string;
 }
 
-const SEO: FunctionComponent<SEOArgs> = (args: SEOArgs) => {
+const SEO: FunctionComponent<SEOArgs> = (args) => {
   return (
     <>
       <Head>

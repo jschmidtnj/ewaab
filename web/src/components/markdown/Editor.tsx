@@ -7,7 +7,7 @@ interface EditorArgs {
   value: string;
 }
 
-const Editor: FunctionComponent<EditorArgs> = (args: EditorArgs) => {
+const Editor: FunctionComponent<EditorArgs> = (args) => {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   return (
     <div className="flex flex-col w-full">

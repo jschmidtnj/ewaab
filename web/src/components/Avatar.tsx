@@ -8,7 +8,7 @@ interface AvatarArgs {
   avatarWidth: number;
 }
 
-const Avatar: FunctionComponent<AvatarArgs> = (args: AvatarArgs) => {
+const Avatar: FunctionComponent<AvatarArgs> = (args) => {
   const apiURL = getAPIURL();
   return args.avatar ? (
     <LazyLoadImage

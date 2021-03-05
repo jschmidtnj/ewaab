@@ -8,6 +8,8 @@ import { messageIndexName } from '../elastic/settings';
 import { UserType } from '../schema/users/user.entity';
 import { Matches } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
+import { deleteReactions } from '../reactions/deleteReaction.resolver';
+import { ReactionParentType } from '../schema/reactions/reaction.entity';
 
 @ArgsType()
 class DeleteArgs {
@@ -32,6 +34,8 @@ class DeleteMessageResolver {
     if (!messageData) {
       throw new Error('no message found');
     }
+
+    await deleteReactions(id, ReactionParentType.message);
 
     if (ctx.auth.type !== UserType.admin) {
       if (messageData.publisher !== ctx.auth.id) {

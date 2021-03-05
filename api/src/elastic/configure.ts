@@ -15,6 +15,7 @@ import Message, { SearchMessage } from '../schema/users/message.entity';
 import messageMappings from './mappings/message';
 import { bulkWriteToElastic } from './elastic';
 import { WriteType } from './writeType';
+import { removeKeys } from '../utils/misc';
 
 const logger = getLogger();
 
@@ -24,7 +25,7 @@ const initializeMapping = async (indexName: string, indexSettings: Record<string
     ignore_unavailable: true
   });
   logger.info(`deleted ${indexName} from elasticsearch: ${deleteRes.body.acknowledged as boolean}`);
-  await sleep(60 * 1e3);
+  await sleep(10 * 1e3);
   try {
     const createIndexRes = await elasticClient.indices.create({
       index: indexName,
@@ -64,11 +65,14 @@ export const initializeMappings = async (): Promise<string> => {
   const users: SearchUser[] = (await UserModel.find()).map(userData => ({
     ...userData
   }));
-  await bulkWriteToElastic(users.map(userData => ({
-    action: WriteType.add,
-    id: userData.id as string,
-    index: settings.userIndexName
-  })));
+  if (users.length > 0) {
+    await bulkWriteToElastic(users.map(userData => ({
+      action: WriteType.add,
+      id: userData.id as string,
+      index: settings.userIndexName,
+      data: removeKeys(userData, ['id'])
+    })));
+  }
 
   // posts
   await initializeMapping(settings.postIndexName, settings.postIndexSettings, postMappings, settings.postType);
@@ -76,11 +80,14 @@ export const initializeMappings = async (): Promise<string> => {
   const posts: SearchPost[] = (await PostModel.find()).map(postData => ({
     ...postData
   }));
-  await bulkWriteToElastic(posts.map(postData => ({
-    action: WriteType.add,
-    id: postData.id as string,
-    index: settings.postIndexName
-  })));
+  if (posts.length > 0) {
+    await bulkWriteToElastic(posts.map(postData => ({
+      action: WriteType.add,
+      id: postData.id as string,
+      index: settings.postIndexName,
+      data: removeKeys(postData, ['id'])
+    })));
+  }
 
   // comments
   await initializeMapping(settings.commentIndexName, settings.commentIndexSettings, commentMappings, settings.commentType);
@@ -88,11 +95,14 @@ export const initializeMappings = async (): Promise<string> => {
   const comments: SearchComment[] = (await CommentModel.find()).map(commentData => ({
     ...commentData
   }));
-  await bulkWriteToElastic(comments.map(commentData => ({
-    action: WriteType.add,
-    id: commentData.id as string,
-    index: settings.commentIndexName
-  })));
+  if (comments.length > 0) {
+    await bulkWriteToElastic(comments.map(commentData => ({
+      action: WriteType.add,
+      id: commentData.id as string,
+      index: settings.commentIndexName,
+      data: removeKeys(commentData, ['id'])
+    })));
+  }
 
   // messages
   await initializeMapping(settings.messageIndexName, settings.messageIndexSettings, messageMappings, settings.messageType);
@@ -100,11 +110,14 @@ export const initializeMappings = async (): Promise<string> => {
   const messages: SearchMessage[] = (await MessageModel.find()).map(messageData => ({
     ...messageData
   }));
-  await bulkWriteToElastic(messages.map(messageData => ({
-    action: WriteType.add,
-    id: messageData.id as string,
-    index: settings.messageIndexName
-  })));
+  if (messages.length > 0) {
+    await bulkWriteToElastic(messages.map(messageData => ({
+      action: WriteType.add,
+      id: messageData.id as string,
+      index: settings.messageIndexName,
+      data: removeKeys(messageData, ['id'])
+    })));
+  }
 
   return 'initialized all mappings';
 };

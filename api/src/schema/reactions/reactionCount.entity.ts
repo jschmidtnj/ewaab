@@ -6,8 +6,13 @@ import { ReactionParentType } from './reaction.entity';
 @ObjectType({ description: 'reaction count' })
 @Entity({ name: 'reactionCounts' })
 export default class ReactionCount {
+  @Field({ description: 'reaction count id' })
+  @PrimaryColumn('uuid')
+  @IsDefined()
+  id: string;
+
   @Field(_type => String, { description: 'type of reaction' })
-  @PrimaryColumn('text')
+  @Column({ type: 'text' })
   @IsDefined()
   type: string;
 
@@ -26,11 +31,11 @@ export default class ReactionCount {
   parentType: ReactionParentType;
 }
 
-@ObjectType({ description: 'reactions data' })
-export class ReactionsData {
-  @Field(_type => [ReactionCount], { description: 'counts for all given reactions' })
-  counts?: ReactionCount[];
+@ObjectType({ description: 'reaction count data' })
+export class ReactionsCountData {
+  @Field(_type => [ReactionCount], { description: 'counts for reactions' })
+  reactions: ReactionCount[];
 
-  @Field(_type => [String], { description: 'reactions a given user made' })
-  reactions?: string[];
+  @Field(_type => Int, { description: 'number of total reactions' })
+  count: number;
 }

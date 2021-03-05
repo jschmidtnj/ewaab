@@ -30,7 +30,7 @@ export default class Reaction {
   @Column({ type: 'text' })
   @Index()
   @IsDefined()
-  reaction: string;
+  type: string;
 
   @Field({ description: 'reaction publisher' })
   @Column({ type: 'uuid' })

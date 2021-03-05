@@ -9,7 +9,7 @@ interface CodeArgs {
   value: string;
 }
 
-const CodeBlock: FunctionComponent<CodeArgs> = (args: CodeArgs) => {
+const CodeBlock: FunctionComponent<CodeArgs> = (args) => {
   return (
     <SyntaxHighlighter
       language={args.language ? args.language : null}
@@ -24,7 +24,7 @@ interface MarkdownArgs {
   content: string;
 }
 
-const Markdown: FunctionComponent<MarkdownArgs> = (args: MarkdownArgs) => {
+const Markdown: FunctionComponent<MarkdownArgs> = (args) => {
   return (
     <ReactMarkdown
       className="markdown"

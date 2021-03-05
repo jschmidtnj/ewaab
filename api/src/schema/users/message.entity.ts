@@ -34,6 +34,11 @@ export class SearchMessage extends BaseTimestamp {
   @Index()
   @IsDefined()
   group: string;
+
+  @Field(_type => Int, { description: 'number of reactions' })
+  @Column({ type: 'int' })
+  @IsDefined()
+  reactionCount: number;
 }
 
 @ObjectType({ description: 'message data search results' })

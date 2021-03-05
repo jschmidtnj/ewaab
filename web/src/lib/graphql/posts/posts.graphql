@@ -17,6 +17,15 @@ fragment postSearchFields on SearchPost {
     type
     name
   }
+  userReactions(page:0, perpage:1) {
+    id
+    type
+  }
+  reactions(page:0, perpage:3) {
+    type
+  }
+  reactionCount
+  commentCount
 }
 
 query posts($query: String, $type: PostType, $page: Int, $perpage: Int,

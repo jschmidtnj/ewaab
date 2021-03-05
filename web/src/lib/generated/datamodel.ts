@@ -33,10 +33,14 @@ export type Comment = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
-  reactions: Array<ReactionCount>;
+  /** number of reactions */
+  reactionCount: Scalars['Int'];
+  /** reactions */
+  reactions?: Maybe<Array<ReactionCount>>;
   /** date updated */
   updated: Scalars['Float'];
-  userReactions: Array<Reaction>;
+  /** user reactions */
+  userReactions?: Maybe<Array<Reaction>>;
 };
 
 /** comment data */
@@ -71,6 +75,7 @@ export type Media = {
   __typename?: 'Media';
   /** file size */
   fileSize: Scalars['Float'];
+  /** media id */
   id: Scalars['String'];
   /** mime type of file */
   mime: Scalars['String'];
@@ -87,6 +92,7 @@ export type MediaData = {
   __typename?: 'MediaData';
   /** file size */
   fileSize: Scalars['Float'];
+  /** media id */
   id: Scalars['String'];
   /** mime type of file */
   mime: Scalars['String'];
@@ -115,6 +121,8 @@ export type Message = {
   id: Scalars['String'];
   /** message publisher */
   publisher: Scalars['String'];
+  /** number of reactions */
+  reactionCount: Scalars['Int'];
   /** date updated */
   updated: Scalars['Float'];
 };
@@ -393,8 +401,10 @@ export enum NotificationType {
 /** post data */
 export type Post = {
   __typename?: 'Post';
+  /** number of comments */
+  commentCount: Scalars['Int'];
   /** comments */
-  comments?: Maybe<SearchCommentsResult>;
+  comments: Array<SearchComment>;
   /** post content */
   content: Scalars['String'];
   /** date created */
@@ -411,8 +421,10 @@ export type Post = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
+  /** number of reactions */
+  reactionCount: Scalars['Int'];
   /** reactions */
-  reactions?: Maybe<Array<ReactionCount>>;
+  reactions: Array<ReactionCount>;
   /** title */
   title: Scalars['String'];
   /** post type */
@@ -420,7 +432,7 @@ export type Post = {
   /** date updated */
   updated: Scalars['Float'];
   /** user reactions */
-  userReactions?: Maybe<Array<Reaction>>;
+  userReactions: Array<Reaction>;
 };
 
 /** post data */
@@ -540,7 +552,7 @@ export type PublisherData = {
 
 export type Query = {
   __typename?: 'Query';
-  comments: SearchCommentsResult;
+  comments: Array<SearchComment>;
   hello: Scalars['String'];
   media: Media;
   messageGroups: Array<MessageGroup>;
@@ -626,7 +638,7 @@ export type Reaction = {
   /** parent */
   parent: Scalars['String'];
   /** reaction type */
-  reaction: Scalars['String'];
+  type: Scalars['String'];
   /** reaction publisher */
   user: Scalars['String'];
 };
@@ -636,6 +648,8 @@ export type ReactionCount = {
   __typename?: 'ReactionCount';
   /** count for reaction type */
   count: Scalars['Int'];
+  /** reaction count id */
+  id: Scalars['String'];
   /** parent */
   parent: Scalars['String'];
   /** type of reaction */
@@ -649,13 +663,13 @@ export enum ReactionParentType {
   Post = 'post',
 }
 
-/** reactions data */
-export type ReactionsData = {
-  __typename?: 'ReactionsData';
-  /** counts for all given reactions */
-  counts: Array<ReactionCount>;
-  /** reactions a given user made */
-  reactions: Array<Scalars['String']>;
+/** reaction count data */
+export type ReactionsCountData = {
+  __typename?: 'ReactionsCountData';
+  /** number of total reactions */
+  count: Scalars['Int'];
+  /** counts for reactions */
+  reactions: Array<ReactionCount>;
 };
 
 /** comment data, indexed in elasticsearch */
@@ -673,10 +687,14 @@ export type SearchComment = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
-  reactions: Array<ReactionCount>;
+  /** number of reactions */
+  reactionCount: Scalars['Int'];
+  /** reactions */
+  reactions?: Maybe<Array<ReactionCount>>;
   /** date updated */
   updated: Scalars['Float'];
-  userReactions: Array<Reaction>;
+  /** user reactions */
+  userReactions?: Maybe<Array<Reaction>>;
 };
 
 /** comment data, indexed in elasticsearch */
@@ -689,19 +707,6 @@ export type SearchCommentReactionsArgs = {
 export type SearchCommentUserReactionsArgs = {
   page?: Maybe<Scalars['Int']>;
   perpage?: Maybe<Scalars['Int']>;
-};
-
-/** comment data search results */
-export type SearchCommentsResult = {
-  __typename?: 'SearchCommentsResult';
-  /** total comments count */
-  count: Scalars['Int'];
-  /** reactions */
-  reactions?: Maybe<Array<ReactionCount>>;
-  /** results */
-  results: Array<SearchComment>;
-  /** user reactions */
-  userReactions?: Maybe<Array<Reaction>>;
 };
 
 /** message data, indexed in elasticsearch */
@@ -717,6 +722,8 @@ export type SearchMessage = {
   id: Scalars['String'];
   /** message publisher */
   publisher: Scalars['String'];
+  /** number of reactions */
+  reactionCount: Scalars['Int'];
   /** date updated */
   updated: Scalars['Float'];
 };
@@ -733,8 +740,10 @@ export type SearchMessagesResult = {
 /** post data, indexed in elasticsearch */
 export type SearchPost = {
   __typename?: 'SearchPost';
+  /** number of comments */
+  commentCount: Scalars['Int'];
   /** comments */
-  comments?: Maybe<SearchCommentsResult>;
+  comments: Array<SearchComment>;
   /** post content */
   content: Scalars['String'];
   /** date created */
@@ -751,8 +760,10 @@ export type SearchPost = {
   publisher: Scalars['String'];
   /** publisher user data */
   publisherData?: Maybe<PublisherData>;
+  /** number of reactions */
+  reactionCount: Scalars['Int'];
   /** reactions */
-  reactions?: Maybe<Array<ReactionCount>>;
+  reactions: Array<ReactionCount>;
   /** title */
   title: Scalars['String'];
   /** post type */
@@ -760,7 +771,7 @@ export type SearchPost = {
   /** date updated */
   updated: Scalars['Float'];
   /** user reactions */
-  userReactions?: Maybe<Array<Reaction>>;
+  userReactions: Array<Reaction>;
 };
 
 /** post data, indexed in elasticsearch */
@@ -993,7 +1004,15 @@ export type PostUpdateDataQuery = { __typename?: 'Query' } & {
 
 export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
   SearchPost,
-  'id' | 'title' | 'content' | 'publisher' | 'created' | 'updated' | 'link'
+  | 'id'
+  | 'title'
+  | 'content'
+  | 'publisher'
+  | 'created'
+  | 'updated'
+  | 'link'
+  | 'reactionCount'
+  | 'commentCount'
 > & {
     publisherData?: Maybe<
       { __typename?: 'PublisherData' } & Pick<
@@ -1003,6 +1022,12 @@ export type PostSearchFieldsFragment = { __typename?: 'SearchPost' } & Pick<
     >;
     mediaData?: Maybe<
       { __typename?: 'MediaData' } & Pick<MediaData, 'id' | 'type' | 'name'>
+    >;
+    userReactions: Array<
+      { __typename?: 'Reaction' } & Pick<Reaction, 'id' | 'type'>
+    >;
+    reactions: Array<
+      { __typename?: 'ReactionCount' } & Pick<ReactionCount, 'type'>
     >;
   };
 
@@ -1027,6 +1052,26 @@ export type PostsQuery = { __typename?: 'Query' } & {
       >;
     };
 };
+
+export type AddReactionMutationVariables = Exact<{
+  parent: Scalars['String'];
+  parentType: ReactionParentType;
+  reaction: Scalars['String'];
+}>;
+
+export type AddReactionMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'addReaction'
+>;
+
+export type DeleteReactionMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+export type DeleteReactionMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'deleteReaction'
+>;
 
 export type UpdatePostMutationVariables = Exact<{
   id: Scalars['String'];
@@ -1264,6 +1309,15 @@ export const PostSearchFields = gql`
       type
       name
     }
+    userReactions(page: 0, perpage: 1) {
+      id
+      type
+    }
+    reactions(page: 0, perpage: 3) {
+      type
+    }
+    reactionCount
+    commentCount
   }
 `;
 export const PublicUserFields = gql`
@@ -1376,6 +1430,20 @@ export const Posts = gql`
     }
   }
   ${PostSearchFields}
+`;
+export const AddReaction = gql`
+  mutation addReaction(
+    $parent: String!
+    $parentType: ReactionParentType!
+    $reaction: String!
+  ) {
+    addReaction(parent: $parent, parentType: $parentType, reaction: $reaction)
+  }
+`;
+export const DeleteReaction = gql`
+  mutation deleteReaction($id: String!) {
+    deleteReaction(id: $id)
+  }
 `;
 export const UpdatePost = gql`
   mutation updatePost(

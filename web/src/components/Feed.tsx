@@ -17,7 +17,7 @@ import PostView from 'components/PostView';
 import DeletePostModal from 'components/modals/DeletePostModal';
 import sleep from 'shared/sleep';
 import { FiEdit } from 'react-icons/fi';
-import { postWriteMap } from 'utils/variables';
+import { elasticWaitTime, postWriteMap } from 'utils/variables';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 
@@ -27,7 +27,7 @@ interface FeedArgs {
   postType: PostType;
 }
 
-const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
+const Feed: FunctionComponent<FeedArgs> = (args) => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
     undefined
   );
@@ -35,21 +35,25 @@ const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
     (state) => state.authReducer.user?.type as UserType | undefined
   );
   const [currentPage, setCurrentPage] = useState<number>(0);
-  const [useCache, setUseCache] = useState<boolean>(!isDebug());
 
-  const runQuery = async (): Promise<void> => {
+  const [postsVariables, setPostsVariables] = useState<
+    PostsQueryVariables | undefined
+  >(undefined);
+
+  const runQuery = async (useCache = !isDebug()): Promise<void> => {
+    const newVariables: PostsQueryVariables = {
+      sortBy: PostSortOption.Created,
+      perpage: numPerPage,
+      ascending: false,
+      page: currentPage,
+      type: args.postType,
+    };
+    setPostsVariables(newVariables);
     const res = await client.query<PostsQuery, PostsQueryVariables>({
       query: Posts,
-      variables: {
-        sortBy: PostSortOption.Created,
-        perpage: numPerPage,
-        ascending: false,
-        page: currentPage,
-        type: args.postType,
-      },
-      fetchPolicy: !useCache ? 'no-cache' : 'cache-first', // disable cache if in debug
+      variables: newVariables,
+      fetchPolicy: !useCache ? 'network-only' : 'cache-first',
     });
-    setUseCache(!isDebug());
     if (res.errors) {
       throw new Error(res.errors.join(', '));
     }
@@ -97,9 +101,8 @@ const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
           postType={args.postType}
           onSubmit={async () => {
             // wait for elasticsearch to update
-            await sleep(1000);
-            setUseCache(false);
-            await runQuery();
+            await sleep(elasticWaitTime);
+            await runQuery(false);
           }}
           updateID={updatePostID}
         />
@@ -110,10 +113,8 @@ const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
           <DeletePostModal
             toggleModal={toggleDeletePostModal}
             onSubmit={async () => {
-              // wait for elasticsearch to update
-              await sleep(1000);
-              setUseCache(false);
-              await runQuery();
+              await sleep(elasticWaitTime);
+              await runQuery(false);
             }}
             variables={deletePostVariables}
           />
@@ -137,7 +138,7 @@ const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
           )}
 
           <div className="flex items-center justify-center">
-            {!posts || posts.loading ? (
+            {!posts || posts.loading || !postsVariables ? (
               <p className="text-md pt-4">Loading...</p>
             ) : !posts.data || posts.data.posts.results.length === 0 ? (
               <p className="text-md pt-4">No posts found</p>
@@ -153,6 +154,7 @@ const Feed: FunctionComponent<FeedArgs> = (args: FeedArgs) => {
                             setDeletePostVariables(vars);
                             toggleDeletePostModal();
                           }}
+                          updateData={runQuery}
                           onUpdatePost={(postID) => {
                             setUpdatePostID(postID);
                             toggleWritePost();

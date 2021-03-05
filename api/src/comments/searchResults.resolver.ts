@@ -3,7 +3,6 @@ import { PublisherData } from '../schema/users/user.entity';
 import { SearchComment } from '../schema/posts/comment.entity';
 import { getPublisherData } from '../posts/searchResults.resolver';
 import { UserReactionsArgs, getUserReactions, CountReactionsArgs, getReactionCounts } from '../reactions/reactions.resolver';
-import { SearchPost } from '../schema/posts/post.entity';
 import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
 import ReactionCount from '../schema/reactions/reactionCount.entity';
 
@@ -15,12 +14,12 @@ class SearchResultsResolver implements ResolverInterface<SearchComment> {
   }
 
   @FieldResolver(_returns => [Reaction])
-  async userReactions(@Root() searchResult: SearchPost, @Args() args: UserReactionsArgs): Promise<Reaction[]> {
+  async userReactions(@Root() searchResult: SearchComment, @Args() args: UserReactionsArgs): Promise<Reaction[]> {
     return await getUserReactions(args, searchResult.id as string, ReactionParentType.comment);
   }
 
   @FieldResolver(_returns => [ReactionCount])
-  async reactions(@Root() searchResult: SearchPost, @Args() args: CountReactionsArgs): Promise<ReactionCount[]> {
+  async reactions(@Root() searchResult: SearchComment, @Args() args: CountReactionsArgs): Promise<ReactionCount[]> {
     return await getReactionCounts(args, searchResult.id as string, ReactionParentType.comment);
   }
 }

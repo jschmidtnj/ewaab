@@ -20,13 +20,11 @@ import { UserType } from 'lib/generated/datamodel';
 
 const checkAuthInterval = 5; // check every few minutes
 
-interface PrivateRouteData {
-  children?: ReactNode;
+interface PrivateRouteArgs {
+  children: ReactNode;
 }
 
-const PrivateRoute: FunctionComponent<PrivateRouteData> = (
-  args: PrivateRouteData
-) => {
+const PrivateRoute: FunctionComponent<PrivateRouteArgs> = (args) => {
   const [isLoading, setLoading] = useState(true);
   const router = useRouter();
 

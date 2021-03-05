@@ -9,9 +9,7 @@ interface LocationSelectArgs {
   disabled: boolean;
 }
 
-const LocationSelect: FunctionComponent<LocationSelectArgs> = (
-  args: LocationSelectArgs
-) => {
+const LocationSelect: FunctionComponent<LocationSelectArgs> = (args) => {
   const locationRef = useRef(null);
   const router = useRouter();
 

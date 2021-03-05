@@ -21,9 +21,7 @@ interface PasswordFormArgs {
   resetToken: string;
 }
 
-const PasswordForm: FunctionComponent<PasswordFormArgs> = (
-  args: PasswordFormArgs
-) => {
+const PasswordForm: FunctionComponent<PasswordFormArgs> = (args) => {
   const router = useRouter();
   return (
     <Formik

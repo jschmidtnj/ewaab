@@ -11,6 +11,7 @@ import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { UserType } from '../schema/users/user.entity';
+import { removeKeys } from '../utils/misc';
 
 @ArgsType()
 class UpdateCommentArgs {
@@ -35,7 +36,7 @@ class UpdateCommentResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
-    if (!Object.values(Object.assign({}, args, { id: undefined })).some(elem => elem !== undefined)) {
+    if (!removeKeys(args, ['id']).some(elem => elem !== undefined)) {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
     const CommentModel = getRepository(Comment);

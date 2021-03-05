@@ -21,7 +21,7 @@ interface LayoutArgs {
 // TODO - see https://github.com/staylor/react-helmet-async/issues/26
 // try adding react-helmet-async to this
 
-const EmptyLayout: FunctionComponent<LayoutArgs> = (args: LayoutArgs) => {
+const EmptyLayout: FunctionComponent<LayoutArgs> = (args) => {
   const router = useRouter();
 
   const currentTheme = Theme.light;

@@ -4,10 +4,14 @@ import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { getRepository } from 'typeorm';
 import Comment from '../schema/posts/comment.entity';
 import { elasticClient } from '../elastic/init';
-import { commentIndexName } from '../elastic/settings';
+import { commentIndexName, postIndexName } from '../elastic/settings';
 import { UserType } from '../schema/users/user.entity';
 import { Matches } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
+import Post from '../schema/posts/post.entity';
+import esb from 'elastic-builder';
+import { deleteReactions } from '../reactions/deleteReaction.resolver';
+import { ReactionParentType } from '../schema/reactions/reaction.entity';
 
 @ArgsType()
 class DeleteArgs {
@@ -27,7 +31,7 @@ class DeleteCommentResolver {
     }
     const CommentModel = getRepository(Comment);
     const commentData = await CommentModel.findOne(id, {
-      select: ['id', 'publisher']
+      select: ['id', 'publisher', 'post']
     });
     if (!commentData) {
       throw new Error('no comment found');
@@ -43,6 +47,22 @@ class DeleteCommentResolver {
       index: commentIndexName
     });
     await CommentModel.delete(id);
+
+    await deleteReactions(id, ReactionParentType.comment);
+
+    const updateCommentsScript = esb.script('source', 'ctx._source.commentCount--').lang('painless');
+
+    const PostModel = getRepository(Post);
+    await PostModel.decrement({
+      id: commentData.post
+    }, 'commentCount', 1);
+    await elasticClient.update({
+      index: postIndexName,
+      id: commentData.post,
+      body: {
+        script: updateCommentsScript.toJSON()
+      }
+    });
 
     return `deleted post ${id}`;
   }

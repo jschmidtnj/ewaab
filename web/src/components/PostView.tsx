@@ -1,7 +1,14 @@
 import {
+  AddReaction,
+  AddReactionMutation,
+  AddReactionMutationVariables,
   DeletePostMutationVariables,
+  DeleteReaction,
+  DeleteReactionMutation,
+  DeleteReactionMutationVariables,
   MediaType,
   PostSearchFieldsFragment,
+  ReactionParentType,
   UserType,
 } from 'lib/generated/datamodel';
 import Avatar from 'components/Avatar';
@@ -18,7 +25,14 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { postMediaWidth } from 'shared/variables';
 import { FiFileText } from 'react-icons/fi';
 import Markdown from './markdown/Markdown';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
+import { Emoji } from 'emoji-mart';
+import { BsDot } from 'react-icons/bs';
+import EmojiPicker from './EmojiPicker';
+import { AiFillLike, AiOutlineLike, AiOutlineMessage } from 'react-icons/ai';
+import { client } from 'utils/apollo';
+import CommentsView from './CommentsView';
+import { elasticWaitTime } from 'utils/variables';
 
 interface MediaViewArgs {
   id: string;
@@ -26,7 +40,7 @@ interface MediaViewArgs {
   type: MediaType;
 }
 
-const MediaView: FunctionComponent<MediaViewArgs> = (args: MediaViewArgs) => {
+const MediaView: FunctionComponent<MediaViewArgs> = (args) => {
   const apiURL = getAPIURL();
 
   if (args.type === MediaType.Image) {
@@ -55,9 +69,10 @@ interface PostViewArgs {
   data: PostSearchFieldsFragment;
   onDeletePost: (variables: DeletePostMutationVariables) => void;
   onUpdatePost: (id: string) => void;
+  updateData: (useCache: boolean) => Promise<void>;
 }
 
-const PostView: FunctionComponent<PostViewArgs> = (args: PostViewArgs) => {
+const PostView: FunctionComponent<PostViewArgs> = (args) => {
   const router = useRouter();
 
   const userID = useSelector<RootState, string | undefined>(
@@ -66,6 +81,25 @@ const PostView: FunctionComponent<PostViewArgs> = (args: PostViewArgs) => {
   const userType = useSelector<RootState, UserType | undefined>(
     (state) => state.authReducer.user?.type as UserType | undefined
   );
+
+  const [emojiPickerVisible, setEmojiPickerVisible] = useState<boolean>(false);
+  const toggleEmojiPicker = () => setEmojiPickerVisible(!emojiPickerVisible);
+
+  const [commentsVisible, setCommentsVisible] = useState<boolean>(false);
+
+  const [updateTimeout, setUpdateTimeout] = useState<
+    ReturnType<typeof setTimeout> | undefined
+  >(undefined);
+
+  useEffect(() => {
+    return () => {
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+    };
+  }, []);
+
+  const numberFormat = new Intl.NumberFormat(router.locale);
 
   return (
     <div className="bg-white rounded-lg text-left overflow-hidden shadow-sm mb-4">
@@ -132,7 +166,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args: PostViewArgs) => {
             </div>
           </button>
         </div>
-        <div className="ml-4 mt-4">
+        <div className="mx-4 mt-4">
           <h2
             className="text-lg leading-5 font-semibold text-gray-900"
             id="modal-headline"
@@ -166,7 +200,129 @@ const PostView: FunctionComponent<PostViewArgs> = (args: PostViewArgs) => {
           )}
         </>
       )}
-      <div>{/* TODO - add reactions, fix emoji picker */}</div>
+      <div className="sm:p-4 p-2">
+        <div className="mx-4 mt-2">
+          {args.data.reactionCount === 0 ? null : (
+            <div className="my-2">
+              {args.data.reactions.map((reaction, i) => (
+                <span
+                  className="pr-2"
+                  key={`reaction-post-${args.data.id}-${i}`}
+                >
+                  <Emoji emoji={reaction.type} size={16} />
+                </span>
+              ))}
+              <span className="px-2">
+                {numberFormat.format(args.data.reactionCount)}
+              </span>
+            </div>
+          )}
+          {args.data.commentCount === 0 ? null : (
+            <>
+              {args.data.reactionCount === 0 ? null : (
+                <span>
+                  <BsDot />
+                </span>
+              )}
+              <span>
+                {numberFormat.format(args.data.commentCount)} comment
+                {args.data.commentCount !== 1 ? 's' : ''}
+              </span>
+            </>
+          )}
+          <hr className="mb-2" />
+
+          <div>
+            <EmojiPicker
+              isVisible={emojiPickerVisible}
+              toggleView={toggleEmojiPicker}
+              currentEmoji={
+                args.data.userReactions.length > 0
+                  ? args.data.userReactions[0].type
+                  : undefined
+              }
+              setEmoji={async (emoji) => {
+                try {
+                  const addReactionRes = await client.mutate<
+                    AddReactionMutation,
+                    AddReactionMutationVariables
+                  >({
+                    mutation: AddReaction,
+                    variables: {
+                      parent: args.data.id,
+                      parentType: ReactionParentType.Post,
+                      reaction: emoji,
+                    },
+                  });
+                  if (addReactionRes.errors) {
+                    throw new Error(addReactionRes.errors.join(', '));
+                  }
+
+                  if (args.data.userReactions.length > 0) {
+                    const reactionID = args.data.userReactions[0].id;
+                    const deleteReactionRes = await client.mutate<
+                      DeleteReactionMutation,
+                      DeleteReactionMutationVariables
+                    >({
+                      mutation: DeleteReaction,
+                      variables: {
+                        id: reactionID,
+                      },
+                    });
+                    if (deleteReactionRes.errors) {
+                      throw new Error(deleteReactionRes.errors.join(', '));
+                    }
+                  }
+                  if (updateTimeout) {
+                    clearTimeout(updateTimeout);
+                  }
+                  setUpdateTimeout(
+                    setTimeout(async () => {
+                      await args.updateData(false);
+                    }, elasticWaitTime)
+                  );
+                  setEmojiPickerVisible(false);
+                } catch (err) {
+                  toast(err.message, {
+                    type: 'error',
+                  });
+                }
+              }}
+            >
+              <button
+                className={
+                  (args.data.userReactions.length > 0
+                    ? 'text-purple-700'
+                    : '') + ' text-2xl mr-2'
+                }
+                onClick={(evt) => {
+                  evt.preventDefault();
+                  toggleEmojiPicker();
+                }}
+              >
+                {args.data.userReactions.length > 0 ? (
+                  <AiFillLike />
+                ) : (
+                  <AiOutlineLike />
+                )}
+              </button>
+              <button
+                className={
+                  (commentsVisible ? 'text-gray-800' : 'text-gray-500') +
+                  ' text-2xl'
+                }
+                onClick={(evt) => {
+                  evt.preventDefault();
+                  setCommentsVisible(true);
+                }}
+              >
+                <AiOutlineMessage />
+              </button>
+            </EmojiPicker>
+          </div>
+        </div>
+      </div>
+      {!commentsVisible ? null : <CommentsView post={args.data.id} />}
     </div>
   );
 };

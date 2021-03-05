@@ -4,7 +4,7 @@ import { IsDefined } from 'class-validator';
 import { BaseTimestamp } from '../utils/baseTimestamp';
 import { PublisherData } from '../users/user.entity';
 import { MediaData } from '../media/media.entity';
-import { SearchCommentsResult } from './comment.entity';
+import { SearchComment } from './comment.entity';
 import ReactionCount from '../reactions/reactionCount.entity';
 import Reaction from '../reactions/reaction.entity';
 
@@ -56,16 +56,26 @@ export class SearchPost extends BaseTimestamp {
   @Column({ type: 'uuid', nullable: true })
   media?: string | null;
 
+  @Field(_type => Int, { description: 'number of reactions' })
+  @Column({ type: 'int' })
+  @IsDefined()
+  reactionCount: number;
+
+  @Field(_type => Int, { description: 'number of comments' })
+  @Column({ type: 'int' })
+  @IsDefined()
+  commentCount: number;
+
   @Field(_type => MediaData, { description: 'media data', nullable: true })
   mediaData?: MediaData;
 
-  @Field(_type => SearchCommentsResult, { description: 'comments', nullable: true })
-  comments?: SearchCommentsResult;
+  @Field(_type => [SearchComment], { description: 'comments' })
+  comments?: SearchComment[];
 
-  @Field(_type => [ReactionCount], { description: 'reactions', nullable: true })
+  @Field(_type => [ReactionCount], { description: 'reactions' })
   reactions?: ReactionCount[];
 
-  @Field(_type => [Reaction], { description: 'user reactions', nullable: true })
+  @Field(_type => [Reaction], { description: 'user reactions' })
   userReactions?: Reaction[];
 }
 

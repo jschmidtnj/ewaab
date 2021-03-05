@@ -12,6 +12,8 @@ import { uuidRegex } from '../shared/variables';
 import Comment from '../schema/posts/comment.entity';
 import { bulkWriteToElastic } from '../elastic/elastic';
 import { WriteType } from '../elastic/writeType';
+import { ReactionParentType } from '../schema/reactions/reaction.entity';
+import { deleteReactions } from '../reactions/deleteReaction.resolver';
 
 @ArgsType()
 class DeleteArgs {
@@ -61,6 +63,8 @@ class DeletePostResolver {
         await CommentModel.delete(commentData.id);
       }
     }
+
+    await deleteReactions(id, ReactionParentType.post);
 
     await elasticClient.delete({
       id,

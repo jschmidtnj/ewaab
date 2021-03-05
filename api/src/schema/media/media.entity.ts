@@ -19,7 +19,7 @@ registerEnumType(MediaType, {
 
 @ObjectType({ description: 'media data', isAbstract: true })
 export class MediaData {
-  @Field()
+  @Field({ description: 'media id' })
   @PrimaryColumn('uuid')
   id: string;
 

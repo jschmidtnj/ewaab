@@ -4,7 +4,7 @@ import { MediaData } from '../schema/media/media.entity';
 import { SearchPost } from '../schema/posts/post.entity';
 import User, { PublisherData } from '../schema/users/user.entity';
 import Media from '../schema/media/media.entity';
-import { SearchCommentsResult } from '../schema/posts/comment.entity';
+import { SearchComment } from '../schema/posts/comment.entity';
 import { PostCommentsArgs, searchComments } from '../comments/comments.resolver';
 import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
 import { CountReactionsArgs, getReactionCounts, getUserReactions, UserReactionsArgs } from '../reactions/reactions.resolver';
@@ -52,8 +52,8 @@ class SearchResultsResolver implements ResolverInterface<SearchPost> {
     return await getMediaData(searchResult.media);
   }
 
-  @FieldResolver(_returns => SearchCommentsResult)
-  async comments(@Root() searchResult: SearchPost, @Args() args: PostCommentsArgs): Promise<SearchCommentsResult> {
+  @FieldResolver(_returns => [SearchComment])
+  async comments(@Root() searchResult: SearchPost, @Args() args: PostCommentsArgs): Promise<SearchComment[]> {
     return await searchComments(args, searchResult.id as string);
   }
 

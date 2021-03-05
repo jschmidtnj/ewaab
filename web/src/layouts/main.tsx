@@ -7,7 +7,7 @@ interface LayoutArgs {
   children: ReactNode;
 }
 
-const Layout: FunctionComponent<LayoutArgs> = (args: LayoutArgs) => {
+const Layout: FunctionComponent<LayoutArgs> = (args) => {
   return (
     <EmptyLayout>
       <Header />

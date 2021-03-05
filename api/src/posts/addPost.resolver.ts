@@ -153,6 +153,8 @@ class AddPostResolver {
       publisher: ctx.auth!.id,
       media: mediaID,
       link: args.link,
+      commentCount: 0,
+      reactionCount: 0
     };
 
     await elasticClient.index({

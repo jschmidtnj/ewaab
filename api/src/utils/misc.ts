@@ -39,3 +39,11 @@ export const arrayHash = (elements: BinaryLike[]): string => {
   }
   return hash.digest('hex');
 };
+
+export const removeKeys = (elem: unknown, keys: string[]): unknown[] => {
+  const removed: Record<string, undefined> = {};
+  for (const key in keys) {
+    removed[key] = undefined;
+  }
+  return Object.values(Object.assign({}, elem, removed));
+};

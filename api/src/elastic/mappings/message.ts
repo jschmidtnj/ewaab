@@ -10,6 +10,9 @@ const messageMappings = {
   },
   group: {
     type: 'keyword'
+  },
+  reactionCount: {
+    type: 'integer'
   }
 };
 

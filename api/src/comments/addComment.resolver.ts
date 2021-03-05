@@ -3,11 +3,13 @@ import { MinLength, Matches } from 'class-validator';
 import { getRepository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { elasticClient } from '../elastic/init';
-import { commentIndexName } from '../elastic/settings';
+import { commentIndexName, postIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import Comment, { SearchComment } from '../schema/posts/comment.entity';
+import Post from '../schema/posts/post.entity';
+import esb from 'elastic-builder';
 
 @ArgsType()
 class AddCommentArgs {
@@ -44,6 +46,7 @@ class AddCommentResolver {
       updated: now,
       publisher: ctx.auth!.id,
       post: args.post,
+      reactionCount: 0
     };
 
     const id = uuidv4();
@@ -56,6 +59,20 @@ class AddCommentResolver {
     const newComment = await CommentModel.save({
       ...searchComment,
       id
+    });
+
+    const updateCommentsScript = esb.script('source', 'ctx._source.commentCount++').lang('painless');
+
+    const PostModel = getRepository(Post);
+    await PostModel.increment({
+      id: args.post
+    }, 'commentCount', 1);
+    await elasticClient.update({
+      index: postIndexName,
+      id: args.post,
+      body: {
+        script: updateCommentsScript.toJSON()
+      }
     });
 
     return `created comment ${newComment.id}`;

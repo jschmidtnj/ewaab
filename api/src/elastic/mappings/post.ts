@@ -24,6 +24,12 @@ const postMappings = {
   },
   media: {
     type: 'keyword'
+  },
+  reactionCount: {
+    type: 'integer'
+  },
+  commentCount: {
+    type: 'integer'
   }
 };
 

@@ -80,12 +80,10 @@ export const initializeApolloClient = async (): Promise<void> => {
 };
 
 interface WrapApolloArgs {
-  children?: ReactNode;
+  children: ReactNode;
 }
 
-export const WrapApollo: FunctionComponent<WrapApolloArgs> = (
-  args: WrapApolloArgs
-) => {
+export const WrapApollo: FunctionComponent<WrapApolloArgs> = (args) => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     (async () => {

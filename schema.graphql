@@ -22,23 +22,30 @@ type Comment {
 
   """publisher user data"""
   publisherData: PublisherData
+
+  """number of reactions"""
+  reactionCount: Int!
+
+  """reactions"""
   reactions(
     """page number"""
     page: Int = 0
 
     """number per page"""
     perpage: Int = 10
-  ): [ReactionCount!]!
+  ): [ReactionCount!]
 
   """date updated"""
   updated: Float!
+
+  """user reactions"""
   userReactions(
     """page number"""
     page: Int = 0
 
     """number per page"""
     perpage: Int = 10
-  ): [Reaction!]!
+  ): [Reaction!]
 }
 
 """comment sort options"""
@@ -60,6 +67,8 @@ type LoginOutput {
 type Media {
   """file size"""
   fileSize: Float!
+
+  """media id"""
   id: String!
 
   """mime type of file"""
@@ -79,6 +88,8 @@ type Media {
 type MediaData {
   """file size"""
   fileSize: Float!
+
+  """media id"""
   id: String!
 
   """mime type of file"""
@@ -113,6 +124,9 @@ type Message {
 
   """message publisher"""
   publisher: String!
+
+  """number of reactions"""
+  reactionCount: Int!
 
   """date updated"""
   updated: Float!
@@ -485,6 +499,9 @@ enum NotificationType {
 
 """post data"""
 type Post {
+  """number of comments"""
+  commentCount: Int!
+
   """comments"""
   comments(
     """sort direction"""
@@ -501,7 +518,7 @@ type Post {
 
     """sort by this field"""
     sortBy: CommentSortOption
-  ): SearchCommentsResult
+  ): [SearchComment!]!
 
   """post content"""
   content: String!
@@ -527,6 +544,9 @@ type Post {
   """publisher user data"""
   publisherData: PublisherData
 
+  """number of reactions"""
+  reactionCount: Int!
+
   """reactions"""
   reactions(
     """page number"""
@@ -534,7 +554,7 @@ type Post {
 
     """number per page"""
     perpage: Int = 10
-  ): [ReactionCount!]
+  ): [ReactionCount!]!
 
   """title"""
   title: String!
@@ -552,7 +572,7 @@ type Post {
 
     """number per page"""
     perpage: Int = 10
-  ): [Reaction!]
+  ): [Reaction!]!
 }
 
 """post count data"""
@@ -694,7 +714,7 @@ type Query {
 
     """sort by this field"""
     sortBy: CommentSortOption
-  ): SearchCommentsResult!
+  ): [SearchComment!]!
   hello: String!
   media(
     """media id"""
@@ -815,7 +835,7 @@ type Reaction {
   parent: String!
 
   """reaction type"""
-  reaction: String!
+  type: String!
 
   """reaction publisher"""
   user: String!
@@ -825,6 +845,9 @@ type Reaction {
 type ReactionCount {
   """count for reaction type"""
   count: Int!
+
+  """reaction count id"""
+  id: String!
 
   """parent"""
   parent: String!
@@ -840,13 +863,13 @@ enum ReactionParentType {
   post
 }
 
-"""reactions data"""
-type ReactionsData {
-  """counts for all given reactions"""
-  counts: [ReactionCount!]!
+"""reaction count data"""
+type ReactionsCountData {
+  """number of total reactions"""
+  count: Int!
 
-  """reactions a given user made"""
-  reactions: [String!]!
+  """counts for reactions"""
+  reactions: [ReactionCount!]!
 }
 
 """comment data, indexed in elasticsearch"""
@@ -868,38 +891,30 @@ type SearchComment {
 
   """publisher user data"""
   publisherData: PublisherData
+
+  """number of reactions"""
+  reactionCount: Int!
+
+  """reactions"""
   reactions(
     """page number"""
     page: Int = 0
 
     """number per page"""
     perpage: Int = 10
-  ): [ReactionCount!]!
+  ): [ReactionCount!]
 
   """date updated"""
   updated: Float!
+
+  """user reactions"""
   userReactions(
     """page number"""
     page: Int = 0
 
     """number per page"""
     perpage: Int = 10
-  ): [Reaction!]!
-}
-
-"""comment data search results"""
-type SearchCommentsResult {
-  """total comments count"""
-  count: Int!
-
-  """reactions"""
-  reactions: [ReactionCount!]
-
-  """results"""
-  results: [SearchComment!]!
-
-  """user reactions"""
-  userReactions: [Reaction!]
+  ): [Reaction!]
 }
 
 """message data, indexed in elasticsearch"""
@@ -919,6 +934,9 @@ type SearchMessage {
   """message publisher"""
   publisher: String!
 
+  """number of reactions"""
+  reactionCount: Int!
+
   """date updated"""
   updated: Float!
 }
@@ -934,6 +952,9 @@ type SearchMessagesResult {
 
 """post data, indexed in elasticsearch"""
 type SearchPost {
+  """number of comments"""
+  commentCount: Int!
+
   """comments"""
   comments(
     """sort direction"""
@@ -950,7 +971,7 @@ type SearchPost {
 
     """sort by this field"""
     sortBy: CommentSortOption
-  ): SearchCommentsResult
+  ): [SearchComment!]!
 
   """post content"""
   content: String!
@@ -976,6 +997,9 @@ type SearchPost {
   """publisher user data"""
   publisherData: PublisherData
 
+  """number of reactions"""
+  reactionCount: Int!
+
   """reactions"""
   reactions(
     """page number"""
@@ -983,7 +1007,7 @@ type SearchPost {
 
     """number per page"""
     perpage: Int = 10
-  ): [ReactionCount!]
+  ): [ReactionCount!]!
 
   """title"""
   title: String!
@@ -1001,7 +1025,7 @@ type SearchPost {
 
     """number per page"""
     perpage: Int = 10
-  ): [Reaction!]
+  ): [Reaction!]!
 }
 
 """post data search results"""

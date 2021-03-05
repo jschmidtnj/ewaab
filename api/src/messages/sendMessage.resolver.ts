@@ -51,7 +51,8 @@ class SendMessageResolver {
       created: now,
       updated: now,
       publisher: ctx.auth.id,
-      group: args.group
+      group: args.group,
+      reactionCount: 0
     };
 
     const id = uuidv4();

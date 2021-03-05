@@ -51,12 +51,10 @@ export const store = createStore(
 const persistor = persistStore(store as any);
 
 interface WrapReduxArgs {
-  children?: ReactNode;
+  children: ReactNode;
 }
 
-export const WrapRedux: FunctionComponent<WrapReduxArgs> = (
-  args: WrapReduxArgs
-) => (
+export const WrapRedux: FunctionComponent<WrapReduxArgs> = (args) => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       {args.children}

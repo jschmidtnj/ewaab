@@ -7,6 +7,9 @@ const commentMappings = {
   },
   publisher: {
     type: 'keyword'
+  },
+  reactionCount: {
+    type: 'integer'
   }
 };
 

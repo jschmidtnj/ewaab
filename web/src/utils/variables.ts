@@ -12,6 +12,8 @@ export const defaultPerPage = 10;
 
 const perPageValues = [5, defaultPerPage, 15];
 
+export const elasticWaitTime = 1000; // time to wait for elastic to update
+
 export const perPageOptions: SelectNumberObject[] = perPageValues.map(
   (val) => ({
     label: val,

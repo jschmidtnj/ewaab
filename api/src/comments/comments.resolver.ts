@@ -4,7 +4,7 @@ import { commentIndexName } from '../elastic/settings';
 import { Matches, IsOptional } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
 import esb from 'elastic-builder';
-import { CommentSortOption, SearchComment, SearchCommentsResult } from '../schema/posts/comment.entity';
+import { CommentSortOption, SearchComment } from '../schema/posts/comment.entity';
 import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import { PaginationArgs } from '../schema/utils/pagination';
@@ -32,7 +32,7 @@ class CommentsArgs extends PostCommentsArgs {
   post: string;
 }
 
-export const searchComments = async (args: PostCommentsArgs, post: string): Promise<SearchCommentsResult> => {
+export const searchComments = async (args: PostCommentsArgs, post: string): Promise<SearchComment[]> => {
   const mustShouldParams: esb.Query[] = [];
   const filterMustParams: esb.Query[] = [];
 
@@ -69,16 +69,13 @@ export const searchComments = async (args: PostCommentsArgs, post: string): Prom
     };
     results.push(currentComment);
   }
-  return {
-    results,
-    count: elasticCommentData.body.hits.total.value
-  };
+  return results;
 };
 
 @Resolver()
 class CommentsResolver {
-  @Query(_returns => SearchCommentsResult)
-  async comments(@Args() args: CommentsArgs, @Ctx() ctx: GraphQLContext): Promise<SearchCommentsResult> {
+  @Query(_returns => [SearchComment])
+  async comments(@Args() args: CommentsArgs, @Ctx() ctx: GraphQLContext): Promise<SearchComment[]> {
     if (!await checkPostAccess({
       ctx,
       accessType: AuthAccessType.view,

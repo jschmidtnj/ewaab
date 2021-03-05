@@ -5,7 +5,14 @@ import { strMinLen, uuidRegex } from '../shared/variables';
 import { AuthAccessType, checkMessageAccess, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
-import { nanoid } from 'nanoid';
+import { v4 as uuidv4 } from 'uuid';
+import Post from '../schema/posts/post.entity';
+import { elasticClient } from '../elastic/init';
+import esb from 'elastic-builder';
+import { commentIndexName, messageIndexName, postIndexName } from '../elastic/settings';
+import Message from '../schema/users/message.entity';
+import Comment from '../schema/posts/comment.entity';
+import ReactionCount from '../schema/reactions/reactionCount.entity';
 
 @ArgsType()
 class AddReactionArgs {
@@ -37,7 +44,7 @@ class AddReactionResolver {
       })) {
         throw new Error(`user does not have access to view message ${args.parent}`);
       }
-    } else if ([ReactionParentType.comment, ReactionParentType.message].includes(args.parentType)) {
+    } else if ([ReactionParentType.comment, ReactionParentType.message, ReactionParentType.post].includes(args.parentType)) {
       if (!await checkPostAccess({
         ctx,
         accessType: AuthAccessType.view,
@@ -51,15 +58,82 @@ class AddReactionResolver {
 
     const ReactionModel = getRepository(Reaction);
     const newReaction = await ReactionModel.save({
-      id: nanoid(),
+      id: uuidv4(),
       created: new Date().getTime(),
       parent: args.parent,
       parentType: args.parentType,
-      reaction: args.reaction,
+      type: args.reaction,
       user: ctx.auth!.id
     });
 
-    return `created reaction ${newReaction.id}`;
+    const ReactionCountModel = getRepository(ReactionCount);
+    const currentCount = await ReactionCountModel.findOne({
+      where: {
+        parent: args.parent,
+        parentType: args.parentType,
+        type: args.reaction,
+      },
+      select: ['id']
+    });
+    if (!currentCount) {
+      await ReactionCountModel.save({
+        id: uuidv4(),
+        parent: args.parent,
+        parentType: args.parentType,
+        type: args.reaction,
+        count: 1
+      });
+    } else {
+      await ReactionCountModel.increment({
+        id: currentCount.id
+      }, 'count', 1);
+    }
+
+    const updateReactionsScript = esb.script('source', 'ctx._source.reactionCount++').lang('painless');
+
+    if ([ReactionParentType.post, ReactionParentType.message, ReactionParentType.comment].includes(args.parentType)) {
+      if (args.parentType === ReactionParentType.post) {
+        const PostModel = getRepository(Post);
+        await PostModel.increment({
+          id: args.parent
+        }, 'reactionCount', 1);
+        await elasticClient.update({
+          index: postIndexName,
+          id: args.parent,
+          body: {
+            script: updateReactionsScript.toJSON()
+          }
+        });
+      } else if (args.parentType === ReactionParentType.message) {
+        const MessageModel = getRepository(Message);
+        await MessageModel.increment({
+          id: args.parent
+        }, 'reactionCount', 1);
+        await elasticClient.update({
+          index: messageIndexName,
+          id: args.parent,
+          body: {
+            script: updateReactionsScript.toJSON()
+          }
+        });
+      } else if (args.parent === ReactionParentType.comment) {
+        const CommentModel = getRepository(Comment);
+        await CommentModel.increment({
+          id: args.parent
+        }, 'reactionCount', 1);
+        await elasticClient.update({
+          index: commentIndexName,
+          id: args.parent,
+          body: {
+            script: updateReactionsScript.toJSON()
+          }
+        });
+      } else {
+        throw new Error(`unhandled parent type ${args.parentType}`);
+      }
+    }
+
+    return newReaction.id;
   }
 }
 

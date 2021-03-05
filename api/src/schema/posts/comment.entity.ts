@@ -37,23 +37,19 @@ export class SearchComment extends BaseTimestamp {
   @IsDefined()
   post: string;
 
-  @Field(_type => PublisherData, { description: 'publisher user data', nullable: true })
-  publisherData?: PublisherData;
-}
-
-@ObjectType({ description: 'comment data search results' })
-export class SearchCommentsResult {
-  @Field(_type => [SearchComment], { description: 'results' })
-  results: SearchComment[];
-
-  @Field(_type => Int, { description: 'total comments count' })
-  count: number;
+  @Field(_type => Int, { description: 'number of reactions' })
+  @Column({ type: 'int' })
+  @IsDefined()
+  reactionCount: number;
 
   @Field(_type => [ReactionCount], { description: 'reactions', nullable: true })
   reactions?: ReactionCount[];
 
   @Field(_type => [Reaction], { description: 'user reactions', nullable: true })
   userReactions?: Reaction[];
+
+  @Field(_type => PublisherData, { description: 'publisher user data', nullable: true })
+  publisherData?: PublisherData;
 }
 
 @ObjectType({ description: 'comment data' })
