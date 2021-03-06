@@ -24,15 +24,16 @@ import { getAPIURL } from 'utils/axios';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { postMediaWidth } from 'shared/variables';
 import { FiFileText } from 'react-icons/fi';
-import Markdown from './markdown/Markdown';
+import Markdown from 'components/markdown/Markdown';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { Emoji } from 'emoji-mart';
 import { BsDot } from 'react-icons/bs';
-import EmojiPicker from './EmojiPicker';
+import EmojiPicker from 'components/EmojiPicker';
 import { AiFillLike, AiOutlineLike, AiOutlineMessage } from 'react-icons/ai';
 import { client } from 'utils/apollo';
-import CommentsView from './CommentsView';
+import CommentsView from 'components/CommentsView';
 import { elasticWaitTime } from 'utils/variables';
+import Link from 'next/link';
 
 interface MediaViewArgs {
   id: string;
@@ -86,6 +87,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
   const toggleEmojiPicker = () => setEmojiPickerVisible(!emojiPickerVisible);
 
   const [commentsVisible, setCommentsVisible] = useState<boolean>(false);
+  const toggleComments = () => setCommentsVisible(!commentsVisible);
 
   const [updateTimeout, setUpdateTimeout] = useState<
     ReturnType<typeof setTimeout> | undefined
@@ -108,7 +110,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
         args.data.publisher !== userID ? null : (
           <div className="flex justify-end text-2xl text-gray-800">
             <button
-              className="focus:outline-none mr-8 p-2 absolute z-10 hover:text-gray-600"
+              className="mr-8 p-2 absolute z-10 hover:text-gray-600"
               onClick={(evt) => {
                 evt.preventDefault();
                 args.onUpdatePost(args.data.id);
@@ -117,7 +119,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
               <BsPencil />
             </button>
             <button
-              className="focus:outline-none p-2 absolute z-10 hover:text-gray-600"
+              className="p-2 absolute z-10 hover:text-gray-600"
               onClick={(evt) => {
                 evt.preventDefault();
                 args.onDeletePost({
@@ -131,40 +133,39 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
         )}
 
         <div className="mb-2">
-          <button
-            onClick={(evt) => {
-              evt.preventDefault();
-              if (!args.data.publisherData) {
-                toast('user does not exist', {
-                  type: 'warning',
-                });
-                return;
-              }
-              router.push(`/${args.data.publisherData.username}`);
-            }}
-            className="focus:outline-none mx-4 flex items-center text-left w-full"
+          <Link
+            href={
+              !args.data.publisherData
+                ? '/404'
+                : `/${args.data.publisherData.username}`
+            }
           >
-            <Avatar avatar={args.data.publisherData?.avatar} avatarWidth={40} />
-            <div className="inline-block ml-2">
-              {!args.data.publisherData ? (
-                <p className="font-medium">Deleted</p>
-              ) : (
-                <>
-                  <p className="font-medium text-sm">
-                    {args.data.publisherData.name}
-                  </p>
-                  <p className="text-xs">
-                    {args.data.publisherData.description}
-                  </p>
-                  <p className="text-xs">
-                    {formatDistanceToNow(args.data.created, {
-                      addSuffix: true,
-                    })}
-                  </p>
-                </>
-              )}
-            </div>
-          </button>
+            <a className="mx-4 flex items-center text-left w-full">
+              <Avatar
+                avatar={args.data.publisherData?.avatar}
+                avatarWidth={40}
+              />
+              <div className="inline-block ml-2">
+                {!args.data.publisherData ? (
+                  <p className="font-medium">Deleted</p>
+                ) : (
+                  <>
+                    <p className="font-medium text-sm">
+                      {args.data.publisherData.name}
+                    </p>
+                    <p className="text-xs">
+                      {args.data.publisherData.description}
+                    </p>
+                    <p className="text-xs">
+                      {formatDistanceToNow(args.data.created, {
+                        addSuffix: true,
+                      })}
+                    </p>
+                  </>
+                )}
+              </div>
+            </a>
+          </Link>
         </div>
         <div className="mx-4 mt-4">
           <h2
@@ -232,10 +233,11 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
           )}
           <hr className="mb-2" />
 
-          <div>
+          <div className="mt-2 space-x-4">
             <EmojiPicker
               isVisible={emojiPickerVisible}
               toggleView={toggleEmojiPicker}
+              className="inline-block mr-2"
               currentEmoji={
                 args.data.userReactions.length > 0
                   ? args.data.userReactions[0].type
@@ -293,7 +295,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
                 className={
                   (args.data.userReactions.length > 0
                     ? 'text-purple-700'
-                    : '') + ' text-2xl mr-2'
+                    : '') + ' text-2xl'
                 }
                 onClick={(evt) => {
                   evt.preventDefault();
@@ -306,23 +308,24 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
                   <AiOutlineLike />
                 )}
               </button>
-              <button
-                className={
-                  (commentsVisible ? 'text-gray-800' : 'text-gray-500') +
-                  ' text-2xl'
-                }
-                onClick={(evt) => {
-                  evt.preventDefault();
-                  setCommentsVisible(true);
-                }}
-              >
-                <AiOutlineMessage />
-              </button>
             </EmojiPicker>
+            <button
+              className={
+                (commentsVisible ? 'text-gray-800' : 'text-gray-500') +
+                ' text-2xl inline-block'
+              }
+              onClick={(evt) => {
+                evt.preventDefault();
+                toggleComments();
+              }}
+            >
+              <AiOutlineMessage />
+            </button>
           </div>
+
+          {!commentsVisible ? null : <CommentsView post={args.data.id} />}
         </div>
       </div>
-      {!commentsVisible ? null : <CommentsView post={args.data.id} />}
     </div>
   );
 };

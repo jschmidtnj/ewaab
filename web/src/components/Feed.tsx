@@ -36,22 +36,16 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
   );
   const [currentPage, setCurrentPage] = useState<number>(0);
 
-  const [postsVariables, setPostsVariables] = useState<
-    PostsQueryVariables | undefined
-  >(undefined);
-
   const runQuery = async (useCache = !isDebug()): Promise<void> => {
-    const newVariables: PostsQueryVariables = {
-      sortBy: PostSortOption.Created,
-      perpage: numPerPage,
-      ascending: false,
-      page: currentPage,
-      type: args.postType,
-    };
-    setPostsVariables(newVariables);
     const res = await client.query<PostsQuery, PostsQueryVariables>({
       query: Posts,
-      variables: newVariables,
+      variables: {
+        sortBy: PostSortOption.Created,
+        perpage: numPerPage,
+        ascending: false,
+        page: currentPage,
+        type: args.postType,
+      },
       fetchPolicy: !useCache ? 'network-only' : 'cache-first',
     });
     if (res.errors) {
@@ -125,7 +119,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
           !postWriteMap[userType].includes(args.postType) ? null : (
             <div className="bg-white px-4 sm:px-16 py-4 flex items-center justify-center mt-4 mb-8 rounded-md">
               <button
-                className="focus:outline-none flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
+                className="flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
                 onClick={(evt) => {
                   evt.preventDefault();
                   toggleWritePost();
@@ -138,7 +132,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
           )}
 
           <div className="flex items-center justify-center">
-            {!posts || posts.loading || !postsVariables ? (
+            {!posts || posts.loading ? (
               <p className="text-md pt-4">Loading...</p>
             ) : !posts.data || posts.data.posts.results.length === 0 ? (
               <p className="text-md pt-4">No posts found</p>

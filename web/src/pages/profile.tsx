@@ -903,7 +903,7 @@ const ProfilePage: FunctionComponent = () => {
                                   resumeInputElem.click();
                                 }}
                                 type="button"
-                                className="ml-7 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="ml-7 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                               >
                                 {user.resume ? 'Change' : 'Upload'}
                               </button>
@@ -934,7 +934,7 @@ const ProfilePage: FunctionComponent = () => {
                                   avatarInputElem.click();
                                 }}
                                 type="button"
-                                className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                               >
                                 Change
                               </button>
@@ -979,7 +979,7 @@ const ProfilePage: FunctionComponent = () => {
                                 handleSubmit();
                               }}
                               disabled={isSubmitting}
-                              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
                               Update
                             </button>
@@ -1047,7 +1047,7 @@ const ProfilePage: FunctionComponent = () => {
                                   toggleDeleteAccountModal();
                                 }}
                                 disabled={isSubmitting}
-                                className="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                className="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                               >
                                 Delete Account
                               </button>

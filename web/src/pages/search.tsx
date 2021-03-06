@@ -20,6 +20,7 @@ import {
   perPageOptions,
   postWriteMap,
   SelectNumberObject,
+  elasticWaitTime,
 } from 'utils/variables';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
@@ -30,6 +31,7 @@ import DeletePostModal from 'components/modals/DeletePostModal';
 import sleep from 'shared/sleep';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
+import isDebug from 'utils/mode';
 
 const SearchPage: FunctionComponent = () => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
@@ -44,14 +46,17 @@ const SearchPage: FunctionComponent = () => {
 
   const [defaultQuery, setDefaultQuery] = useState<string>('');
 
-  const runQuery = async (variables: PostsQueryVariables): Promise<void> => {
+  const runQuery = async (
+    variables: PostsQueryVariables,
+    useCache = !isDebug()
+  ): Promise<void> => {
     if (variables.query?.length === 0) {
       variables.query = undefined;
     }
     const res = await client.query<PostsQuery, PostsQueryVariables>({
       query: Posts,
       variables,
-      fetchPolicy: 'network-only', // disable cache
+      fetchPolicy: !useCache ? 'network-only' : 'cache-first', // disable cache
     });
     if (res.errors) {
       throw new Error(res.errors.join(', '));
@@ -137,7 +142,7 @@ const SearchPage: FunctionComponent = () => {
                 setSubmitting(false);
               };
               try {
-                await runQuery(formData);
+                await runQuery(formData, false);
               } catch (err) {
                 console.error(JSON.stringify(err, null, 2));
                 toast(err.message, {
@@ -301,7 +306,7 @@ const SearchPage: FunctionComponent = () => {
                             }
                           >
                             <button
-                              className="w-full flex flex-row p-3 border-b first:rounded-md last:rounded-md focus:outline-none"
+                              className="w-full flex flex-row p-3 border-b first:rounded-md last:rounded-md"
                               onClick={(evt) => {
                                 evt.preventDefault();
                                 let newType: PostType | undefined;
@@ -369,7 +374,7 @@ const SearchPage: FunctionComponent = () => {
                       toggleModal={toggleDeletePostModal}
                       onSubmit={async () => {
                         // wait for elasticsearch to update
-                        await sleep(1000);
+                        await sleep(elasticWaitTime);
                         formRef.current.handleSubmit();
                       }}
                       variables={deletePostVariables}
@@ -393,6 +398,11 @@ const SearchPage: FunctionComponent = () => {
                                     onDeletePost={(vars) => {
                                       setDeletePostVariables(vars);
                                       toggleDeletePostModal();
+                                    }}
+                                    updateData={async () => {
+                                      // wait for elasticsearch to update
+                                      await sleep(elasticWaitTime);
+                                      formRef.current.handleSubmit();
                                     }}
                                     onUpdatePost={(postID) => {
                                       setUpdatePostID(postID);

@@ -1,0 +1,18 @@
+fragment commentFields on SearchComment {
+  content
+  created
+  publisherData {
+    username
+    avatar
+    name
+    description
+  }
+}
+
+query comments($post: String!, $sortBy: CommentSortOption, $ascending: Boolean,
+               $page: Int, $perpage: Int) {
+  comments(post: $post, sortBy: $sortBy, ascending: $ascending,
+           page: $page, perpage: $perpage) {
+    ...commentFields
+  }
+}

@@ -8,6 +8,15 @@
 
 @tailwind components;
 
+
+/* remove outlines on focus */
+button:focus {
+  @apply outline-none;
+}
+input:focus {
+  @apply outline-none;
+}
+
 /* remove recaptcha badge */
 .grecaptcha-badge {
   visibility: hidden;
@@ -52,6 +61,18 @@
   min-height: 0 !important;
   @apply h-40;
   overflow-y: auto;
+}
+
+.editor-min .CodeMirror-scroll {
+  @apply h-auto;
+}
+
+.editor-min .CodeMirror {
+  @apply h-auto;
+  @apply rounded-t-3xl;
+  @apply rounded-b-3xl;
+  @apply text-sm;
+  @apply py-1;
 }
 
 @import './markdown.scss';

@@ -420,7 +420,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                 <div className="my-4">
                   <div className="ml-80 flex justify-center text-2xl text-gray-300">
                     <button
-                      className="focus:outline-none mr-20 absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
+                      className="mr-20 absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
                       onClick={(evt) => {
                         evt.preventDefault();
                         imageInputElem.click();
@@ -429,7 +429,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                       <BsPencil />
                     </button>
                     <button
-                      className="focus:outline-none absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
+                      className="absolute z-10 mt-2 rounded-full bg-gray-700 p-1"
                       onClick={(evt) => {
                         evt.preventDefault();
                         setPreviewImage(undefined);
@@ -547,7 +547,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                     evt.preventDefault();
                     args.toggleModal();
                   }}
-                  className="mt-2 text-sm rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="mt-2 text-sm rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Cancel
                 </button>
@@ -561,7 +561,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                     !formRef.current ? true : formRef.current.isSubmitting
                   }
                   type="submit"
-                  className="mt-2 ml-2 text-sm rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-700 font-medium text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="mt-2 ml-2 text-sm rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-700 font-medium text-white hover:bg-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Post
                 </button>

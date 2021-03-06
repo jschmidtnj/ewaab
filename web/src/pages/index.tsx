@@ -36,7 +36,7 @@ const Index: FunctionComponent = () => {
                 <Link href="/login">
                   <a
                     href="/login"
-                    className="mt-8 py-2 px-10 opacity-70 shadow-md no-underline rounded-full bg-blue-700 font-medium text-md btn-primary hover:bg-pink-600 focus:outline-none active:shadow-none mr-2"
+                    className="mt-8 py-2 px-10 opacity-70 shadow-md no-underline rounded-full bg-blue-700 font-medium text-md btn-primary hover:bg-pink-600 active:shadow-none mr-2"
                   >
                     Login
                   </a>

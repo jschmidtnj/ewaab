@@ -16,8 +16,7 @@ const Editor: FunctionComponent<EditorArgs> = (args) => {
           className={
             (!showPreview
               ? 'text-blue-500 border-b-2 font-medium border-blue-500'
-              : '') +
-            'text-gray-600 py-3 px-4 block hover:text-blue-500 focus:outline-none'
+              : '') + 'text-gray-600 py-3 px-4 block hover:text-blue-500'
           }
           onClick={(evt) => {
             evt.preventDefault();
@@ -30,8 +29,7 @@ const Editor: FunctionComponent<EditorArgs> = (args) => {
           className={
             (showPreview
               ? 'text-blue-500 border-b-2 font-medium border-blue-500'
-              : '') +
-            'text-gray-600 py-3 px-4 block hover:text-blue-500 focus:outline-none'
+              : '') + 'text-gray-600 py-3 px-4 block hover:text-blue-500'
           }
           onClick={(evt) => {
             evt.preventDefault();

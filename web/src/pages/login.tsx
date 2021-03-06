@@ -201,7 +201,7 @@ const Login: FunctionComponent = () => {
                         type="password"
                         autoComplete="current-code"
                         required
-                        className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                         placeholder="Code"
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -236,7 +236,7 @@ const Login: FunctionComponent = () => {
                     <div className="text-sm">
                       <button
                         type="button"
-                        className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
+                        className="font-medium text-indigo-600 hover:text-indigo-500"
                         onClick={(evt) => {
                           evt.preventDefault();
                           setUseCode(false);
@@ -255,7 +255,7 @@ const Login: FunctionComponent = () => {
                       }}
                       disabled={isSubmitting}
                       type="submit"
-                      className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                         <svg
@@ -377,7 +377,7 @@ const Login: FunctionComponent = () => {
                         type="text"
                         autoComplete="email"
                         required
-                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                         placeholder="Email / Username"
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -404,7 +404,7 @@ const Login: FunctionComponent = () => {
                         type="password"
                         autoComplete="current-password"
                         required
-                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                         placeholder="Password"
                         onChange={handleChange}
                         onBlur={handleBlur}
@@ -440,7 +440,7 @@ const Login: FunctionComponent = () => {
                     <div className="text-sm">
                       <button
                         type="button"
-                        className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none mr-2"
+                        className="font-medium text-indigo-600 hover:text-indigo-500 mr-2"
                         onClick={(evt) => {
                           evt.preventDefault();
                           setUseCode(true);
@@ -464,7 +464,7 @@ const Login: FunctionComponent = () => {
                       }}
                       disabled={isSubmitting}
                       type="submit"
-                      className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                         <svg

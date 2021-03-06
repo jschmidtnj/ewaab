@@ -1,6 +1,7 @@
 import { Picker } from 'emoji-mart';
-import { FunctionComponent, ReactNode } from 'react';
+import { FunctionComponent, HTMLAttributes, ReactNode } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
+import sleep from 'shared/sleep';
 
 interface EmojiPickerArgs {
   isVisible: boolean;
@@ -8,30 +9,33 @@ interface EmojiPickerArgs {
   currentEmoji?: string;
   setEmoji: (emoji: string) => Promise<void>;
   children: ReactNode;
+  className?: HTMLAttributes<HTMLDivElement>['className'];
 }
 
 const EmojiPicker: FunctionComponent<EmojiPickerArgs> = (args) => {
-  // https://dev.to/alexandprivate/build-your-own-react-tooltip-component-25bd
-  // TODO - create component
   return (
-    <div>
+    <div className={args.className}>
       {!args.isVisible ? null : (
-        <OutsideClickHandler
-          onOutsideClick={() => {
-            console.log('clicked outside');
-            args.toggleView();
-          }}
-        >
-          <Picker
-            showPreview={false}
-            showSkinTones={false}
-            emoji={args.currentEmoji}
-            onSelect={async (emoji) => {
-              await args.setEmoji(emoji.id!);
-              args.toggleView();
+        <div className="absolute mt-8 flex items-center z-20">
+          <OutsideClickHandler
+            onOutsideClick={async () => {
+              await sleep(50);
+              if (args.isVisible) {
+                args.toggleView();
+              }
             }}
-          />
-        </OutsideClickHandler>
+          >
+            <Picker
+              showPreview={false}
+              showSkinTones={false}
+              emoji={args.currentEmoji}
+              onSelect={async (emoji) => {
+                await args.setEmoji(emoji.id!);
+                args.toggleView();
+              }}
+            />
+          </OutsideClickHandler>
+        </div>
       )}
       {args.children}
     </div>
