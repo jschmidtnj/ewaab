@@ -101,19 +101,18 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
           updateID={updatePostID}
         />
       )}
+      {!deletePostModalIsOpen || !deletePostVariables ? null : (
+        <DeletePostModal
+          toggleModal={toggleDeletePostModal}
+          onSubmit={async () => {
+            await sleep(elasticWaitTime);
+            await runQuery(false);
+          }}
+          variables={deletePostVariables}
+        />
+      )}
 
       <div className="flex flex-col mt-4">
-        {!deletePostModalIsOpen || !deletePostVariables ? null : (
-          <DeletePostModal
-            toggleModal={toggleDeletePostModal}
-            onSubmit={async () => {
-              await sleep(elasticWaitTime);
-              await runQuery(false);
-            }}
-            variables={deletePostVariables}
-          />
-        )}
-
         <div className="col-span-3 lg:mx-4">
           {!userType ||
           !postWriteMap[userType].includes(args.postType) ? null : (

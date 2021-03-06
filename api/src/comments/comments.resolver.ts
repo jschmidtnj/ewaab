@@ -55,7 +55,7 @@ export const searchComments = async (args: PostCommentsArgs, post: string): Prom
     requestBody = requestBody.sort(esb.sort(args.sortBy,
       args.ascending ? 'asc' : 'desc'));
   }
-  requestBody = requestBody.from(args.page).size(args.perpage);
+  requestBody = requestBody.from(args.page * args.perpage).size(args.perpage);
 
   const elasticCommentData = await elasticClient.search({
     index: commentIndexName,

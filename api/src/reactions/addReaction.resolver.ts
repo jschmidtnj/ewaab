@@ -44,11 +44,22 @@ class AddReactionResolver {
       })) {
         throw new Error(`user does not have access to view message ${args.parent}`);
       }
-    } else if ([ReactionParentType.comment, ReactionParentType.message, ReactionParentType.post].includes(args.parentType)) {
+    } else if ([ReactionParentType.comment, ReactionParentType.post].includes(args.parentType)) {
+      let postID = args.parent;
+      if (args.parentType === ReactionParentType.comment) {
+        const CommentModel = getRepository(Comment);
+        const commentData = await CommentModel.findOne(args.parent, {
+          select: ['post']
+        });
+        if (!commentData) {
+          throw new Error(`cannot find comment with id ${args.parent}`);
+        }
+        postID = commentData.post;
+      }
       if (!await checkPostAccess({
         ctx,
         accessType: AuthAccessType.view,
-        id: args.parent
+        id: postID
       })) {
         throw new Error(`user does not have access to view post ${args.parent}`);
       }
@@ -116,7 +127,7 @@ class AddReactionResolver {
             script: updateReactionsScript.toJSON()
           }
         });
-      } else if (args.parent === ReactionParentType.comment) {
+      } else if (args.parentType === ReactionParentType.comment) {
         const CommentModel = getRepository(Comment);
         await CommentModel.increment({
           id: args.parent

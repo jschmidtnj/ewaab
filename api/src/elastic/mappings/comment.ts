@@ -8,6 +8,9 @@ const commentMappings = {
   publisher: {
     type: 'keyword'
   },
+  post: {
+    type: 'keyword'
+  },
   reactionCount: {
     type: 'integer'
   }

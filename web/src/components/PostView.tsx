@@ -29,7 +29,12 @@ import { FunctionComponent, useEffect, useState } from 'react';
 import { Emoji } from 'emoji-mart';
 import { BsDot } from 'react-icons/bs';
 import EmojiPicker from 'components/EmojiPicker';
-import { AiFillLike, AiOutlineLike, AiOutlineMessage } from 'react-icons/ai';
+import {
+  AiFillLike,
+  AiFillMessage,
+  AiOutlineLike,
+  AiOutlineMessage,
+} from 'react-icons/ai';
 import { client } from 'utils/apollo';
 import CommentsView from 'components/CommentsView';
 import { elasticWaitTime } from 'utils/variables';
@@ -105,7 +110,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
 
   return (
     <div className="bg-white rounded-lg text-left overflow-hidden shadow-sm mb-4">
-      <div className="sm:p-4 p-2">
+      <div className="sm:px-4 pt-4 px-2">
         {userType !== UserType.Admin &&
         args.data.publisher !== userID ? null : (
           <div className="flex justify-end text-2xl text-gray-800">
@@ -156,13 +161,13 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
                     <p className="text-xs">
                       {args.data.publisherData.description}
                     </p>
-                    <p className="text-xs">
-                      {formatDistanceToNow(args.data.created, {
-                        addSuffix: true,
-                      })}
-                    </p>
                   </>
                 )}
+                <p className="text-xs">
+                  {formatDistanceToNow(args.data.created, {
+                    addSuffix: true,
+                  })}
+                </p>
               </div>
             </a>
           </Link>
@@ -201,36 +206,38 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
           )}
         </>
       )}
-      <div className="sm:p-4 p-2">
+      <div className="pt-2 pb-2 sm:px-4 px-2">
         <div className="mx-4 mt-2">
-          {args.data.reactionCount === 0 ? null : (
-            <div className="my-2">
-              {args.data.reactions.map((reaction, i) => (
-                <span
-                  className="pr-2"
-                  key={`reaction-post-${args.data.id}-${i}`}
-                >
-                  <Emoji emoji={reaction.type} size={16} />
+          <div className="flex items-center justify-start text-sm">
+            {args.data.reactionCount === 0 ? null : (
+              <div className="flex items-center justify-center">
+                {args.data.reactions.map((reaction, i) => (
+                  <span
+                    className="pr-2 pt-2"
+                    key={`reaction-post-${args.data.id}-${i}`}
+                  >
+                    <Emoji emoji={reaction.type} size={16} />
+                  </span>
+                ))}
+                <span className="pl-2">
+                  {numberFormat.format(args.data.reactionCount)}
                 </span>
-              ))}
-              <span className="px-2">
-                {numberFormat.format(args.data.reactionCount)}
-              </span>
-            </div>
-          )}
-          {args.data.commentCount === 0 ? null : (
-            <>
-              {args.data.reactionCount === 0 ? null : (
+              </div>
+            )}
+            {args.data.commentCount === 0 ? null : (
+              <div className="flex items-center justify-center">
+                {args.data.reactionCount === 0 ? null : (
+                  <span className="px-1">
+                    <BsDot />
+                  </span>
+                )}
                 <span>
-                  <BsDot />
+                  {numberFormat.format(args.data.commentCount)} comment
+                  {args.data.commentCount !== 1 ? 's' : ''}
                 </span>
-              )}
-              <span>
-                {numberFormat.format(args.data.commentCount)} comment
-                {args.data.commentCount !== 1 ? 's' : ''}
-              </span>
-            </>
-          )}
+              </div>
+            )}
+          </div>
           <hr className="mb-2" />
 
           <div className="mt-2 space-x-4">
@@ -295,7 +302,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
                 className={
                   (args.data.userReactions.length > 0
                     ? 'text-purple-700'
-                    : '') + ' text-2xl'
+                    : 'text-gray-700') + ' text-2xl'
                 }
                 onClick={(evt) => {
                   evt.preventDefault();
@@ -311,7 +318,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
             </EmojiPicker>
             <button
               className={
-                (commentsVisible ? 'text-gray-800' : 'text-gray-500') +
+                (commentsVisible ? 'text-blue-700' : 'text-gray-700') +
                 ' text-2xl inline-block'
               }
               onClick={(evt) => {
@@ -319,11 +326,17 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
                 toggleComments();
               }}
             >
-              <AiOutlineMessage />
+              {commentsVisible ? <AiFillMessage /> : <AiOutlineMessage />}
             </button>
           </div>
 
-          {!commentsVisible ? null : <CommentsView post={args.data.id} />}
+          {!commentsVisible ? null : (
+            <CommentsView
+              post={args.data.id}
+              commentCount={args.data.commentCount}
+              updateData={args.updateData}
+            />
+          )}
         </div>
       </div>
     </div>

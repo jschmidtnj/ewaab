@@ -1,11 +1,21 @@
 fragment commentFields on SearchComment {
   content
   created
+  publisher
+  id
   publisherData {
     username
     avatar
     name
     description
+  }
+  userReactions {
+    id
+    type
+  }
+  reactionCount
+  reactions {
+    type
   }
 }
 
