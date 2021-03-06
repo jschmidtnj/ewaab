@@ -53,7 +53,7 @@ export const getMediaAuthenticated = async (args: MediaArgs, ctx: GraphQLContext
     if (!await checkPostAccess({
       ctx,
       accessType: AuthAccessType.view,
-      id: args.id
+      id: media.parent
     })) {
       throw new Error(`user of type ${ctx.auth.type} not authorized to view post ${args.id}`);
     }

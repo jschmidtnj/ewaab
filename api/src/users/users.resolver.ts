@@ -2,7 +2,7 @@ import { Resolver, Query, ArgsType, Field, Float, Args, Ctx } from 'type-graphql
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import { Min, isEmail, Matches, IsOptional, IsIn } from 'class-validator';
-import { SearchUser, SearchUsersResult, UserSortOption, UserType } from '../schema/users/user.entity';
+import { BaseSearchUser, SearchUsersResult, UserSortOption, UserType } from '../schema/users/user.entity';
 import { locationRegex } from '../shared/variables';
 import majors from '../shared/majors';
 import esb from 'elastic-builder';
@@ -103,16 +103,16 @@ class UsersResolver {
       requestBody = requestBody.sort(esb.sort(args.sortBy,
         args.ascending ? 'asc' : 'desc'));
     }
-    requestBody = requestBody.from(args.page).size(args.perpage);
+    requestBody = requestBody.from(args.page * args.perpage).size(args.perpage);
 
     const elasticUserData = await elasticClient.search({
       index: userIndexName,
       body: requestBody.toJSON()
     });
-    const results: SearchUser[] = [];
+    const results: BaseSearchUser[] = [];
     for (const hit of elasticUserData.body.hits.hits) {
-      const currentUser: SearchUser = {
-        ...hit._source as SearchUser,
+      const currentUser: BaseSearchUser = {
+        ...hit._source as BaseSearchUser,
         id: hit._id as string,
       };
       results.push(currentUser);

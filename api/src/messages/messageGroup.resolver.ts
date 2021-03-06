@@ -2,9 +2,9 @@ import { Ctx, FieldResolver, Resolver, ResolverInterface, Root } from 'type-grap
 import { Any, getRepository } from 'typeorm';
 import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
 import User, { PublicUser } from '../schema/users/user.entity';
-import { publicUserSelect } from '../users/publicUser.resolver';
 import { GraphQLContext } from '../utils/context';
 import { defaultDBCache } from '../utils/variables';
+import { keys } from 'ts-transformer-keys';
 
 @Resolver(_of => MessageGroup)
 class MessageGroupsResolver implements ResolverInterface<MessageGroup> {
@@ -15,7 +15,7 @@ class MessageGroupsResolver implements ResolverInterface<MessageGroup> {
       where: {
         id: Any(messageGroup.userIDs)
       },
-      select: publicUserSelect,
+      select: keys<PublicUser>(),
       cache: defaultDBCache
     })).map(user => user as PublicUser);
 

@@ -1,3 +1,17 @@
+query postUpdates($id: String!) {
+  post(id: $id) {
+    userReactions(page:0, perpage:1) {
+      id
+      type
+    }
+    reactions(page:0, perpage:3) {
+      type
+    }
+    reactionCount
+    commentCount
+  }
+}
+
 fragment postSearchFields on SearchPost {
   id
   title

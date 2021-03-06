@@ -13,60 +13,41 @@ import {
   AddComment,
   AddCommentMutation,
   AddCommentMutationVariables,
-  AddReaction,
-  AddReactionMutation,
-  AddReactionMutationVariables,
   CommentFieldsFragment,
   Comments,
   CommentSortOption,
   CommentsQuery,
   CommentsQueryVariables,
+  CommentUpdates,
+  CommentUpdatesQuery,
+  CommentUpdatesQueryVariables,
   DeleteComment,
   DeleteCommentMutation,
   DeleteCommentMutationVariables,
-  DeleteReaction,
-  DeleteReactionMutation,
-  DeleteReactionMutationVariables,
-  ReactionParentType,
-  UserType,
 } from 'lib/generated/datamodel';
-import { BsDot } from 'react-icons/bs';
 import sleep from 'shared/sleep';
-import { Emoji } from 'emoji-mart';
 import { elasticWaitTime } from 'utils/variables';
 import { ApolloError } from '@apollo/client';
 import isDebug from 'utils/mode';
-import Markdown from 'components/markdown/Markdown';
-import { formatDistanceStrict } from 'date-fns';
-import Link from 'next/link';
-import EmojiPicker from 'components/EmojiPicker';
-import { BiTrash } from 'react-icons/bi';
+import { cloneDeep } from '@apollo/client/utilities';
+import CommentView from './CommentView';
 
 const numPerPage = 5;
 
 interface CommentsViewArgs {
   post: string;
   commentCount: number;
-  updateData: (useCache: boolean) => Promise<void>;
+  updateSinglePost: (postID: string, useCache: boolean) => Promise<void>;
 }
 
 const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
   const avatar = useSelector<RootState, string | undefined>(
     (state) => state.authReducer.user?.avatar
   );
-  const userType = useSelector<RootState, UserType | undefined>(
-    (state) => state.authReducer.user?.type as UserType | undefined
-  );
-  const userID = useSelector<RootState, string | undefined>(
-    (state) => state.authReducer.user?.id
-  );
 
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [comments, setComments] = useState<CommentFieldsFragment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const [emojiPickerVisible, setEmojiPickerVisible] = useState<boolean>(false);
-  const toggleEmojiPicker = () => setEmojiPickerVisible(!emojiPickerVisible);
 
   const getComments = async (
     useCache = !isDebug(),
@@ -88,7 +69,7 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
       throw new Error(res.errors.join(', '));
     }
     setCurrentPage(pageNum);
-    console.log(pageNum, currentComments, res.data.comments);
+
     if (currentComments.length > 0) {
       setComments([
         ...currentComments,
@@ -102,22 +83,10 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
     setLoading(res.loading);
   };
 
-  const [updateTimeout, setUpdateTimeout] = useState<
-    ReturnType<typeof setTimeout> | undefined
-  >(undefined);
-
-  useEffect(() => {
-    return () => {
-      if (updateTimeout) {
-        clearTimeout(updateTimeout);
-      }
-    };
-  }, []);
-
   useEffect(() => {
     (async () => {
       try {
-        await getComments(true);
+        await getComments(false);
       } catch (err) {
         // console.log(JSON.stringify(err));
         toast((err as ApolloError).message, {
@@ -167,13 +136,20 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
               if (addCommentRes.errors) {
                 throw new Error(addCommentRes.errors.join(', '));
               }
+              if (!addCommentRes.data) {
+                throw new Error('no comment data found');
+              }
 
+              setComments([
+                (addCommentRes.data
+                  .addComment as unknown) as CommentFieldsFragment,
+                ...comments,
+              ]);
+              resetForm();
               setStatus({ success: true });
               setSubmitting(false);
               await sleep(elasticWaitTime);
-              await getComments(false, [], 0);
-              await args.updateData(false);
-              resetForm();
+              await args.updateSinglePost(args.post, false);
             } catch (err) {
               const errObj: Error = err;
               toast(errObj.message, {
@@ -229,179 +205,83 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
           </p>
         ) : (
           comments.map((comment, i) => (
-            <div
-              className="flex items-start justify-center"
+            <CommentView
               key={`comment-${args.post}-${i}`}
-            >
-              <div className="inline-block">
-                <Link
-                  href={
-                    !comment.publisherData
-                      ? '/404'
-                      : `/${comment.publisherData.username}`
+              comment={comment}
+              post={args.post}
+              updateSingleComment={async (
+                commentID: string,
+                useCache = !isDebug()
+              ) => {
+                try {
+                  const currentCommentIndex = comments.findIndex(
+                    (elem) => elem.id === commentID
+                  );
+                  if (currentCommentIndex < 0) {
+                    throw new Error(`comment with id ${commentID} not found`);
                   }
-                >
-                  <a>
-                    <Avatar
-                      avatar={comment.publisherData?.avatar}
-                      avatarWidth={45}
-                    />
-                  </a>
-                </Link>
-              </div>
-              <div className="ml-4 w-full bg-gray-200 rounded-md p-2">
-                <div className="flex z-10 space-x-2 justify-end text-gray-800">
-                  <p className="absolute mr-6 text-xs">
-                    {formatDistanceStrict(comment.created, new Date(), {
-                      addSuffix: true,
-                    })}
-                  </p>
-                  {userType !== UserType.Admin &&
-                  comment.publisher !== userID ? null : (
-                    <button
-                      className="absolute text-md hover:text-gray-600"
-                      onClick={async (evt) => {
-                        evt.preventDefault();
-                        try {
-                          const deleteCommentRes = await client.mutate<
-                            DeleteCommentMutation,
-                            DeleteCommentMutationVariables
-                          >({
-                            mutation: DeleteComment,
-                            variables: {
-                              id: comment.id,
-                            },
-                          });
-                          if (deleteCommentRes.errors) {
-                            throw new Error(deleteCommentRes.errors.join(', '));
-                          }
-                          await sleep(elasticWaitTime);
-                          await getComments(false, [], 0);
-                          await args.updateData(false);
-                        } catch (err) {
-                          const errObj: Error = err;
-                          toast(errObj.message, {
-                            type: 'error',
-                          });
-                        }
-                      }}
-                    >
-                      <BiTrash />
-                    </button>
-                  )}
-                </div>
-                <Link
-                  href={
-                    !comment.publisherData
-                      ? '/404'
-                      : `/${comment.publisherData.username}`
+                  const res = await client.query<
+                    CommentUpdatesQuery,
+                    CommentUpdatesQueryVariables
+                  >({
+                    query: CommentUpdates,
+                    variables: {
+                      id: commentID,
+                    },
+                    fetchPolicy: !useCache ? 'network-only' : 'cache-first',
+                  });
+                  if (res.errors) {
+                    throw new Error(res.errors.join(', '));
                   }
-                >
-                  <a>
-                    {!comment.publisherData ? (
-                      <p className="font-medium">Deleted</p>
-                    ) : (
-                      <>
-                        <p className="font-bold text-xs">
-                          {comment.publisherData.name}
-                        </p>
-                        <p className="text-xs">
-                          {comment.publisherData.description}
-                        </p>
-                      </>
-                    )}
-                  </a>
-                </Link>
-                <Markdown content={comment.content} />
-              </div>
-              {/* TODO - move like button under comment somehow, fix reactions list */}
-              <div>
-                <EmojiPicker
-                  isVisible={emojiPickerVisible}
-                  toggleView={toggleEmojiPicker}
-                  className="inline-block mr-2"
-                  currentEmoji={
-                    comment.userReactions.length > 0
-                      ? comment.userReactions[0].type
-                      : undefined
+                  const commentCopy = cloneDeep(comments[currentCommentIndex]);
+                  for (const key in res.data.comment) {
+                    commentCopy[key] = res.data.comment[key];
                   }
-                  setEmoji={async (emoji) => {
-                    try {
-                      const addReactionRes = await client.mutate<
-                        AddReactionMutation,
-                        AddReactionMutationVariables
-                      >({
-                        mutation: AddReaction,
-                        variables: {
-                          parent: comment.id,
-                          parentType: ReactionParentType.Comment,
-                          reaction: emoji,
-                        },
-                      });
-                      if (addReactionRes.errors) {
-                        throw new Error(addReactionRes.errors.join(', '));
-                      }
-
-                      if (comment.userReactions.length > 0) {
-                        const reactionID = comment.userReactions[0].id;
-                        const deleteReactionRes = await client.mutate<
-                          DeleteReactionMutation,
-                          DeleteReactionMutationVariables
-                        >({
-                          mutation: DeleteReaction,
-                          variables: {
-                            id: reactionID,
-                          },
-                        });
-                        if (deleteReactionRes.errors) {
-                          throw new Error(deleteReactionRes.errors.join(', '));
-                        }
-                      }
-                      if (updateTimeout) {
-                        clearTimeout(updateTimeout);
-                      }
-                      setUpdateTimeout(
-                        setTimeout(async () => {
-                          await getComments(false);
-                        }, elasticWaitTime)
-                      );
-                      setEmojiPickerVisible(false);
-                    } catch (err) {
-                      toast(err.message, {
-                        type: 'error',
-                      });
-                    }
-                  }}
-                >
-                  <button
-                    className={
-                      (comment.userReactions.length > 0
-                        ? 'text-purple-700'
-                        : 'text-gray-700') + ' text-sm'
-                    }
-                    onClick={(evt) => {
-                      evt.preventDefault();
-                      toggleEmojiPicker();
-                    }}
-                  >
-                    Like
-                  </button>
-                </EmojiPicker>
-                {comment.reactionCount === 0 ? null : (
-                  <span className="px-1">
-                    <BsDot />
-                  </span>
-                )}
-                {comment.reactions.map((reaction, i) => (
-                  <span
-                    className="pr-2 pt-2"
-                    key={`reaction-post-${args.post}-comment-${comment.id}-${i}`}
-                  >
-                    <Emoji emoji={reaction.type} size={16} />
-                  </span>
-                ))}
-              </div>
-            </div>
+                  const newComments = [...comments];
+                  newComments[currentCommentIndex] = commentCopy;
+                  setComments(newComments);
+                } catch (err) {
+                  // console.log(JSON.stringify(err));
+                  toast((err as ApolloError).message, {
+                    type: 'error',
+                  });
+                }
+              }}
+              onDelete={async () => {
+                try {
+                  const deleteCommentRes = await client.mutate<
+                    DeleteCommentMutation,
+                    DeleteCommentMutationVariables
+                  >({
+                    mutation: DeleteComment,
+                    variables: {
+                      id: comment.id,
+                    },
+                  });
+                  if (deleteCommentRes.errors) {
+                    throw new Error(deleteCommentRes.errors.join(', '));
+                  }
+                  const currentCommentIndex = comments.findIndex(
+                    (elem) => elem.id === comment.id
+                  );
+                  if (currentCommentIndex < 0) {
+                    throw new Error(
+                      `cannot find comment with id ${comment.id}`
+                    );
+                  }
+                  const newComments = [...comments];
+                  newComments.splice(currentCommentIndex, 1);
+                  setComments(newComments);
+                  await sleep(elasticWaitTime);
+                  await args.updateSinglePost(args.post, false);
+                } catch (err) {
+                  const errObj: Error = err;
+                  toast(errObj.message, {
+                    type: 'error',
+                  });
+                }
+              }}
+            />
           ))
         )}
       </div>

@@ -80,7 +80,7 @@ const DeletePostModal: FunctionComponent<ModalArgs> = (args) => {
                   toast('Deleted Post', {
                     type: 'success',
                   });
-                  args.onSubmit();
+                  await args.onSubmit();
                   args.toggleModal();
                 } catch (err) {
                   // console.log(JSON.stringify(err, null, 2));

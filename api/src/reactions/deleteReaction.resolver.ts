@@ -111,7 +111,7 @@ class DeleteReactionResolver {
             script: updateReactionsScript.toJSON()
           }
         });
-      } else if (reactionData.parent === ReactionParentType.comment) {
+      } else if (reactionData.parentType === ReactionParentType.comment) {
         const CommentModel = getRepository(Comment);
         await CommentModel.decrement({
           id: reactionData.parent

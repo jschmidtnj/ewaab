@@ -21,7 +21,7 @@ registerEnumType(PostType, {
 });
 
 @ObjectType({ description: 'post data, indexed in elasticsearch', isAbstract: true })
-export class SearchPost extends BaseTimestamp {
+export class BaseSearchPost extends BaseTimestamp {
   @Field({ description: 'post id' })
   id?: string;
 
@@ -49,9 +49,6 @@ export class SearchPost extends BaseTimestamp {
   @IsDefined()
   publisher: string;
 
-  @Field(_type => PublisherData, { description: 'publisher user data', nullable: true })
-  publisherData?: PublisherData;
-
   @Field(_type => String, { description: 'media for post', nullable: true })
   @Column({ type: 'uuid', nullable: true })
   media?: string | null;
@@ -65,6 +62,12 @@ export class SearchPost extends BaseTimestamp {
   @Column({ type: 'int' })
   @IsDefined()
   commentCount: number;
+}
+
+@ObjectType({ description: 'post data with field resolvers', isAbstract: true })
+export class SearchPost extends BaseSearchPost {
+  @Field(_type => PublisherData, { description: 'publisher user data', nullable: true })
+  publisherData?: PublisherData;
 
   @Field(_type => MediaData, { description: 'media data', nullable: true })
   mediaData?: MediaData;

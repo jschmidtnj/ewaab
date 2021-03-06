@@ -40,10 +40,10 @@ export const arrayHash = (elements: BinaryLike[]): string => {
   return hash.digest('hex');
 };
 
-export const removeKeys = (elem: unknown, keys: string[]): unknown[] => {
+export const removeKeys = (elem: unknown, keys: string[]): Record<string, unknown> => {
   const removed: Record<string, undefined> = {};
-  for (const key in keys) {
+  for (const key of keys) {
     removed[key] = undefined;
   }
-  return Object.values(Object.assign({}, elem, removed));
+  return Object.assign({}, elem, removed);
 };

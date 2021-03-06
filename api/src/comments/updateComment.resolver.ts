@@ -36,7 +36,7 @@ class UpdateCommentResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
-    if (!removeKeys(args, ['id']).some(elem => elem !== undefined)) {
+    if (!Object.values(removeKeys(args, ['id'])).some(elem => elem !== undefined)) {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
     const CommentModel = getRepository(Comment);

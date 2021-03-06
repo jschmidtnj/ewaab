@@ -7,7 +7,7 @@ import { commentIndexName, postIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import Comment, { SearchComment } from '../schema/posts/comment.entity';
+import Comment, { BaseSearchComment } from '../schema/posts/comment.entity';
 import Post from '../schema/posts/post.entity';
 import esb from 'elastic-builder';
 
@@ -28,8 +28,8 @@ class AddCommentArgs {
 
 @Resolver()
 class AddCommentResolver {
-  @Mutation(_returns => String)
-  async addComment(@Args() args: AddCommentArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
+  @Mutation(_returns => Comment)
+  async addComment(@Args() args: AddCommentArgs, @Ctx() ctx: GraphQLContext): Promise<Comment> {
     if (!await checkPostAccess({
       ctx,
       accessType: AuthAccessType.view,
@@ -40,7 +40,7 @@ class AddCommentResolver {
 
     const CommentModel = getRepository(Comment);
     const now = new Date().getTime();
-    const searchComment: SearchComment = {
+    const searchComment: BaseSearchComment = {
       content: args.content,
       created: now,
       updated: now,
@@ -75,7 +75,7 @@ class AddCommentResolver {
       }
     });
 
-    return `created comment ${newComment.id}`;
+    return newComment;
   }
 }
 

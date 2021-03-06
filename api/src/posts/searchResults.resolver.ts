@@ -1,14 +1,15 @@
-import { ResolverInterface, FieldResolver, Root, Resolver, Args } from 'type-graphql';
+import { ResolverInterface, FieldResolver, Root, Resolver, Args, Ctx } from 'type-graphql';
 import { getRepository } from 'typeorm';
 import { MediaData } from '../schema/media/media.entity';
 import { SearchPost } from '../schema/posts/post.entity';
 import User, { PublisherData } from '../schema/users/user.entity';
 import Media from '../schema/media/media.entity';
-import { SearchComment } from '../schema/posts/comment.entity';
+import { SearchComment, BaseSearchComment } from '../schema/posts/comment.entity';
 import { PostCommentsArgs, searchComments } from '../comments/comments.resolver';
 import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
 import { CountReactionsArgs, getReactionCounts, getUserReactions, UserReactionsArgs } from '../reactions/reactions.resolver';
 import ReactionCount from '../schema/reactions/reactionCount.entity';
+import { GraphQLContext } from '../utils/context';
 
 export const getPublisherData = async (publisher: string): Promise<PublisherData | undefined> => {
   const UserModel = getRepository(User);
@@ -53,13 +54,13 @@ class SearchResultsResolver implements ResolverInterface<SearchPost> {
   }
 
   @FieldResolver(_returns => [SearchComment])
-  async comments(@Root() searchResult: SearchPost, @Args() args: PostCommentsArgs): Promise<SearchComment[]> {
+  async comments(@Root() searchResult: SearchPost, @Args() args: PostCommentsArgs): Promise<BaseSearchComment[]> {
     return await searchComments(args, searchResult.id as string);
   }
 
   @FieldResolver(_returns => [Reaction])
-  async userReactions(@Root() searchResult: SearchPost, @Args() args: UserReactionsArgs): Promise<Reaction[]> {
-    return await getUserReactions(args, searchResult.id as string, ReactionParentType.post);
+  async userReactions(@Root() searchResult: SearchPost, @Args() args: UserReactionsArgs, @Ctx() ctx: GraphQLContext): Promise<Reaction[]> {
+    return await getUserReactions(args, searchResult.id as string, ReactionParentType.post, ctx.auth!.id);
   }
 
   @FieldResolver(_returns => [ReactionCount])

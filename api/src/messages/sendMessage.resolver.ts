@@ -7,7 +7,7 @@ import { messageIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import Message, { SearchMessage } from '../schema/users/message.entity';
+import Message, { BaseSearchMessage } from '../schema/users/message.entity';
 import User from '../schema/users/user.entity';
 
 @ArgsType()
@@ -46,7 +46,7 @@ class SendMessageResolver {
 
     const MessageModel = getRepository(Message);
     const now = new Date().getTime();
-    const searchMessage: SearchMessage = {
+    const searchMessage: BaseSearchMessage = {
       content: args.content,
       created: now,
       updated: now,

@@ -20,6 +20,7 @@
   "dependencies": {
     "@apollo/client": "^3.3.6",
     "@apollo/react-hooks": "^4.0.0",
+    "@svgr/webpack": "^5.5.0",
     "@tailwindcss/forms": "^0.2.1",
     "apollo-link-context": "^1.0.20",
     "apollo-upload-client": "^14.1.3",

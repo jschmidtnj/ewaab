@@ -6,7 +6,7 @@ import Post from '../schema/posts/post.entity';
 
 @ArgsType()
 export class PostArgs {
-  @Field(_type => String, { description: 'search query' })
+  @Field(_type => String, { description: 'post id' })
   id: string;
 }
 
@@ -20,7 +20,7 @@ class PostResolver {
     const PostModel = getRepository(Post);
     const post = await PostModel.findOne(args.id);
     if (!post) {
-      throw new Error(`cannot find user with id ${ctx.auth.id}`);
+      throw new Error(`cannot find post with id ${args.id}`);
     }
     if (!await checkPostAccess({
       ctx,

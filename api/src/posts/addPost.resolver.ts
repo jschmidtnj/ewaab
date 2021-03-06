@@ -4,7 +4,7 @@ import { getRepository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
-import Post, { PostType, SearchPost } from '../schema/posts/post.entity';
+import Post, { PostType, BaseSearchPost } from '../schema/posts/post.entity';
 import { postMediaWidth, strMinLen } from '../shared/variables';
 import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
@@ -121,8 +121,8 @@ export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Pr
 
 @Resolver()
 class AddPostResolver {
-  @Mutation(_returns => String)
-  async addPost(@Args() args: AddPostArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
+  @Mutation(_returns => Post)
+  async addPost(@Args() args: AddPostArgs, @Ctx() ctx: GraphQLContext): Promise<Post> {
     if (!await checkPostAccess({
       ctx,
       accessType: AuthAccessType.add,
@@ -144,7 +144,7 @@ class AddPostResolver {
 
     const PostModel = getRepository(Post);
     const now = new Date().getTime();
-    const searchPost: SearchPost = {
+    const searchPost: BaseSearchPost = {
       title: args.title,
       content: args.content,
       type: args.type,
@@ -167,7 +167,7 @@ class AddPostResolver {
       id,
     });
 
-    return `created post ${newPost.id}`;
+    return newPost;
   }
 }
 

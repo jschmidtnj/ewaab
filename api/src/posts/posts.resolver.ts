@@ -5,7 +5,7 @@ import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { IsOptional, Matches, ValidateIf } from 'class-validator';
-import { PostCount, PostSortOption, PostType, SearchPost, SearchPostsResult } from '../schema/posts/post.entity';
+import { PostCount, PostSortOption, PostType, BaseSearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import esb from 'elastic-builder';
 import { uuidRegex } from '../shared/variables';
 import { postViewMap } from '../utils/variables';
@@ -111,7 +111,8 @@ class PostsResolver {
       requestBody = requestBody.sort(esb.sort(args.sortBy,
         args.ascending ? 'asc' : 'desc'));
     }
-    requestBody = requestBody.from(args.page).size(args.perpage).aggregations(aggregates);
+    requestBody = requestBody.from(args.page * args.perpage).size(args.perpage).aggregations(aggregates);
+    // TODO - fix pagination!
 
     const searchParams: RequestParams.Search = {
       index: postIndexName,
@@ -121,10 +122,10 @@ class PostsResolver {
     };
 
     const elasticPostData = await elasticClient.search(searchParams);
-    const results: SearchPost[] = [];
+    const results: BaseSearchPost[] = [];
     for (const hit of elasticPostData.body.hits.hits) {
-      const currentPost: SearchPost = {
-        ...hit._source as SearchPost,
+      const currentPost: BaseSearchPost = {
+        ...hit._source as BaseSearchPost,
         id: hit._id as string,
       };
       results.push(currentPost);

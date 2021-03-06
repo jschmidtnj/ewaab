@@ -1,3 +1,16 @@
+query commentUpdates($id: String!) {
+  comment(id: $id) {
+    userReactions(page:0, perpage:1) {
+      id
+      type
+    }
+    reactionCount
+    reactions(page: 0, perpage: 3) {
+      type
+    }
+  }
+}
+
 fragment commentFields on SearchComment {
   content
   created
@@ -14,7 +27,7 @@ fragment commentFields on SearchComment {
     type
   }
   reactionCount
-  reactions {
+  reactions(page: 0, perpage: 3) {
     type
   }
 }

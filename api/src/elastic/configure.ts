@@ -6,16 +6,17 @@ import userMappings from './mappings/user';
 import { IndicesPutMapping } from '@elastic/elasticsearch/api/requestParams';
 import postMappings from './mappings/post';
 import { getRepository } from 'typeorm';
-import User, { SearchUser } from '../schema/users/user.entity';
-import Post, { SearchPost } from '../schema/posts/post.entity';
+import User, { BaseSearchUser } from '../schema/users/user.entity';
+import Post, { BaseSearchPost } from '../schema/posts/post.entity';
 import sleep from '../shared/sleep';
 import commentMappings from './mappings/comment';
-import Comment, { SearchComment } from '../schema/posts/comment.entity';
-import Message, { SearchMessage } from '../schema/users/message.entity';
+import Comment, { BaseSearchComment } from '../schema/posts/comment.entity';
+import Message, { BaseSearchMessage } from '../schema/users/message.entity';
 import messageMappings from './mappings/message';
 import { bulkWriteToElastic } from './elastic';
 import { WriteType } from './writeType';
 import { removeKeys } from '../utils/misc';
+import { keys } from 'ts-transformer-keys';
 
 const logger = getLogger();
 
@@ -44,7 +45,7 @@ const initializeMapping = async (indexName: string, indexSettings: Record<string
     type: indexType,
     body: {
       properties: indexMappings,
-      dynamic: false
+      dynamic: 'strict'
     },
     include_type_name: true
   };
@@ -62,8 +63,8 @@ export const initializeMappings = async (): Promise<string> => {
   // users
   await initializeMapping(settings.userIndexName, settings.userIndexSettings, userMappings, settings.userType);
   const UserModel = getRepository(User);
-  const users: SearchUser[] = (await UserModel.find()).map(userData => ({
-    ...userData
+  const users: BaseSearchUser[] = (await UserModel.find({
+    select: keys<BaseSearchUser>()
   }));
   if (users.length > 0) {
     await bulkWriteToElastic(users.map(userData => ({
@@ -77,8 +78,8 @@ export const initializeMappings = async (): Promise<string> => {
   // posts
   await initializeMapping(settings.postIndexName, settings.postIndexSettings, postMappings, settings.postType);
   const PostModel = getRepository(Post);
-  const posts: SearchPost[] = (await PostModel.find()).map(postData => ({
-    ...postData
+  const posts: BaseSearchPost[] = (await PostModel.find({
+    select: keys<BaseSearchPost>()
   }));
   if (posts.length > 0) {
     await bulkWriteToElastic(posts.map(postData => ({
@@ -92,8 +93,8 @@ export const initializeMappings = async (): Promise<string> => {
   // comments
   await initializeMapping(settings.commentIndexName, settings.commentIndexSettings, commentMappings, settings.commentType);
   const CommentModel = getRepository(Comment);
-  const comments: SearchComment[] = (await CommentModel.find()).map(commentData => ({
-    ...commentData
+  const comments: BaseSearchComment[] = (await CommentModel.find({
+    select: keys<BaseSearchComment>()
   }));
   if (comments.length > 0) {
     await bulkWriteToElastic(comments.map(commentData => ({
@@ -107,8 +108,8 @@ export const initializeMappings = async (): Promise<string> => {
   // messages
   await initializeMapping(settings.messageIndexName, settings.messageIndexSettings, messageMappings, settings.messageType);
   const MessageModel = getRepository(Message);
-  const messages: SearchMessage[] = (await MessageModel.find()).map(messageData => ({
-    ...messageData
+  const messages: BaseSearchMessage[] = (await MessageModel.find({
+    select: keys<BaseSearchMessage>()
   }));
   if (messages.length > 0) {
     await bulkWriteToElastic(messages.map(messageData => ({

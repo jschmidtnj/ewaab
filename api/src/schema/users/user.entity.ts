@@ -44,7 +44,7 @@ export class PublisherData extends BaseTimestamp {
 }
 
 @ObjectType({ description: 'user data, indexed for search', isAbstract: true })
-export class SearchUser extends PublisherData {
+export class BaseSearchUser extends PublisherData {
   @Field({ description: 'email' })
   @Column({ type: 'text' })
   @Index({ unique: true })
@@ -78,6 +78,11 @@ export class SearchUser extends PublisherData {
   @Column({ type: 'text' })
   @IsDefined()
   locationName: string;
+}
+
+@ObjectType({ description: 'user data with field resolvers', isAbstract: true })
+export class SearchUser extends BaseSearchUser {
+  
 }
 
 export enum UserSortOption {

@@ -32,6 +32,7 @@ import sleep from 'shared/sleep';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 import isDebug from 'utils/mode';
+import { updateSinglePost } from 'components/Feed';
 
 const SearchPage: FunctionComponent = () => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
@@ -399,11 +400,14 @@ const SearchPage: FunctionComponent = () => {
                                       setDeletePostVariables(vars);
                                       toggleDeletePostModal();
                                     }}
-                                    updateData={async () => {
-                                      // wait for elasticsearch to update
-                                      await sleep(elasticWaitTime);
-                                      formRef.current.handleSubmit();
-                                    }}
+                                    updateSinglePost={(postID, useCache) =>
+                                      updateSinglePost(
+                                        posts,
+                                        setPosts,
+                                        postID,
+                                        useCache
+                                      )
+                                    }
                                     onUpdatePost={(postID) => {
                                       setUpdatePostID(postID);
                                       toggleWritePost();
@@ -434,6 +438,7 @@ const SearchPage: FunctionComponent = () => {
                                       'page',
                                       formRef.current.values.page - 1
                                     );
+                                    formRef.current.handleSubmit();
                                   }}
                                   disabled={formRef.current?.values.page === 0}
                                 >
@@ -447,6 +452,7 @@ const SearchPage: FunctionComponent = () => {
                                       'page',
                                       formRef.current.values.page + 1
                                     );
+                                    formRef.current.handleSubmit();
                                   }}
                                   disabled={
                                     formRef.current &&

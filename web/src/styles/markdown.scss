@@ -23,6 +23,10 @@
   @apply mt-6;
 }
 
+.markdown-small p {
+  @apply text-sm;
+}
+
 .markdown strong {
   @apply font-semibold;
 }
@@ -46,6 +50,10 @@
   @apply pb-2;
 }
 
+.markdown-small h1 {
+  @apply text-2xl;
+}
+
 .markdown h2 {
   @apply leading-tight;
   @apply border-b;
@@ -56,12 +64,20 @@
   @apply pb-2;
 }
 
+.markdown-small h2 {
+  @apply text-xl;
+}
+
 .markdown h3 {
   @apply leading-snug;
   @apply text-lg;
   @apply font-semibold;
   @apply mb-4;
   @apply mt-6;
+}
+
+.markdown-small h3 {
+  @apply text-base;
 }
 
 .markdown h4 {
@@ -72,12 +88,20 @@
   @apply mt-6;
 }
 
+.markdown-small h4 {
+  @apply text-sm;
+}
+
 .markdown h5 {
   @apply leading-tight;
   @apply text-sm;
   @apply font-semibold;
   @apply mb-4;
   @apply mt-6;
+}
+
+.markdown-small h5 {
+  @apply text-xs;
 }
 
 .markdown h6 {
@@ -89,6 +113,10 @@
   @apply mt-6;
 }
 
+.markdown-small h6 {
+  @apply text-xs;
+}
+
 .markdown blockquote {
   @apply text-base;
   @apply border-l-4;
@@ -96,6 +124,10 @@
   @apply pl-4;
   @apply pr-4;
   @apply text-gray-600;
+}
+
+.markdown-small blockquote {
+  @apply text-sm;
 }
 
 .markdown code {
@@ -106,6 +138,10 @@
   @apply rounded;
   @apply px-1;
   @apply py-05;
+}
+
+.markdown-small code {
+  @apply text-xs;
 }
 
 .markdown pre {
@@ -128,10 +164,20 @@
   @apply list-disc;
 }
 
+.markdown-small ul {
+  @apply text-sm;
+  @apply pl-4;
+}
+
 .markdown ol {
   @apply text-base;
   @apply pl-8;
   @apply list-decimal;
+}
+
+.markdown-small ol {
+  @apply text-sm;
+  @apply pl-4;
 }
 
 .markdown kbd {
@@ -150,6 +196,10 @@
 .markdown table {
   @apply text-base;
   @apply border-gray-600;
+}
+
+.markdown-small table {
+  @apply text-sm;
 }
 
 .markdown th {

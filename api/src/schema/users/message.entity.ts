@@ -14,7 +14,7 @@ registerEnumType(MessageSortOption, {
 });
 
 @ObjectType({ description: 'message data, indexed in elasticsearch', isAbstract: true })
-export class SearchMessage extends BaseTimestamp {
+export class BaseSearchMessage extends BaseTimestamp {
   @Field({ description: 'message id' })
   id?: string;
 
@@ -39,6 +39,11 @@ export class SearchMessage extends BaseTimestamp {
   @Column({ type: 'int' })
   @IsDefined()
   reactionCount: number;
+}
+
+@ObjectType({ description: 'message elasticsearch + field resolvers', isAbstract: true })
+export class SearchMessage extends BaseSearchMessage {
+
 }
 
 @ObjectType({ description: 'message data search results' })

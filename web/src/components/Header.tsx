@@ -123,7 +123,7 @@ const Header: FunctionComponent = () => {
   return (
     <nav className="bg-white dark:bg-gray-800">
       <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="relative flex items-center justify-between h-20">
+        <div className="relative flex items-center justify-between h-16">
           <div className="sm:hidden absolute inset-y-0 left-0 flex items-center">
             <VisibilitySensor
               onChange={setHamburgerVisible}
@@ -173,7 +173,7 @@ const Header: FunctionComponent = () => {
           </div>
           <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
             <Link href="/">
-              <a className="flex-shrink-0 w-20 flex items-center sm:ml-10">
+              <a className="flex-shrink-0 w-28 flex items-center sm:ml-2">
                 <Image
                   src="/assets/img/ewaab/logo.png"
                   width={1372}

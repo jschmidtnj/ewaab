@@ -26,6 +26,10 @@ export default withPlugins([[withBundleAnalyzer], [withPWA]], {
       config.resolve.fallback = {};
     }
     config.resolve.fallback.util = require.resolve('util/');
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
     return config;
   },
 });

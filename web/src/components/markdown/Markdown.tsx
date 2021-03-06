@@ -22,12 +22,14 @@ const CodeBlock: FunctionComponent<CodeArgs> = (args) => {
 
 interface MarkdownArgs {
   content: string;
+  className?: string;
 }
 
 const Markdown: FunctionComponent<MarkdownArgs> = (args) => {
+  const className = args.className ? args.className : '';
   return (
     <ReactMarkdown
-      className="markdown"
+      className={'markdown ' + className}
       renderers={{
         code: CodeBlock,
       }}

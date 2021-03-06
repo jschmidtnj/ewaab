@@ -5,9 +5,18 @@ import {
   PostsQuery,
   PostsQueryVariables,
   PostType,
+  PostUpdates,
+  PostUpdatesQuery,
+  PostUpdatesQueryVariables,
   UserType,
 } from 'lib/generated/datamodel';
-import { FunctionComponent, useEffect, useState } from 'react';
+import {
+  Dispatch,
+  FunctionComponent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { ApolloError, ApolloQueryResult } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
@@ -20,12 +29,61 @@ import { FiEdit } from 'react-icons/fi';
 import { elasticWaitTime, postWriteMap } from 'utils/variables';
 import { useSelector } from 'react-redux';
 import { RootState } from 'state';
+import { cloneDeep } from '@apollo/client/utilities';
 
 const numPerPage = 10;
 
 interface FeedArgs {
   postType: PostType;
 }
+
+export const updateSinglePost = async (
+  posts: ApolloQueryResult<PostsQuery>,
+  setPosts: Dispatch<SetStateAction<ApolloQueryResult<PostsQuery>>>,
+  postID: string,
+  useCache = !isDebug()
+): Promise<void> => {
+  try {
+    const currentPostIndex = posts.data.posts.results.findIndex(
+      (elem) => elem.id === postID
+    );
+    if (currentPostIndex < 0) {
+      throw new Error(`post with id ${postID} not found`);
+    }
+    const res = await client.query<PostUpdatesQuery, PostUpdatesQueryVariables>(
+      {
+        query: PostUpdates,
+        variables: {
+          id: postID,
+        },
+        fetchPolicy: !useCache ? 'network-only' : 'cache-first',
+      }
+    );
+    if (res.errors) {
+      throw new Error(res.errors.join(', '));
+    }
+    const postCopy = cloneDeep(posts.data.posts.results[currentPostIndex]);
+    for (const key in res.data.post) {
+      postCopy[key] = res.data.post[key];
+    }
+    const newResults = [...posts.data.posts.results];
+    newResults[currentPostIndex] = postCopy;
+    setPosts({
+      ...posts,
+      data: {
+        posts: {
+          ...posts.data.posts,
+          results: newResults,
+        },
+      },
+    });
+  } catch (err) {
+    // console.log(JSON.stringify(err));
+    toast((err as ApolloError).message, {
+      type: 'error',
+    });
+  }
+};
 
 const Feed: FunctionComponent<FeedArgs> = (args) => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
@@ -37,21 +95,28 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
   const [currentPage, setCurrentPage] = useState<number>(0);
 
   const runQuery = async (useCache = !isDebug()): Promise<void> => {
-    const res = await client.query<PostsQuery, PostsQueryVariables>({
-      query: Posts,
-      variables: {
-        sortBy: PostSortOption.Created,
-        perpage: numPerPage,
-        ascending: false,
-        page: currentPage,
-        type: args.postType,
-      },
-      fetchPolicy: !useCache ? 'network-only' : 'cache-first',
-    });
-    if (res.errors) {
-      throw new Error(res.errors.join(', '));
+    try {
+      const res = await client.query<PostsQuery, PostsQueryVariables>({
+        query: Posts,
+        variables: {
+          sortBy: PostSortOption.Created,
+          perpage: numPerPage,
+          ascending: false,
+          page: currentPage,
+          type: args.postType,
+        },
+        fetchPolicy: !useCache ? 'network-only' : 'cache-first',
+      });
+      if (res.errors) {
+        throw new Error(res.errors.join(', '));
+      }
+      setPosts(res);
+    } catch (err) {
+      // console.log(JSON.stringify(err));
+      toast((err as ApolloError).message, {
+        type: 'error',
+      });
     }
-    setPosts(res);
   };
 
   const [writePostModalIsOpen, setWritePostIsOpen] = useState<boolean>(false);
@@ -76,19 +141,12 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
 
   useEffect(() => {
     (async () => {
-      try {
-        await runQuery();
-      } catch (err) {
-        // console.log(JSON.stringify(err));
-        toast((err as ApolloError).message, {
-          type: 'error',
-        });
-      }
+      await runQuery();
     })();
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto px-2 sm:px-6 lg:px-8 pt-2">
+    <div className="max-w-2xl mx-auto px-2 sm:px-6 lg:px-8 pt-2 pb-56">
       {!writePostModalIsOpen ? null : (
         <WritePostModal
           toggleModal={toggleWritePost}
@@ -105,8 +163,25 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
         <DeletePostModal
           toggleModal={toggleDeletePostModal}
           onSubmit={async () => {
-            await sleep(elasticWaitTime);
-            await runQuery(false);
+            const currentPostIndex = posts.data.posts.results.findIndex(
+              (elem) => elem.id === deletePostVariables.id
+            );
+            if (currentPostIndex < 0) {
+              throw new Error(
+                `cannot find post with id ${deletePostVariables.id}`
+              );
+            }
+            const newResults = [...posts.data.posts.results];
+            newResults.splice(currentPostIndex, 1);
+            setPosts({
+              ...posts,
+              data: {
+                posts: {
+                  ...posts.data.posts,
+                  results: newResults,
+                },
+              },
+            });
           }}
           variables={deletePostVariables}
         />
@@ -147,7 +222,9 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
                             setDeletePostVariables(vars);
                             toggleDeletePostModal();
                           }}
-                          updateData={runQuery}
+                          updateSinglePost={(postID, useCache) =>
+                            updateSinglePost(posts, setPosts, postID, useCache)
+                          }
                           onUpdatePost={(postID) => {
                             setUpdatePostID(postID);
                             toggleWritePost();

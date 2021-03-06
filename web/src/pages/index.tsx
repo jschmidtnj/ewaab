@@ -5,13 +5,26 @@ import Header from 'components/Header';
 import EmptyLayout from 'layouts/empty';
 import Footer from 'components/Footer';
 import { FunctionComponent } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from 'state';
+import {
+  defaultLoggedInPage,
+  defaultLoggedInPageVisitor,
+} from 'utils/variables';
+import { UserType } from 'lib/generated/datamodel';
 
 const Index: FunctionComponent = () => {
+  const loggedIn = useSelector<RootState, boolean>(
+    (state) => state.authReducer.loggedIn
+  );
+  const userType = useSelector<RootState, UserType>(
+    (state) => state.authReducer.userType
+  );
   return (
     <EmptyLayout>
       <SEO page="home" />
       <Header />
-      <div className="absolute top-20 left-0 right-0 bottom-0">
+      <div className="absolute top-16 left-0 right-0 bottom-0">
         <Image
           src="/assets/img/homepage_background.png"
           layout="fill"
@@ -33,12 +46,17 @@ const Index: FunctionComponent = () => {
                 </div>
               </div>
               <div className="flex justify-left items-center">
-                <Link href="/login">
-                  <a
-                    href="/login"
-                    className="mt-8 py-2 px-10 opacity-70 shadow-md no-underline rounded-full bg-blue-700 font-medium text-md btn-primary hover:bg-pink-600 active:shadow-none mr-2"
-                  >
-                    Login
+                <Link
+                  href={
+                    !loggedIn
+                      ? '/login'
+                      : userType === UserType.Visitor
+                      ? defaultLoggedInPageVisitor
+                      : defaultLoggedInPage
+                  }
+                >
+                  <a className="mt-8 py-2 px-10 opacity-70 shadow-md no-underline rounded-full bg-blue-700 font-medium text-md btn-primary hover:bg-pink-600 active:shadow-none mr-2">
+                    {!loggedIn ? 'Login' : 'Enter'}
                   </a>
                 </Link>
               </div>

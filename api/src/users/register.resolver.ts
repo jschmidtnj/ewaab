@@ -3,7 +3,7 @@ import { Resolver, ArgsType, Field, Args, Mutation } from 'type-graphql';
 import { IsEmail, MinLength, Matches } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, validUsername, strMinLen } from '../shared/variables';
 import { accountExistsEmail, accountExistsUsername } from './shared';
-import User, { SearchUser } from '../schema/users/user.entity';
+import User, { BaseSearchUser } from '../schema/users/user.entity';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
@@ -157,7 +157,7 @@ class RegisterResolver {
     const hashedPassword = await argon2.hash(args.password);
     const UserModel = getRepository(User);
     const now = new Date().getTime();
-    const searchUser: SearchUser = {
+    const searchUser: BaseSearchUser = {
       created: now,
       updated: now,
       email: args.email,

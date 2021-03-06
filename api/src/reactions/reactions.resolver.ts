@@ -11,12 +11,16 @@ export class UserReactionsArgs extends PaginationArgs {
 }
 
 export const getUserReactions = async (args: UserReactionsArgs, parent: string,
-  parentType: ReactionParentType): Promise<Reaction[]> => {
+  parentType: ReactionParentType, user: string): Promise<Reaction[]> => {
   const ReactionModel = getRepository(Reaction);
   const data = await ReactionModel.find({
     where: {
       parent,
-      parentType
+      parentType,
+      user
+    },
+    order: {
+      created: 'DESC'
     },
     take: args.perpage,
     skip: args.page * args.perpage,
@@ -37,6 +41,9 @@ export const getReactionCounts = async (args: CountReactionsArgs, parent: string
     where: {
       parent,
       parentType
+    },
+    order: {
+      count: 'DESC'
     },
     take: args.perpage,
     skip: args.page * args.perpage,

@@ -5,6 +5,7 @@ import { verifyVisitor } from '../auth/checkAuth';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { getRepository } from 'typeorm';
+import { keys } from 'ts-transformer-keys';
 
 @ArgsType()
 class PublicUserArgs {
@@ -14,10 +15,6 @@ class PublicUserArgs {
   @Field({ description: 'user name', nullable: true })
   username?: string;
 }
-
-export const publicUserSelect: (keyof PublicUser)[] = ['alumniYear', 'avatar', 'bio', 'created', 'description', 'email', 'facebook', 'github',
-  'id', 'jobTitle', 'location', 'locationName', 'major', 'mentor', 'name', 'pronouns', 'resume',
-  'twitter', 'type', 'university', 'updated', 'url', 'username'];
 
 @Resolver()
 class PublicUserResolver {
@@ -30,17 +27,17 @@ class PublicUserResolver {
     const UserModel = getRepository(User);
     if (args.id) {
       user = await UserModel.findOne(args.id, {
-        select: publicUserSelect
+        select: keys<PublicUser>()
       });
     } else if (args.username) {
       user = await UserModel.findOne({
         username: args.username,
       }, {
-        select: publicUserSelect
+        select: keys<PublicUser>()
       });
     } else {
       user = await UserModel.findOne(ctx.auth.id, {
-        select: publicUserSelect
+        select: keys<PublicUser>()
       });
     }
     if (!user) {

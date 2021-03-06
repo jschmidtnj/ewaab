@@ -61,7 +61,7 @@ class UpdatePostResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
-    if (!removeKeys(args, ['deleteMedia', 'id']).some(elem => elem !== undefined)) {
+    if (!Object.values(removeKeys(args, ['deleteMedia', 'id'])).some(elem => elem !== undefined)) {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
 

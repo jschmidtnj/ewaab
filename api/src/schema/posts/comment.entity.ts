@@ -17,7 +17,7 @@ registerEnumType(CommentSortOption, {
 });
 
 @ObjectType({ description: 'comment data, indexed in elasticsearch', isAbstract: true })
-export class SearchComment extends BaseTimestamp {
+export class BaseSearchComment extends BaseTimestamp {
   @Field({ description: 'comment id' })
   id?: string;
 
@@ -41,7 +41,10 @@ export class SearchComment extends BaseTimestamp {
   @Column({ type: 'int' })
   @IsDefined()
   reactionCount: number;
+}
 
+@ObjectType({ description: 'comment elasticsearch data + field resolvers', isAbstract: true })
+export class SearchComment extends BaseSearchComment {
   @Field(_type => [ReactionCount], { description: 'reactions', nullable: true })
   reactions?: ReactionCount[];
 

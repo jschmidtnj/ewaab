@@ -24,7 +24,12 @@
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "pretty": false,
-    "noImplicitThis": false
+    "noImplicitThis": false,
+    "plugins": [
+      {
+        "transform": "ts-transformer-keys/transformer"
+      }
+    ]
   },
   "include": [
     "src",

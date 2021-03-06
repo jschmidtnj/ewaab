@@ -75,7 +75,7 @@ interface PostViewArgs {
   data: PostSearchFieldsFragment;
   onDeletePost: (variables: DeletePostMutationVariables) => void;
   onUpdatePost: (id: string) => void;
-  updateData: (useCache: boolean) => Promise<void>;
+  updateSinglePost: (postID: string, useCache: boolean) => Promise<void>;
 }
 
 const PostView: FunctionComponent<PostViewArgs> = (args) => {
@@ -207,8 +207,8 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
         </>
       )}
       <div className="pt-2 pb-2 sm:px-4 px-2">
-        <div className="mx-4 mt-2">
-          <div className="flex items-center justify-start text-sm">
+        <div className="mx-4 mt-1">
+          <div className="flex items-center justify-start text-sm mb-1 mt-2">
             {args.data.reactionCount === 0 ? null : (
               <div className="flex items-center justify-center">
                 {args.data.reactions.map((reaction, i) => (
@@ -219,7 +219,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
                     <Emoji emoji={reaction.type} size={16} />
                   </span>
                 ))}
-                <span className="pl-2">
+                <span className="pl-1">
                   {numberFormat.format(args.data.reactionCount)}
                 </span>
               </div>
@@ -287,7 +287,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
                   }
                   setUpdateTimeout(
                     setTimeout(async () => {
-                      await args.updateData(false);
+                      await args.updateSinglePost(args.data.id, false);
                     }, elasticWaitTime)
                   );
                   setEmojiPickerVisible(false);
@@ -334,7 +334,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
             <CommentsView
               post={args.data.id}
               commentCount={args.data.commentCount}
-              updateData={args.updateData}
+              updateSinglePost={args.updateSinglePost}
             />
           )}
         </div>

@@ -4,7 +4,7 @@ import { messageIndexName } from '../elastic/settings';
 import { Matches, IsOptional } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
 import esb from 'elastic-builder';
-import Message, { MessageSortOption, SearchMessage, SearchMessagesResult } from '../schema/users/message.entity';
+import Message, { MessageSortOption, BaseSearchMessage, SearchMessagesResult } from '../schema/users/message.entity';
 import { checkMessageGroupAccess } from '../auth/checkAuth';
 import { GraphQLContext, SubscriptionContext } from '../utils/context';
 import { PaginationArgs } from '../schema/utils/pagination';
@@ -56,16 +56,16 @@ export const searchMessages = async (args: SearchMessagesArgs): Promise<SearchMe
     requestBody = requestBody.sort(esb.sort(args.sortBy,
       args.ascending ? 'asc' : 'desc'));
   }
-  requestBody = requestBody.from(args.page).size(args.perpage);
+  requestBody = requestBody.from(args.page * args.perpage).size(args.perpage);
 
   const elasticMessageData = await elasticClient.search({
     index: messageIndexName,
     body: requestBody.toJSON()
   });
-  const results: SearchMessage[] = [];
+  const results: BaseSearchMessage[] = [];
   for (const hit of elasticMessageData.body.hits.hits) {
-    const currentMessage: SearchMessage = {
-      ...hit._source as SearchMessage,
+    const currentMessage: BaseSearchMessage = {
+      ...hit._source as BaseSearchMessage,
       id: hit._id as string,
     };
     results.push(currentMessage);

@@ -190,7 +190,7 @@ type Mutation {
 
     """post id"""
     post: String!
-  ): String!
+  ): Comment!
   addMessageGroup(
     """user ids"""
     members: [String!]!
@@ -210,7 +210,7 @@ type Mutation {
 
     """post type"""
     type: PostType!
-  ): String!
+  ): Post!
   addReaction(
     """parent id"""
     parent: String!
@@ -696,6 +696,11 @@ type PublisherData {
 }
 
 type Query {
+  """comment data"""
+  comment(
+    """comment id"""
+    id: String!
+  ): Comment!
   comments(
     """sort direction"""
     ascending: Boolean = true
@@ -730,7 +735,7 @@ type Query {
 
   """post data"""
   post(
-    """search query"""
+    """post id"""
     id: String!
   ): Post!
   posts(
@@ -872,7 +877,7 @@ type ReactionsCountData {
   reactions: [ReactionCount!]!
 }
 
-"""comment data, indexed in elasticsearch"""
+"""comment elasticsearch data + field resolvers"""
 type SearchComment {
   """comment content"""
   content: String!
@@ -917,7 +922,7 @@ type SearchComment {
   ): [Reaction!]
 }
 
-"""message data, indexed in elasticsearch"""
+"""message elasticsearch + field resolvers"""
 type SearchMessage {
   """message content"""
   content: String!
@@ -950,7 +955,7 @@ type SearchMessagesResult {
   results: [SearchMessage!]!
 }
 
-"""post data, indexed in elasticsearch"""
+"""post data with field resolvers"""
 type SearchPost {
   """number of comments"""
   commentCount: Int!
@@ -1040,7 +1045,7 @@ type SearchPostsResult {
   results: [SearchPost!]!
 }
 
-"""user data, indexed for search"""
+"""user data with field resolvers"""
 type SearchUser {
   """alumni year"""
   alumniYear: Int

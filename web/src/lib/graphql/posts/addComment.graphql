@@ -1,3 +1,22 @@
 mutation addComment($post: String!, $content: String!) {
-  addComment(post: $post, content: $content)
+  addComment(post: $post, content: $content) {
+    content
+    created
+    publisher
+    id
+    publisherData {
+      username
+      avatar
+      name
+      description
+    }
+    userReactions {
+      id
+      type
+    }
+    reactionCount
+    reactions(page: 0, perpage: 3) {
+      type
+    }
+  }
 }

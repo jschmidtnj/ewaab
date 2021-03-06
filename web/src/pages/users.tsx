@@ -30,6 +30,8 @@ import PrivateRoute from 'components/PrivateRoute';
 
 const avatarWidth = 40;
 
+const minSelectSearchLen = 2;
+
 const majorsOptions: SelectStringObject[] = majors.map((major) => ({
   label: major,
   value: major,
@@ -82,6 +84,8 @@ const UsersPage: FunctionComponent = () => {
   const [users, setUsers] = useState<ApolloQueryResult<UsersQuery> | undefined>(
     undefined
   );
+
+  const [showMajorOptions, setShowMajorOptions] = useState<boolean>(false);
 
   const [defaultQuery, setDefaultQuery] = useState<string>('');
 
@@ -268,7 +272,17 @@ const UsersPage: FunctionComponent = () => {
                           id="majors"
                           name="majors"
                           isMulti={true}
-                          options={majorsOptions}
+                          options={showMajorOptions ? majorsOptions : []}
+                          noOptionsMessage={() =>
+                            showMajorOptions
+                              ? 'No majors found'
+                              : `Enter at least ${minSelectSearchLen} characters`
+                          }
+                          onInputChange={(newVal) => {
+                            setShowMajorOptions(
+                              newVal.length >= minSelectSearchLen
+                            );
+                          }}
                           cacheOptions={true}
                           defaultValue={[]}
                           placeholder="Major"
