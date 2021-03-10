@@ -1,4 +1,4 @@
-@import '~react-toastify/dist/ReactToastify.css';
+@import "~react-toastify/dist/ReactToastify.css";
 
 /* base styles */
 
@@ -8,11 +8,11 @@
 
 @tailwind components;
 
-
 /* remove outlines on focus */
 button:focus {
   @apply outline-none;
 }
+
 input:focus {
   @apply outline-none;
 }
@@ -55,11 +55,12 @@ input:focus {
   @apply bg-red-500;
 }
 
-@import '~easymde/dist/easymde.min.css';
+@import "~easymde/dist/easymde.min.css";
 
 .CodeMirror-scroll {
-  min-height: 0 !important;
   @apply h-40;
+
+  min-height: 0 !important;
   overflow-y: auto;
 }
 
@@ -75,9 +76,8 @@ input:focus {
   @apply py-1;
 }
 
-@import './markdown.scss';
-
-@import '~emoji-mart/css/emoji-mart.css';
+@import "./markdown.scss";
+@import "~emoji-mart/css/emoji-mart.css";
 
 /* utilities */
 

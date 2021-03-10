@@ -32,7 +32,7 @@ const Header: FunctionComponent = () => {
   const dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
   const [userMenuOpen, setUserMenuOpen] = useState<boolean>(false);
   const userMenuRef = useOnClickOutside(async (_evt) => {
-    await sleep(50);
+    await sleep(200);
     if (userMenuOpen) {
       setUserMenuOpen(false);
     }
@@ -218,13 +218,12 @@ const Header: FunctionComponent = () => {
                   ref={userMenuRef}
                 >
                   {allUserPaths}
-                  <a
-                    href="#"
+                  <button
                     onClick={(evt) => {
                       evt.preventDefault();
                       dispatchAuthThunk(thunkLogout());
                     }}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     role="menuitem"
                   >
                     <FormattedMessage id="sign out">
@@ -232,7 +231,7 @@ const Header: FunctionComponent = () => {
                         capitalizeFirstLetter(messages[0])
                       }
                     </FormattedMessage>
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

@@ -207,7 +207,6 @@ class RegisterResolver {
     await sendEmailUtil({
       content: emailData,
       email: newUser.email,
-      name: newUser.name,
       subject: emailTemplateData.subject
     });
     return `created user ${id}`;

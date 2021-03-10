@@ -1,6 +1,13 @@
 import { getS3EmailData, getEmailKey } from '../utils/aws';
 import Handlebars from 'handlebars';
 
+export interface PostEmailData {
+  name: string;
+  username: string;
+  avatarURL: string;
+  content: string;
+}
+
 interface TemplateFiles {
   hello: {
     file: string;
@@ -31,6 +38,16 @@ interface TemplateFiles {
       verify_url: string;
     }>;
     subject: string;
+  },
+  postNotifications: {
+    file: string;
+    template?: HandlebarsTemplateDelegate<{
+      avatarURL: string;
+      username: string;
+      name: string;
+      posts: PostEmailData[];
+    }>;
+    subject: string;
   }
 }
 
@@ -57,13 +74,18 @@ export const emailTemplateFiles: TemplateFiles = {
     template: undefined,
     subject: 'Password Reset'
   },
+  postNotifications: {
+    file: 'post_notifications.html',
+    template: undefined,
+    subject: 'EWAAB Posts'
+  }
 };
 
 const compileEmailTemplates = async (): Promise<void> => {
   for (const emailTemplateKey in emailTemplateFiles) {
     const currentTemplateElement = emailTemplateFiles[propertyOf<TemplateFiles>(emailTemplateKey)];
     const emailTemplate = await getS3EmailData(getEmailKey(currentTemplateElement.file), false);
-    currentTemplateElement.template = Handlebars.compile(emailTemplate);
+    currentTemplateElement.template = Handlebars.compile(emailTemplate) as HandlebarsTemplateDelegate;
   }
 };
 

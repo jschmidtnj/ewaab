@@ -103,7 +103,6 @@ class InviteUserResolver {
     await sendEmailUtil({
       content: emailData,
       email: args.email,
-      name: args.name,
       subject: emailTemplateData.subject
     });
     return `check email ${args.email} for confirmation`;

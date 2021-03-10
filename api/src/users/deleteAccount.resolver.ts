@@ -4,12 +4,13 @@ import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { IsEmail, IsOptional } from 'class-validator';
 import User from '../schema/users/user.entity';
-import { Any, FindOneOptions, getRepository } from 'typeorm';
+import { FindOneOptions, getRepository } from 'typeorm';
 import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import { deleteMessages } from '../messages/deleteMessages.resolver';
 import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
+import { defaultDBCache } from '../utils/variables';
 
 @ArgsType()
 class DeleteArgs {
@@ -54,25 +55,17 @@ class DeleteResolver {
       throw new Error('no user found');
     }
 
-    try {
-      const MessageGroupModel = getRepository(MessageGroup);
-      const messageGroups = await MessageGroupModel.find({
-        where: {
-          userIDs: Any([userFindRes.id])
-        },
-        select: ['id', 'userCount']
-      });
-      for (const messageGroup of messageGroups) {
-        if (messageGroup.userCount === 2) {
-          await deleteMessages({
-            group: messageGroup.id
-          }, userFindRes.id);
-        }
+    const MessageGroupModel = getRepository(MessageGroup);
+    const messageGroups = await MessageGroupModel.createQueryBuilder('messageGroup')
+      .where('messageGroup.userIDs @> :userIDs').setParameters({
+        userIDs: [userFindRes.id]
+      }).select(['id', '"userCount"']).cache(defaultDBCache).getMany();
+    for (const messageGroup of messageGroups) {
+      if (messageGroup.userCount === 2) {
+        await deleteMessages({
+          group: messageGroup.id
+        }, userFindRes.id);
       }
-    } catch (err) {
-      // TODO - fix this
-      // eslint-disable-next-line no-console
-      console.error(JSON.stringify(err));
     }
 
     const MessageGroupUserModel = getRepository(MessageGroupUser);

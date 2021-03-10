@@ -383,7 +383,7 @@ const SearchPage: FunctionComponent = () => {
                   )}
 
                   <div className="col-span-3 lg:mx-4">
-                    {!posts || posts.loading ? (
+                    {!posts || posts.loading || !formRef.current ? (
                       <p className="text-md pt-4">Loading...</p>
                     ) : !posts.data || posts.data.posts.results.length === 0 ? (
                       <p className="text-md pt-4">No posts found</p>
@@ -423,8 +423,11 @@ const SearchPage: FunctionComponent = () => {
                           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                             <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
                               <span className="text-sm text-gray-700 mr-4">
-                                Showing {posts.data.posts.results.length} /{' '}
-                                {posts.data.posts.count}
+                                Showing{' '}
+                                {posts.data.posts.results.length +
+                                  formRef.current.values.page *
+                                    formRef.current.values.perpage}{' '}
+                                / {posts.data.posts.count}
                               </span>
                               <div
                                 className="relative inline-flex -space-x-px"
@@ -440,7 +443,7 @@ const SearchPage: FunctionComponent = () => {
                                     );
                                     formRef.current.handleSubmit();
                                   }}
-                                  disabled={formRef.current?.values.page === 0}
+                                  disabled={formRef.current.values.page === 0}
                                 >
                                   Prev
                                 </button>

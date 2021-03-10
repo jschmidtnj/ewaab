@@ -1,5 +1,5 @@
 import { Args, ArgsType, Ctx, Query, Resolver } from 'type-graphql';
-import { Any, getRepository } from 'typeorm';
+import { getRepository } from 'typeorm';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import MessageGroup from '../schema/users/messageGroup.entity';
 import { PaginationArgs } from '../schema/utils/pagination';
@@ -13,14 +13,10 @@ export class MessageGroupsArgs extends PaginationArgs {
 
 export const getMessageGroups = async (args: MessageGroupsArgs, userID: string): Promise<MessageGroup[]> => {
   const MessageGroupModel = getRepository(MessageGroup);
-  const data = await MessageGroupModel.find({
-    where: {
-      userIDs: Any([userID])
-    },
-    take: args.perpage,
-    skip: args.page * args.perpage,
-    cache: defaultDBCache
-  });
+  const data = await MessageGroupModel.createQueryBuilder('messageGroup')
+    .where('messageGroup.userIDs @> :userIDs').setParameters({
+      userIDs: [userID]
+    }).take(args.perpage).skip(args.page * args.perpage).cache(defaultDBCache).getMany();
   return data;
 };
 

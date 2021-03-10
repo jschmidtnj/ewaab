@@ -109,7 +109,7 @@ interface GenerateJWTMediaArgs {
   type: UserType;
 }
 
-export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs): Promise<string> => {
+export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs, expiration?: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     let secret: string;
     let jwtIssuer: string;
@@ -127,7 +127,7 @@ export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs): Promise<stri
     };
     const signOptions: SignOptions = {
       issuer: jwtIssuer,
-      expiresIn: mediaJWTExpiration
+      expiresIn: expiration
     };
     sign(authData, secret, signOptions, (err, token) => {
       if (err) {

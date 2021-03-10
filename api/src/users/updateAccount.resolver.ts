@@ -225,7 +225,6 @@ class UpdateAccountResolver {
       await sendEmailUtil({
         content: emailData,
         email: args.email,
-        name: args.name,
         subject: emailTemplateData.subject
       });
     }

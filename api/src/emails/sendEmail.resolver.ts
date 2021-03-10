@@ -27,7 +27,6 @@ class SendTestEmailArgs {
 }
 
 interface SendEmailUtilArgs {
-  name: string;
   email: string;
   content: string;
   subject: string;
@@ -86,7 +85,6 @@ class SendTestEmailResolver {
       subject = templateData.subject;
     }
     await sendEmailUtil({
-      name: args.name,
       email: args.email,
       subject,
       content

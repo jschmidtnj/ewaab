@@ -7,7 +7,7 @@ const refreshCookiePath = '/refreshToken';
 export const mediaCookieName = 'media';
 const mediaCookiePath = '/media';
 
-const sameSite = configData.PRODUCTION ? 'strict' : 'lax';
+const sameSite = configData.USE_SECURE ? 'strict' : 'lax';
 
 export const setCookies = (res: Response, refreshToken: string, mediaToken: string): void => {
   res.cookie(refreshCookieName, refreshToken, {

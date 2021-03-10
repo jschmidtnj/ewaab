@@ -101,7 +101,6 @@ export const WrapApollo: FunctionComponent<WrapApolloArgs> = (args) => {
   return (
     <>
       {loading ? null : (
-        // @ts-ignore TODO - figure out how to remove this
         <ApolloProvider client={client}>{args.children}</ApolloProvider>
       )}
     </>

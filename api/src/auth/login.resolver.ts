@@ -1,6 +1,6 @@
 import { GraphQLContext } from '../utils/context';
 import argon2 from 'argon2';
-import { generateJWTAccess, generateJWTMediaAccess, generateJWTRefresh } from '../utils/jwt';
+import { generateJWTAccess, generateJWTMediaAccess, generateJWTRefresh, mediaJWTExpiration } from '../utils/jwt';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation, ObjectType } from 'type-graphql';
 import { MinLength, Matches } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, capitalLetterRegex, lowercaseLetterRegex } from '../shared/variables';
@@ -81,7 +81,7 @@ class LoginResolvers {
       throw new Error('password is invalid');
     }
     const token = await generateJWTAccess(user);
-    setCookies(ctx.res, await generateJWTRefresh(user), await generateJWTMediaAccess(user));
+    setCookies(ctx.res, await generateJWTRefresh(user), await generateJWTMediaAccess(user, mediaJWTExpiration));
     return {
       token,
       type: user.type

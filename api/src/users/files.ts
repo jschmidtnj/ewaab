@@ -72,7 +72,11 @@ export const getFile = async (args: {
       req: args.req,
       res: args.res
     });
-    if (mediaCookieName in args.req.cookies) {
+    if ('t' in args.req.query) {
+      mediaData = await getMediaAuthenticated({
+        id: mediaID
+      }, ctx, await decodeMediaAuth(args.req.query['t'] as string));
+    } else if (mediaCookieName in args.req.cookies) {
       mediaData = await getMediaAuthenticated({
         id: mediaID
       }, ctx, await decodeMediaAuth(args.req.cookies[mediaCookieName]));

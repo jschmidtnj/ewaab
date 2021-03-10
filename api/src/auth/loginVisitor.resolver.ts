@@ -1,6 +1,6 @@
 import { GraphQLContext } from '../utils/context';
 import argon2 from 'argon2';
-import { generateJWTAccess, generateJWTMediaAccess, generateJWTRefresh } from '../utils/jwt';
+import { generateJWTAccess, generateJWTMediaAccess, generateJWTRefresh, mediaJWTExpiration } from '../utils/jwt';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { MinLength } from 'class-validator';
 import { passwordMinLen } from '../shared/variables';
@@ -57,7 +57,7 @@ class LoginResolvers {
     }), await generateJWTMediaAccess({
       id: codeID,
       type: UserType.visitor
-    }));
+    }, mediaJWTExpiration));
     return token;
   }
 }

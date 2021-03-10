@@ -15,14 +15,14 @@
     "emails"
   ],
   "scripts": {
-    "start": "yarn run compile-emails",
+    "start": "yarn run compile",
     "test": "echo \"Error: no test specified for status\"",
     "precommit": "yarn run test",
     "save": "./save_emails.sh",
     "compile": "mjml src/*.mjml -o dist",
-    "watch-emails": "mjml --watch src/*.mjml -o dist",
+    "watch": "mjml --watch src/*.mjml -o dist",
     "serve": "node static-server.js",
-    "watch": "concurrently \"yarn watch-emails\" \"yarn serve\""
+    "dev": "concurrently \"yarn watch\" \"yarn serve\""
   },
   "dependencies": {
     "concurrently": "^5.3.0",

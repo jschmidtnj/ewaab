@@ -1,7 +1,6 @@
 import { Resolver, Query, Ctx, ArgsType, Field, Int, Args } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
-import { RequestParams } from '@elastic/elasticsearch';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { IsOptional, Matches, ValidateIf } from 'class-validator';
@@ -57,6 +56,90 @@ const buildFilters = (mustShouldParams: esb.Query[], filterMustParams: esb.Query
     );
 };
 
+export const getPosts = async (args: PostsArgs, ctx: GraphQLContext): Promise<SearchPostsResult> => {
+  if (!ctx.auth) {
+    throw new Error('no auth found for getting posts');
+  }
+  const mustShouldParams: esb.Query[] = [];
+  const filterMustParams: esb.Query[] = [];
+  let filterShouldParams: esb.Query[] = [];
+
+  if (args.query) {
+    args.query = args.query.toLowerCase();
+    mustShouldParams.push(esb.matchQuery('title', args.query).fuzziness('AUTO'));
+    mustShouldParams.push(esb.matchQuery('content', args.query).fuzziness('AUTO'));
+  }
+
+  if (args.publisher !== undefined) {
+    filterMustParams.push(esb.termQuery('publisher', args.publisher));
+  }
+
+  if (args.created !== undefined) {
+    filterMustParams.push(esb.rangeQuery('created').gte(args.created));
+  }
+
+  if (args.type) {
+    if (!postViewMap[ctx.auth.type].includes(args.type)) {
+      throw new Error(`user of type ${ctx.auth.type} not authorized to find posts of type ${args.type}`);
+    }
+    filterShouldParams.push(esb.termQuery('type', args.type));
+  } else {
+    filterShouldParams = filterShouldParams.concat(postViewMap[ctx.auth.type]
+      .map(post_type => esb.termQuery('type', post_type)));
+  }
+
+  if (args.postCounts === undefined) {
+    args.postCounts = postViewMap[ctx.auth.type];
+  } else if (args.postCounts.some(postType => !postViewMap[ctx.auth!.type].includes(postType))) {
+    throw new Error(`user of type ${ctx.auth!.type} not authorized to aggregate over given post types`);
+  }
+
+  const aggregates: esb.Aggregation[] = [];
+
+  for (const postType of postViewMap[ctx.auth.type]) {
+    const filters = [...filterMustParams, esb.matchQuery('type', postType)];
+    aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters, filterShouldParams)));
+  }
+
+  let requestBody = esb.requestBodySearch().query(buildFilters(mustShouldParams, filterMustParams, filterShouldParams));
+  if (args.sortBy) {
+    requestBody = requestBody.sort(esb.sort(args.sortBy,
+      args.ascending ? 'asc' : 'desc'));
+  }
+  requestBody = requestBody.from(args.page * args.perpage).size(args.perpage).aggregations(aggregates);
+
+  const elasticPostData = await elasticClient.search({
+    index: postIndexName,
+    body: requestBody.toJSON()
+  });
+  console.log(elasticPostData.body.hits);
+  const results: BaseSearchPost[] = [];
+  for (const hit of elasticPostData.body.hits.hits) {
+    const currentPost: BaseSearchPost = {
+      ...hit._source as BaseSearchPost,
+      id: hit._id as string,
+    };
+    results.push(currentPost);
+  }
+  const totalCount = elasticPostData.body.hits.total.value;
+  let counts: PostCount[] = [];
+
+  for (const postType of args.postCounts) {
+    const count: number = elasticPostData.body.aggregations[postType].buckets[postType].doc_count;
+    counts.push({
+      count,
+      type: postType
+    });
+  }
+  counts = counts.reverse();
+
+  return {
+    results,
+    count: totalCount,
+    postCounts: counts
+  };
+};
+
 @Resolver()
 class PostsResolver {
   @Query(_returns => SearchPostsResult)
@@ -64,89 +147,7 @@ class PostsResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
-
-    const mustShouldParams: esb.Query[] = [];
-    const filterMustParams: esb.Query[] = [];
-    let filterShouldParams: esb.Query[] = [];
-
-    if (args.query) {
-      args.query = args.query.toLowerCase();
-      mustShouldParams.push(esb.matchQuery('title', args.query).fuzziness('AUTO'));
-      mustShouldParams.push(esb.matchQuery('content', args.query).fuzziness('AUTO'));
-    }
-
-    if (args.publisher !== undefined) {
-      filterMustParams.push(esb.termQuery('publisher', args.publisher));
-    }
-
-    if (args.created !== undefined) {
-      filterMustParams.push(esb.rangeQuery('created').gte(args.created));
-    }
-
-    if (args.type) {
-      if (!postViewMap[ctx.auth.type].includes(args.type)) {
-        throw new Error(`user of type ${ctx.auth.type} not authorized to find posts of type ${args.type}`);
-      }
-      filterShouldParams.push(esb.termQuery('type', args.type));
-    } else {
-      filterShouldParams = filterShouldParams.concat(postViewMap[ctx.auth.type]
-        .map(post_type => esb.termQuery('type', post_type)));
-    }
-
-    if (args.postCounts === undefined) {
-      args.postCounts = postViewMap[ctx.auth.type];
-    } else if (args.postCounts.some(postType => !postViewMap[ctx.auth!.type].includes(postType))) {
-      throw new Error(`user of type ${ctx.auth!.type} not authorized to aggregate over given post types`);
-    }
-
-    const aggregates: esb.Aggregation[] = [];
-
-    for (const postType of postViewMap[ctx.auth.type]) {
-      const filters = [...filterMustParams, esb.matchQuery('type', postType)];
-      aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters, filterShouldParams)));
-    }
-
-    let requestBody = esb.requestBodySearch().query(buildFilters(mustShouldParams, filterMustParams, filterShouldParams));
-    if (args.sortBy) {
-      requestBody = requestBody.sort(esb.sort(args.sortBy,
-        args.ascending ? 'asc' : 'desc'));
-    }
-    requestBody = requestBody.from(args.page * args.perpage).size(args.perpage).aggregations(aggregates);
-    // TODO - fix pagination!
-
-    const searchParams: RequestParams.Search = {
-      index: postIndexName,
-      from: args.page,
-      size: args.perpage,
-      body: requestBody.toJSON()
-    };
-
-    const elasticPostData = await elasticClient.search(searchParams);
-    const results: BaseSearchPost[] = [];
-    for (const hit of elasticPostData.body.hits.hits) {
-      const currentPost: BaseSearchPost = {
-        ...hit._source as BaseSearchPost,
-        id: hit._id as string,
-      };
-      results.push(currentPost);
-    }
-    const totalCount = elasticPostData.body.hits.total.value;
-    let counts: PostCount[] = [];
-
-    for (const postType of args.postCounts) {
-      const count: number = elasticPostData.body.aggregations[postType].buckets[postType].doc_count;
-      counts.push({
-        count,
-        type: postType
-      });
-    }
-    counts = counts.reverse();
-
-    return {
-      results,
-      count: totalCount,
-      postCounts: counts
-    };
+    return await getPosts(args, ctx);
   }
 }
 

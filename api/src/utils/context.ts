@@ -2,8 +2,9 @@ import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { decodeAuth, AuthData } from './jwt';
 import { Request, Response } from 'express';
 import { loginType } from '../auth/shared';
-import { Any, getRepository } from 'typeorm';
+import { getRepository } from 'typeorm';
 import MessageGroup from '../schema/users/messageGroup.entity';
+import { defaultDBCache } from './variables';
 
 export interface BaseSubscriptionContext {
   auth?: AuthData;
@@ -41,12 +42,10 @@ export const onSubscription = async (params: Record<string, unknown>): Promise<B
   const auth = await decodeAuth(loginType.LOCAL, token);
 
   const MessageGroupModel = getRepository(MessageGroup);
-  const groupData = await MessageGroupModel.find({
-    where: {
-      userIDs: Any([auth.id]),
-    },
-    select: ['id']
-  });
+  const groupData = await MessageGroupModel.createQueryBuilder('messageGroup')
+    .where('messageGroup.userIDs @> :userIDs').setParameters({
+      userIDs: [auth.id]
+    }).select(['id']).cache(defaultDBCache).getMany();
   const groups = groupData.map(groupObj => groupObj.id);
 
   return {

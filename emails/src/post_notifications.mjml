@@ -1,0 +1,303 @@
+<mjml>
+  <mj-head>
+    <mj-style inline="inline">
+      .card-header * {
+      font-family: Helvetica, Arial, sans-serif;
+      }
+
+      .card-header a {
+      text-decoration: none;
+      }
+
+      .post-avatar {
+      min-width: 45px;
+      }
+      .post-wrapper {
+      min-width: 360px;
+      }
+
+      .markdown * {
+      font-size: 1rem;
+      font-family: Helvetica, Arial, sans-serif;
+      color: rgba(17, 24, 39, 1);
+      line-height: 1.5;
+      overflow-wrap: break-word;
+      }
+
+      .markdown > * + * {
+      margin-top: 0px;
+      margin-bottom: 1rem;
+      }
+
+      .markdown li + li {
+      margin-top: 0.25rem;
+      }
+
+      .markdown li > p + p {
+      margin-top: 1.5rem;
+      }
+
+      .markdown-small p {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      }
+
+      .markdown strong {
+      font-weight: 600;
+      }
+
+      .markdown a {
+      color: rgba(37, 99, 235, 1);
+      font-weight: 600;
+      }
+
+      .markdown strong a {
+      font-weight: 700;
+      }
+
+      .markdown h1 {
+      line-height: 1.25;
+      border-bottom-width: 1px;
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      padding-bottom: 0.5rem;
+      }
+
+      .markdown-small h1 {
+      font-size: 1.5rem;
+      line-height: 2rem;
+      }
+
+      .markdown h2 {
+      line-height: 1.25;
+      border-bottom-width: 1px;
+      font-size: 1.5rem;
+      line-height: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      padding-bottom: 0.5rem;
+      }
+
+      .markdown-small h2 {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+      }
+
+      .markdown h3 {
+      line-height: 1.375;
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      }
+
+      .markdown-small h3 {
+      font-size: 1rem;
+      line-height: 1.5rem;
+      }
+
+      .markdown h4 {
+      line-height: 1;
+      font-size: 1rem;
+      line-height: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      }
+
+      .markdown-small h4 {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      }
+
+      .markdown h5 {
+      line-height: 1.25;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      }
+
+      .markdown-small h5 {
+      font-size: 0.75rem;
+      line-height: 1rem;
+      }
+
+      .markdown h6 {
+      line-height: 1.25;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      font-weight: 600;
+      color: rgba(75, 85, 99, 1);
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      }
+
+      .markdown-small h6 {
+      font-size: 0.75rem;
+      line-height: 1rem;
+      }
+
+      .markdown blockquote {
+      font-size: 1rem;
+      line-height: 1.5rem;
+      border-left-width: 4px;
+      border-color: rgba(209, 213, 219, 1);
+      padding-left: 1rem;
+      padding-right: 1rem;
+      color: rgba(75, 85, 99, 1);
+      }
+
+      .markdown-small blockquote {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      }
+
+      .markdown code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      display: inline;
+      background-color: rgba(229, 231, 235, 1);
+      border-radius: 0.25rem;
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+      padding-top: 1.25rem;
+      padding-bottom: 1.25rem
+      }
+
+      .markdown-small code {
+      font-size: 0.75rem;
+      line-height: 1rem;
+      }
+
+      .markdown pre {
+      background-color: rgba(243, 244, 246, 1);
+      border-radius: 0.25rem;
+      padding: 1rem;
+      }
+
+      .markdown pre code {
+      display: block;
+      background-color: transparent;
+      padding: 0px;
+      overflow: visible;
+      border-radius: 0px;
+      }
+
+      .markdown ul {
+      font-size: 1rem;
+      line-height: 1.5rem;
+      padding-left: 2rem;
+      list-style-type: disc;
+      }
+
+      .markdown-small ul {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      padding-left: 1rem;
+      }
+
+      .markdown ol {
+      font-size: 1rem;
+      line-height: 1.5rem;
+      padding-left: 2rem;
+      list-style-type: decimal;
+      }
+
+      .markdown-small ol {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      padding-left: 1rem;
+      }
+
+      .markdown kbd {
+      font-size: 0.75rem;
+      line-height: 1rem;
+      display: inline-block;
+      border-radius: 0.25rem;
+      border-width: 1px;
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+      padding-top: 1.25rem;
+      padding-bottom: 1.25rem
+      vertical-align: middle;
+      font-weight: 400;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+      }
+
+      .markdown table {
+      font-size: 1rem;
+      line-height: 1.5rem;
+      border-color: rgba(75, 85, 99, 1);
+      }
+
+      .markdown-small table {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      }
+
+      .markdown th {
+      border-width: 1px;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      }
+
+      .markdown td {
+      border-width: 1px;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      }
+
+      .markdown .highlight pre {
+      background-color: rgba(243, 244, 246, 1);
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#e5e7eb">
+    <mj-section padding-top="30px" padding-bottom="30px" padding-left="30px" padding-right="30px">
+      <mj-group>
+        <mj-column>
+          <mj-image align="left" padding-top="18px" padding-left="5px" padding-right="0" src="https://network.ewaab.org/assets/img/ewaab/logo.png" href="https://network.ewaab.org" target="_blank" alt="ewaab" width="100px"></mj-image>
+        </mj-column>
+        <mj-column>
+          <mj-image align="right" src="{{avatarURL}}" padding-right="5px" border-radius="1000px" href="https://network.ewaab.org/{{username}}" target="_blank" alt="avatar" width="40px"></mj-image>
+        </mj-column>
+      </mj-group>
+    </mj-section>
+    <mj-wrapper padding-left="10px" padding-right="10px" css-class="post-wrapper">
+      {{#each posts}}
+        <mj-section background-color="#ffffff" border-radius="10px">
+          <mj-group width="100%">
+            <mj-column width="20%" padding-left="20px" padding-right="0" padding-top="0">
+              <mj-image align="left" css-class="post-avatar" padding-left="0" padding-right="0" src="{{this.avatarURL}}" border-radius="1000px" href="https://network.ewaab.org/{{this.username}}" target="_blank" alt="avatar" width="45px"></mj-image>
+            </mj-column>
+            <mj-column padding="0">
+              <mj-text align="left" padding="0" css-class="card-header">
+                <h3 padding="0">{{this.name}}</h3>
+                <a target="_blank" href="https://network.ewaab.org/{{this.username}}" padding="0">@{{this.username}}</p>
+              </mj-text>
+            </mj-column>
+          </mj-group>
+          <mj-column width="100%" padding-left="25px" padding-right="25px" css-class="markdown">
+            <mj-raw>
+              {{this.content}}
+            </mj-raw>
+          </mj-column>
+        </mj-section>
+      {{/each}}
+    </mj-wrapper>
+  </mj-body>
+</mjml>

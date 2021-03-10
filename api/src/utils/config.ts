@@ -10,6 +10,7 @@ interface ConfigType {
   WEBSITE_URL: string;
   DEBUG: boolean;
   PRODUCTION: boolean;
+  USE_SECURE: boolean;
   JWT_SECRET: string;
   DB_CONNECTION_URI: string;
   REDIS_HOST: string;
@@ -36,6 +37,7 @@ export const configData: ConfigType = {
   WEBSITE_URL: 'https://network.ewaab.org',
   DEBUG: false,
   PRODUCTION: true,
+  USE_SECURE: true,
   JWT_SECRET: '',
   DB_CONNECTION_URI: '',
   REDIS_HOST: '',
@@ -54,6 +56,10 @@ export const configData: ConfigType = {
   ELASTICSEARCH_URI: '',
   INITIALIZATION_KEY: ''
 };
+
+export const getAPIURL = (): string => {
+  return `http${configData.USE_SECURE ? 's' : ''}://${configData.API_HOST}`;
+}
 
 const addToConfig = (conf: any, allString: boolean): void => {
   for (const key in configData) {

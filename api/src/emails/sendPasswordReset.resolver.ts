@@ -80,7 +80,6 @@ class SendPasswordResetResolver {
     await sendEmailUtil({
       content: emailData,
       email: args.email,
-      name: 'user',
       subject: emailTemplateData.subject
     });
     logger.info('email was sent!');

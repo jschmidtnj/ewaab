@@ -245,8 +245,9 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
               <div className="bg-white px-4 py-3 flex items-center justify-between sm:px-6">
                 <div className="sm:flex sm:flex-1 sm:items-center sm:justify-between">
                   <span className="text-sm text-gray-700 mr-4">
-                    Showing {posts.data.posts.results.length} /{' '}
-                    {posts.data.posts.count}
+                    Showing{' '}
+                    {posts.data.posts.results.length + currentPage * numPerPage}{' '}
+                    / {posts.data.posts.count}
                   </span>
                   <div
                     className="relative inline-flex -space-x-px"
