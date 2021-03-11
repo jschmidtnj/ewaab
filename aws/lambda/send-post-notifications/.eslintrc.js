@@ -42,7 +42,7 @@ module.exports = {
     ],
     '@typescript-eslint/no-explicit-any': 'off',
     'no-async-promise-executor': 'off',
-    'no-console': 'error',
+    'no-console': 'off',
     'no-debugger': 'error'
   },
 };

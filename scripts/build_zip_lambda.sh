@@ -6,16 +6,18 @@ set -e
 cd "../$1"
 
 output="dist.zip"
+dist_folder="dist"
 
-rm -rf yarn.lock node_modules "$output"
+rm -rf "$dist_folder" "$output"
+
+mkdir "$dist_folder"
+cp package.json "$dist_folder"
+cp yarn.lock "$dist_folder"
+cp -R lib/* "$dist_folder"
+
+cd "$dist_folder"
 yarn install --prod
-mv node_modules lib
-
-cd lib
 zip -r "$output" *
 mv "$output" ..
-cd -
-
-yarn install
 
 cd -
