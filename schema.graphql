@@ -348,6 +348,10 @@ type Mutation {
     """recaptcha token"""
     recaptchaToken: String!
   ): String!
+  sendPostsNotification(
+    """user id"""
+    id: String
+  ): String!
   sendTestEmail(
     """content"""
     content: String

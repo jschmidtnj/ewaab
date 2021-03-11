@@ -6,5 +6,5 @@
 set -e
 
 target="s3://ewaab-emails/templates"
-yarn run compile
+yarn run build
 aws s3 sync dist "$target"

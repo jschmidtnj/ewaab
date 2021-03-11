@@ -28,7 +28,7 @@ module.exports = {
     }
   },
   rules: {
-    'no-console': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
     'prettier/prettier': ['error', { 'singleQuote': true }],
     'quotes': [2, 'single', { 'avoidEscape': true }],
     'semi': 'off',
@@ -42,6 +42,7 @@ module.exports = {
     ],
     '@typescript-eslint/no-explicit-any': 'off',
     'no-async-promise-executor': 'off',
+    'no-console': 'error',
     'no-debugger': 'error'
   },
 };

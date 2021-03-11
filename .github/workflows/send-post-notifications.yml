@@ -1,0 +1,49 @@
+name: Upload Send Post Notifications
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "aws/lambda/send-post-notifications/**"
+      - ".github/workflows/send-post-notifications.yml"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # checks out a copy of the repo
+      - uses: actions/checkout@main
+        with:
+          lfs: true
+      - name: Checkout lfs objects
+        run: git lfs checkout
+      - name: Setup Node.js 14
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      # node yarn - cache
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: build
+        run: |
+          cd aws/lambda/send-post-notifications
+          yarn install
+          yarn run predeploy
+          cd -
+      - name: upload
+        uses: appleboy/lambda-action@master
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+          function_name: ewaab-send-post-notifications
+          zip_file: aws/lambda/update-sitemap/dist.zip
+      - name: finish
+        run: echo "finished!"

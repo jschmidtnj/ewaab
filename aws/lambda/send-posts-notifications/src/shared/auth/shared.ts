@@ -1,0 +1,1 @@
+../../../../../../api/src/auth/shared.ts

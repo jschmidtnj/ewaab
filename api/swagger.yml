@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
     description: 'schema for rest portion of apiKey'
     license:
-        name: CC-BY-NC-SA-4.0
+        name: MIT
     title: 'api rest'
     version: 0.0.1
 paths:

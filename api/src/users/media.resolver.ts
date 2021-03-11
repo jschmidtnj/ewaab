@@ -35,6 +35,9 @@ export const getMedia = async (args: MediaArgs): Promise<Media> => {
 export const getMediaAuthenticated = async (args: MediaArgs, ctx: GraphQLContext, tokenData?: MediaAccessTokenData): Promise<Media> => {
   const media = await getMedia(args);
   if (tokenData) {
+    if (tokenData.media && media.id !== tokenData.media) {
+      throw new Error(`token invalid for media with id ${media.id}`);
+    }
     ctx.auth = {
       emailVerified: true,
       id: tokenData.id,

@@ -1,0 +1,1 @@
+../../../../../../api/src/emails/sendEmail.resolver.ts

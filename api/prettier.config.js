@@ -7,10 +7,6 @@ module.exports = {
     "files": [
       "src/**/*.ts",
       "__tests__/**/*.ts"
-    ],
-    "excludeFiles": [
-      "src/grammar/grammars/**/*",
-      "src/grammar/gen/**/*"
     ]
   }]
 };

@@ -2,7 +2,7 @@
   "name": "emails",
   "version": "0.0.1",
   "description": "emails",
-  "license": "CC-BY-NC-SA-4.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jschmidtnj/ewaab.git"
@@ -15,11 +15,11 @@
     "emails"
   ],
   "scripts": {
-    "start": "yarn run compile",
+    "start": "yarn run build",
     "test": "echo \"Error: no test specified for status\"",
     "precommit": "yarn run test",
     "save": "./save_emails.sh",
-    "compile": "mjml src/*.mjml -o dist",
+    "build": "mjml src/*.mjml -o dist",
     "watch": "mjml --watch src/*.mjml -o dist",
     "serve": "node static-server.js",
     "dev": "concurrently \"yarn watch\" \"yarn serve\""

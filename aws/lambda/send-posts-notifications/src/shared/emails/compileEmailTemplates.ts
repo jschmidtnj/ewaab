@@ -1,0 +1,1 @@
+../../../../../../api/src/emails/compileEmailTemplates.ts

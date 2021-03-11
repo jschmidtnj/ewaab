@@ -1,17 +1,46 @@
 import { EventBridgeHandler } from 'aws-lambda';
 import { getLogger } from 'log4js';
-import { initializeConfig } from './utils/config';
+import { getRepository } from 'typeorm';
+import { initializeDB } from './shared/db/connect';
+import { initializeElastic } from './shared/elastic/init';
+import compileEmailTemplates from './shared/emails/compileEmailTemplates';
+import { sendNotification } from './shared/emails/sendPostsNotification.resolver';
+import User from './shared/schema/users/user.entity';
+import { initializeAWS } from './shared/utils/aws';
+import { configData, initializeConfig } from './shared/utils/config';
+import { initializeLogger } from './shared/utils/logger';
 
 const logger = getLogger();
 
-const sendAllNotifications = async (): Promise<void> => {
+const appName = 'ewaab-email-notifications';
+
+const initialize = async (): Promise<void> => {
+  logger.info('start aws initialize');
+  await initializeAWS();
+  logger.info('aws initialized');
+  logger.info('start elastic initialize');
+  await initializeElastic();
+  logger.info('connected to elasticsearch');
   logger.info('start db initialize');
-  await initializeDB();
+  await initializeDB(configData.DB_CONNECTION_URI);
   logger.info('database connection set up');
+  logger.info('start email templates initialize');
+  await compileEmailTemplates();
+  logger.info('email templates compiled');
+};
+
+const sendAllNotifications = async (): Promise<void> => {
+  await initialize();
+  const UserModel = getRepository(User);
+  for (const userData of await UserModel.find({
+    select: ['id']
+  })) {
+    logger.info(await sendNotification(userData.id));
+  }
 };
 
 export const handler: EventBridgeHandler<string, null, void> = async (_event, _context, callback): Promise<void> => {
-  await initializeConfig(false);
+  await initializeConfig(appName);
   initializeLogger();
   await sendAllNotifications();
   callback();
@@ -19,7 +48,7 @@ export const handler: EventBridgeHandler<string, null, void> = async (_event, _c
 };
 
 const sendPostsNotifications = async (): Promise<void> => {
-  await initializeConfig(true);
+  await initializeConfig(appName);
   initializeLogger();
   await sendAllNotifications();
 };

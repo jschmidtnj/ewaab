@@ -3,8 +3,9 @@ import Handlebars from 'handlebars';
 
 export interface PostEmailData {
   name: string;
-  username: string;
+  username?: string;
   avatarURL: string;
+  authorURL: string;
   content: string;
 }
 
@@ -42,6 +43,7 @@ interface TemplateFiles {
   postNotifications: {
     file: string;
     template?: HandlebarsTemplateDelegate<{
+      websiteURL: string;
       avatarURL: string;
       username: string;
       name: string;

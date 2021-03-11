@@ -9,6 +9,7 @@ import esb from 'elastic-builder';
 import { uuidRegex } from '../shared/variables';
 import { postViewMap } from '../utils/variables';
 import { PaginationArgs } from '../schema/utils/pagination';
+import { UserType } from '../schema/users/user.entity';
 
 @ArgsType()
 class PostsArgs extends PaginationArgs {
@@ -56,10 +57,11 @@ const buildFilters = (mustShouldParams: esb.Query[], filterMustParams: esb.Query
     );
 };
 
-export const getPosts = async (args: PostsArgs, ctx: GraphQLContext): Promise<SearchPostsResult> => {
-  if (!ctx.auth) {
+export const getPosts = async (args: PostsArgs, ctx?: GraphQLContext): Promise<SearchPostsResult> => {
+  if (ctx && !ctx.auth) {
     throw new Error('no auth found for getting posts');
   }
+
   const mustShouldParams: esb.Query[] = [];
   const filterMustParams: esb.Query[] = [];
   let filterShouldParams: esb.Query[] = [];
@@ -78,25 +80,26 @@ export const getPosts = async (args: PostsArgs, ctx: GraphQLContext): Promise<Se
     filterMustParams.push(esb.rangeQuery('created').gte(args.created));
   }
 
+  const userType = ctx ? ctx.auth!.type : UserType.admin;
+
   if (args.type) {
-    if (!postViewMap[ctx.auth.type].includes(args.type)) {
-      throw new Error(`user of type ${ctx.auth.type} not authorized to find posts of type ${args.type}`);
+    if (!postViewMap[userType].includes(args.type)) {
+      throw new Error(`user of type ${userType} not authorized to find posts of type ${args.type}`);
     }
     filterShouldParams.push(esb.termQuery('type', args.type));
   } else {
-    filterShouldParams = filterShouldParams.concat(postViewMap[ctx.auth.type]
-      .map(post_type => esb.termQuery('type', post_type)));
+    filterShouldParams = filterShouldParams.concat(postViewMap[userType].map(post_type => esb.termQuery('type', post_type)));
   }
 
   if (args.postCounts === undefined) {
-    args.postCounts = postViewMap[ctx.auth.type];
-  } else if (args.postCounts.some(postType => !postViewMap[ctx.auth!.type].includes(postType))) {
-    throw new Error(`user of type ${ctx.auth!.type} not authorized to aggregate over given post types`);
+    args.postCounts = postViewMap[userType];
+  } else if (args.postCounts.some(postType => !postViewMap[userType].includes(postType))) {
+    throw new Error(`user of type ${userType} not authorized to aggregate over given post types`);
   }
 
   const aggregates: esb.Aggregation[] = [];
 
-  for (const postType of postViewMap[ctx.auth.type]) {
+  for (const postType of postViewMap[userType]) {
     const filters = [...filterMustParams, esb.matchQuery('type', postType)];
     aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters, filterShouldParams)));
   }
@@ -112,7 +115,7 @@ export const getPosts = async (args: PostsArgs, ctx: GraphQLContext): Promise<Se
     index: postIndexName,
     body: requestBody.toJSON()
   });
-  console.log(elasticPostData.body.hits);
+
   const results: BaseSearchPost[] = [];
   for (const hit of elasticPostData.body.hits.hits) {
     const currentPost: BaseSearchPost = {

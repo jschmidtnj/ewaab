@@ -102,11 +102,13 @@ export interface MediaAccessTokenData {
   id: string;
   userType: UserType;
   type: MediaAccessType.media;
+  media?: string;
 }
 
 interface GenerateJWTMediaArgs {
   id: string;
   type: UserType;
+  media?: string;
 }
 
 export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs, expiration?: string): Promise<string> => {
@@ -123,7 +125,8 @@ export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs, expiration?: 
     const authData: MediaAccessTokenData = {
       id: args.id,
       userType: args.type,
-      type: MediaAccessType.media
+      type: MediaAccessType.media,
+      media: args.media
     };
     const signOptions: SignOptions = {
       issuer: jwtIssuer,

@@ -59,7 +59,7 @@ export const configData: ConfigType = {
 
 export const getAPIURL = (): string => {
   return `http${configData.USE_SECURE ? 's' : ''}://${configData.API_HOST}`;
-}
+};
 
 const addToConfig = (conf: any, allString: boolean): void => {
   for (const key in configData) {
@@ -91,8 +91,8 @@ const addToConfig = (conf: any, allString: boolean): void => {
   }
 };
 
-export const initializeConfig = async (): Promise<void> => {
-  const configRes = await cosmiconfig(appName, {
+export const initializeConfig = async (configName: string = appName): Promise<void> => {
+  const configRes = await cosmiconfig(configName, {
     cache: false
   }).search();
   if (!configRes || configRes.isEmpty) {
