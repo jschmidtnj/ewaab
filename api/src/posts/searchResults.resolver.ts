@@ -10,9 +10,10 @@ import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entit
 import { CountReactionsArgs, getReactionCounts, getUserReactions, UserReactionsArgs } from '../reactions/reactions.resolver';
 import ReactionCount from '../schema/reactions/reactionCount.entity';
 import { GraphQLContext } from '../utils/context';
+import { connectionName } from '../db/connect';
 
 export const getPublisherData = async (publisher: string): Promise<PublisherData | undefined> => {
-  const UserModel = getRepository(User);
+  const UserModel = getRepository(User, connectionName);
   const userData = await UserModel.findOne(publisher, {
     select: ['id', 'name', 'username', 'avatar', 'description', 'created', 'updated']
   });
@@ -26,7 +27,7 @@ export const getPublisherData = async (publisher: string): Promise<PublisherData
 };
 
 export const getMediaData = async (media: string): Promise<MediaData> => {
-  const MediaModel = getRepository(Media);
+  const MediaModel = getRepository(Media, connectionName);
   const mediaData = await MediaModel.findOne(media, {
     select: ['id', 'mime', 'name', 'fileSize', 'type']
   });

@@ -8,6 +8,7 @@ import User, { UserType } from '../schema/users/user.entity';
 import { setCookies } from '../utils/cookies';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { FindOneOptions, getRepository } from 'typeorm';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class LoginArgs {
@@ -52,7 +53,7 @@ class LoginResolvers {
     if (!(await verifyRecaptcha(args.recaptchaToken))) {
       throw new Error('invalid recaptcha token');
     }
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     let user: User;
     const findOptions: FindOneOptions<User> = {
       select: ['id', 'type', 'emailVerified', 'password', 'tokenVersion']

@@ -7,6 +7,7 @@ import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.ent
 import { uuidRegex } from '../shared/variables';
 import { GraphQLContext } from '../utils/context';
 import { arrayHash } from '../utils/misc';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class AddMessageGroupArgs {
@@ -32,7 +33,7 @@ class AddMessageGroupResolver {
     args.members.push(ctx.auth!.id);
     const memberHash = arrayHash(args.members);
 
-    const MessageGroupModel = getRepository(MessageGroup);
+    const MessageGroupModel = getRepository(MessageGroup, connectionName);
     if ((await MessageGroupModel.count({
       usersHash: memberHash
     })) > 0) {
@@ -49,7 +50,7 @@ class AddMessageGroupResolver {
       usersHash: memberHash
     });
 
-    const MessageGroupUserModel = getRepository(MessageGroupUser);
+    const MessageGroupUserModel = getRepository(MessageGroupUser, connectionName);
     for (const userID of args.members) {
       await MessageGroupUserModel.save({
         groupID: newMessageGroup.id,

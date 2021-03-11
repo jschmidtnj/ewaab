@@ -6,6 +6,7 @@ import { getRepository } from 'typeorm';
 import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
 import { loginType } from '../auth/shared';
 import { MediaAccessTokenData } from '../utils/jwt';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class MediaArgs {
@@ -14,7 +15,7 @@ class MediaArgs {
 }
 
 export const deleteMedia = async (id: string): Promise<boolean> => {
-  const MediaModel = getRepository(Media);
+  const MediaModel = getRepository(Media, connectionName);
   await MediaModel.delete(id);
   await s3Client.deleteObject({
     Bucket: fileBucket,
@@ -24,7 +25,7 @@ export const deleteMedia = async (id: string): Promise<boolean> => {
 };
 
 export const getMedia = async (args: MediaArgs): Promise<Media> => {
-  const MediaModel = getRepository(Media);
+  const MediaModel = getRepository(Media, connectionName);
   const media = await MediaModel.findOne(args.id);
   if (!media) {
     throw new Error(`cannot find media object with id ${args.id}`);

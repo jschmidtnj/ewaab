@@ -5,6 +5,7 @@ import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
 import MessageGroup from '../schema/users/messageGroup.entity';
 import { defaultDBCache } from './variables';
+import { connectionName } from '../db/connect';
 
 export interface BaseSubscriptionContext {
   auth?: AuthData;
@@ -41,7 +42,7 @@ export const onSubscription = async (params: Record<string, unknown>): Promise<B
   const token = extractBearerToken(params['Authorization'] as string);
   const auth = await decodeAuth(loginType.LOCAL, token);
 
-  const MessageGroupModel = getRepository(MessageGroup);
+  const MessageGroupModel = getRepository(MessageGroup, connectionName);
   const groupData = await MessageGroupModel.createQueryBuilder('messageGroup')
     .where('messageGroup.userIDs @> :userIDs').setParameters({
       userIDs: [auth.id]

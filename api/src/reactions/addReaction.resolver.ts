@@ -13,6 +13,7 @@ import { commentIndexName, messageIndexName, postIndexName } from '../elastic/se
 import Message from '../schema/users/message.entity';
 import Comment from '../schema/posts/comment.entity';
 import ReactionCount from '../schema/reactions/reactionCount.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class AddReactionArgs {
@@ -47,7 +48,7 @@ class AddReactionResolver {
     } else if ([ReactionParentType.comment, ReactionParentType.post].includes(args.parentType)) {
       let postID = args.parent;
       if (args.parentType === ReactionParentType.comment) {
-        const CommentModel = getRepository(Comment);
+        const CommentModel = getRepository(Comment, connectionName);
         const commentData = await CommentModel.findOne(args.parent, {
           select: ['post']
         });
@@ -67,7 +68,7 @@ class AddReactionResolver {
       throw new Error(`unhandled parent type ${args.parentType}`);
     }
 
-    const ReactionModel = getRepository(Reaction);
+    const ReactionModel = getRepository(Reaction, connectionName);
     const newReaction = await ReactionModel.save({
       id: uuidv4(),
       created: new Date().getTime(),
@@ -77,7 +78,7 @@ class AddReactionResolver {
       user: ctx.auth!.id
     });
 
-    const ReactionCountModel = getRepository(ReactionCount);
+    const ReactionCountModel = getRepository(ReactionCount, connectionName);
     const currentCount = await ReactionCountModel.findOne({
       where: {
         parent: args.parent,
@@ -104,7 +105,7 @@ class AddReactionResolver {
 
     if ([ReactionParentType.post, ReactionParentType.message, ReactionParentType.comment].includes(args.parentType)) {
       if (args.parentType === ReactionParentType.post) {
-        const PostModel = getRepository(Post);
+        const PostModel = getRepository(Post, connectionName);
         await PostModel.increment({
           id: args.parent
         }, 'reactionCount', 1);
@@ -116,7 +117,7 @@ class AddReactionResolver {
           }
         });
       } else if (args.parentType === ReactionParentType.message) {
-        const MessageModel = getRepository(Message);
+        const MessageModel = getRepository(Message, connectionName);
         await MessageModel.increment({
           id: args.parent
         }, 'reactionCount', 1);
@@ -128,7 +129,7 @@ class AddReactionResolver {
           }
         });
       } else if (args.parentType === ReactionParentType.comment) {
-        const CommentModel = getRepository(Comment);
+        const CommentModel = getRepository(Comment, connectionName);
         await CommentModel.increment({
           id: args.parent
         }, 'reactionCount', 1);

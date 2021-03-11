@@ -10,6 +10,7 @@ import { GraphQLContext } from '../utils/context';
 import Comment, { BaseSearchComment } from '../schema/posts/comment.entity';
 import Post from '../schema/posts/post.entity';
 import esb from 'elastic-builder';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class AddCommentArgs {
@@ -38,7 +39,7 @@ class AddCommentResolver {
       throw new Error(`user of type ${ctx.auth!.type} not authorized to view post ${args.post}`);
     }
 
-    const CommentModel = getRepository(Comment);
+    const CommentModel = getRepository(Comment, connectionName);
     const now = new Date().getTime();
     const searchComment: BaseSearchComment = {
       content: args.content,
@@ -63,7 +64,7 @@ class AddCommentResolver {
 
     const updateCommentsScript = esb.script('source', 'ctx._source.commentCount++').lang('painless');
 
-    const PostModel = getRepository(Post);
+    const PostModel = getRepository(Post, connectionName);
     await PostModel.increment({
       id: args.post
     }, 'commentCount', 1);

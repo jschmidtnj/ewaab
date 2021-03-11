@@ -12,6 +12,7 @@ import statusCodes from 'http-status-codes';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { UserType } from '../schema/users/user.entity';
 import { removeKeys } from '../utils/misc';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class UpdateMessageArgs {
@@ -39,7 +40,7 @@ class UpdateMessageResolver {
     if (!Object.values(removeKeys(args, ['id'])).some(elem => elem !== undefined)) {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
-    const MessageModel = getRepository(Message);
+    const MessageModel = getRepository(Message, connectionName);
     const messageData = await MessageModel.findOne(args.id, {
       select: ['id', 'publisher']
     });

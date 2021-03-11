@@ -7,6 +7,7 @@ import MessageGroup from '../schema/users/messageGroup.entity';
 import { getMessageGroups, MessageGroupsArgs } from '../messages/messageGroups.resolver';
 import Notification from '../schema/users/notification.entity';
 import { getNotifications, NotificationsArgs } from './notifications';
+import { connectionName } from '../db/connect';
 
 @Resolver(_of => User)
 class UserResolvers implements ResolverInterface<User> {
@@ -18,7 +19,7 @@ class UserResolvers implements ResolverInterface<User> {
     if (!ctx.auth) {
       throw new Error('cannot find auth');
     }
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     const user = await UserModel.findOne(ctx.auth.id);
     if (!user) {
       throw new Error(`cannot find user with id ${ctx.auth.id}`);

@@ -12,9 +12,10 @@ import Post from '../schema/posts/post.entity';
 import Message from '../schema/users/message.entity';
 import Comment from '../schema/posts/comment.entity';
 import ReactionCount from '../schema/reactions/reactionCount.entity';
+import { connectionName } from '../db/connect';
 
 export const deleteReactions = async (parent: string, parentType: ReactionParentType): Promise<void> => {
-  const ReactionModel = getRepository(Reaction);
+  const ReactionModel = getRepository(Reaction, connectionName);
   for (const reaction of await ReactionModel.find({
     where: {
       parent,
@@ -24,7 +25,7 @@ export const deleteReactions = async (parent: string, parentType: ReactionParent
   })) {
     await ReactionModel.delete(reaction.id);
   }
-  const ReactionCountModel = getRepository(ReactionCount);
+  const ReactionCountModel = getRepository(ReactionCount, connectionName);
   for (const reactionCount of await ReactionCountModel.find({
     where: {
       parent,
@@ -52,7 +53,7 @@ class DeleteReactionResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('cannot find auth data');
     }
-    const ReactionModel = getRepository(Reaction);
+    const ReactionModel = getRepository(Reaction, connectionName);
     const reactionData = await ReactionModel.findOne(id, {
       select: ['id', 'user', 'parent', 'parentType', 'type']
     });
@@ -64,7 +65,7 @@ class DeleteReactionResolver {
     }
     await ReactionModel.delete(reactionData.id);
 
-    const ReactionCountModel = getRepository(ReactionCount);
+    const ReactionCountModel = getRepository(ReactionCount, connectionName);
     const currentCount = await ReactionCountModel.findOne({
       where: {
         parent: reactionData.parent,
@@ -88,7 +89,7 @@ class DeleteReactionResolver {
 
     if ([ReactionParentType.post, ReactionParentType.message, ReactionParentType.comment].includes(reactionData.parentType)) {
       if (reactionData.parentType === ReactionParentType.post) {
-        const PostModel = getRepository(Post);
+        const PostModel = getRepository(Post, connectionName);
         await PostModel.decrement({
           id: reactionData.parent
         }, 'reactionCount', 1);
@@ -100,7 +101,7 @@ class DeleteReactionResolver {
           }
         });
       } else if (reactionData.parentType === ReactionParentType.message) {
-        const MessageModel = getRepository(Message);
+        const MessageModel = getRepository(Message, connectionName);
         await MessageModel.decrement({
           id: reactionData.parent
         }, 'reactionCount', 1);
@@ -112,7 +113,7 @@ class DeleteReactionResolver {
           }
         });
       } else if (reactionData.parentType === ReactionParentType.comment) {
-        const CommentModel = getRepository(Comment);
+        const CommentModel = getRepository(Comment, connectionName);
         await CommentModel.decrement({
           id: reactionData.parent
         }, 'reactionCount', 1);

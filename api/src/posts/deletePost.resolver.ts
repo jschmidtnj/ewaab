@@ -14,6 +14,7 @@ import { bulkWriteToElastic } from '../elastic/elastic';
 import { WriteType } from '../elastic/writeType';
 import { ReactionParentType } from '../schema/reactions/reaction.entity';
 import { deleteReactions } from '../reactions/deleteReaction.resolver';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class DeleteArgs {
@@ -31,7 +32,7 @@ class DeletePostResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('cannot find auth data');
     }
-    const PostModel = getRepository(Post);
+    const PostModel = getRepository(Post, connectionName);
     const postData = await PostModel.findOne(id, {
       select: ['id', 'publisher', 'media']
     });
@@ -45,7 +46,7 @@ class DeletePostResolver {
       }
     }
 
-    const CommentModel = getRepository(Comment);
+    const CommentModel = getRepository(Comment, connectionName);
     const comments = await CommentModel.find({
       select: ['id'],
       where: {

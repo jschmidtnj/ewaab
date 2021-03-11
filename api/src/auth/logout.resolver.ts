@@ -6,6 +6,7 @@ import { IsEmail, IsOptional } from 'class-validator';
 import { clearCookies } from '../utils/cookies';
 import { FindOneOptions, getRepository } from 'typeorm';
 import UserCode from '../schema/users/userCode.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class RevokeArgs {
@@ -42,7 +43,7 @@ export class UserResolver {
     }
 
     if (ctx.auth.type === UserType.visitor) {
-      const UserCodeModel = getRepository(UserCode);
+      const UserCodeModel = getRepository(UserCode, connectionName);
       const userCodeData = await UserCodeModel.findOne(ctx.auth.id, {
         select: ['id']
       });
@@ -55,7 +56,7 @@ export class UserResolver {
       return `revoked token for ${userCodeData.id}`;
     }
 
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     let user: User | undefined;
     const findOptions: FindOneOptions<User> = {
       select: ['id']

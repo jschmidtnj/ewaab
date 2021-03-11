@@ -20,6 +20,7 @@ import { defaultMajor } from '../shared/majors';
 import { defaultUniversity } from '../shared/universities';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class RegisterArgs {
@@ -155,7 +156,7 @@ class RegisterResolver {
       throw new Error('user with username already exists');
     }
     const hashedPassword = await argon2.hash(args.password);
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     const now = new Date().getTime();
     const searchUser: BaseSearchUser = {
       created: now,

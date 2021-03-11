@@ -10,6 +10,7 @@ import { Matches } from 'class-validator';
 import { uuidRegex } from '../shared/variables';
 import { deleteReactions } from '../reactions/deleteReaction.resolver';
 import { ReactionParentType } from '../schema/reactions/reaction.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class DeleteArgs {
@@ -27,7 +28,7 @@ class DeleteMessageResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('cannot find auth data');
     }
-    const MessageModel = getRepository(Message);
+    const MessageModel = getRepository(Message, connectionName);
     const messageData = await MessageModel.findOne(id, {
       select: ['id', 'publisher']
     });

@@ -4,6 +4,7 @@ import { getRepository } from 'typeorm';
 import Reaction, { ReactionParentType } from '../schema/reactions/reaction.entity';
 import { PaginationArgs } from '../schema/utils/pagination';
 import { defaultDBCache } from '../utils/variables';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 export class UserReactionsArgs extends PaginationArgs {
@@ -12,7 +13,7 @@ export class UserReactionsArgs extends PaginationArgs {
 
 export const getUserReactions = async (args: UserReactionsArgs, parent: string,
   parentType: ReactionParentType, user: string): Promise<Reaction[]> => {
-  const ReactionModel = getRepository(Reaction);
+  const ReactionModel = getRepository(Reaction, connectionName);
   const data = await ReactionModel.find({
     where: {
       parent,
@@ -36,7 +37,7 @@ export class CountReactionsArgs extends PaginationArgs {
 
 export const getReactionCounts = async (args: CountReactionsArgs, parent: string,
   parentType: ReactionParentType): Promise<ReactionCount[]> => {
-  const ReactionCountModel = getRepository(ReactionCount);
+  const ReactionCountModel = getRepository(ReactionCount, connectionName);
   const data = await ReactionCountModel.find({
     where: {
       parent,

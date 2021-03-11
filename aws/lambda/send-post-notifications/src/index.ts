@@ -1,7 +1,7 @@
 import { EventBridgeHandler } from 'aws-lambda';
 import { getLogger } from 'log4js';
 import { getRepository } from 'typeorm';
-import { initializeDB } from './shared/db/connect';
+import { initializeDB, connectionName } from './shared/db/connect';
 import { initializeElastic } from './shared/elastic/init';
 import compileEmailTemplates from './shared/emails/compileEmailTemplates';
 import { sendNotification } from './shared/emails/sendPostsNotification.resolver';
@@ -31,7 +31,7 @@ const initialize = async (): Promise<void> => {
 
 const sendAllNotifications = async (): Promise<void> => {
   await initialize();
-  const UserModel = getRepository(User);
+  const UserModel = getRepository(User, connectionName);
   for (const userData of await UserModel.find({
     select: ['id']
   })) {

@@ -5,12 +5,13 @@ import User, { PublicUser } from '../schema/users/user.entity';
 import { GraphQLContext } from '../utils/context';
 import { defaultDBCache } from '../utils/variables';
 import { keys } from 'ts-transformer-keys';
+import { connectionName } from '../db/connect';
 
 @Resolver(_of => MessageGroup)
 class MessageGroupsResolver implements ResolverInterface<MessageGroup> {
   @FieldResolver()
   async users(@Root() messageGroup: MessageGroup): Promise<PublicUser[]> {
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     const data = (await UserModel.find({
       where: {
         id: Any(messageGroup.userIDs)
@@ -24,7 +25,7 @@ class MessageGroupsResolver implements ResolverInterface<MessageGroup> {
 
   @FieldResolver()
   async groupData(@Root() messageGroup: MessageGroup, @Ctx() ctx: GraphQLContext): Promise<MessageGroupUser> {
-    const MessageGroupUserModel = getRepository(MessageGroupUser);
+    const MessageGroupUserModel = getRepository(MessageGroupUser, connectionName);
     const data = await MessageGroupUserModel.findOne({
       userID: ctx.auth!.id,
       groupID: messageGroup.id

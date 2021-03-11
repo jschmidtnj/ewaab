@@ -5,6 +5,7 @@ import { configData } from './config';
 import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
 import UserCode from '../schema/users/userCode.entity';
+import { connectionName } from '../db/connect';
 
 export const verifyJWTExpiration = '1h';
 
@@ -197,7 +198,7 @@ export const handleRefreshToken = (req: Request): Promise<string> => {
         let generateArgs: GenerateJWTArgs;
         let tokenVersion: number;
         if (data.type === UserType.visitor) {
-          const UserCodeModel = getRepository(UserCode);
+          const UserCodeModel = getRepository(UserCode, connectionName);
           const userCodeData = await UserCodeModel.findOne(data.id, {
             select: ['tokenVersion', 'id']
           });
@@ -211,7 +212,7 @@ export const handleRefreshToken = (req: Request): Promise<string> => {
             type: UserType.visitor
           };
         } else {
-          const UserModel = getRepository(User);
+          const UserModel = getRepository(User, connectionName);
           const user = await UserModel.findOne(data.id, {
             select: ['tokenVersion', 'id', 'type', 'emailVerified']
           });

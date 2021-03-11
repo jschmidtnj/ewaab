@@ -1,5 +1,6 @@
 import { GraphQLContext } from '../utils/context';
 import { configData } from '../utils/config';
+import { connectionName } from '../db/connect';
 import { getRepository } from 'typeorm';
 import Post, { PostType } from '../schema/posts/post.entity';
 import { UserType } from '../schema/users/user.entity';
@@ -78,7 +79,7 @@ export const checkPostAccess = async (args: CheckPostAccessArgs): Promise<boolea
     return true;
   }
   if (!args.postType || !args.publisher) {
-    const PostModel = getRepository(Post);
+    const PostModel = getRepository(Post, connectionName);
     const post = await PostModel.findOne(args.id, {
       select: ['type', 'publisher']
     });
@@ -120,7 +121,7 @@ export const checkMessageAccess = async (args: CheckMessageAccessArgs): Promise<
     return true;
   }
   if (!args.publisher || !args.group) {
-    const MessageModel = getRepository(Message);
+    const MessageModel = getRepository(Message, connectionName);
     const message = await MessageModel.findOne(args.messageID, {
       select: ['publisher', 'group']
     });
@@ -153,7 +154,7 @@ export const checkMessageGroupAccess = async (args: CheckMessageGroupAccessArgs)
     // admin can do anything
     return true;
   }
-  const MessageGroupModel = getRepository(MessageGroup);
+  const MessageGroupModel = getRepository(MessageGroup, connectionName);
   const messageGroup = await MessageGroupModel.findOne(args.id, {
     select: ['id', 'userIDs']
   });
@@ -183,7 +184,7 @@ export const checkNotificationAccess = async (args: CheckNotificationAccessArgs)
   if (!args.id) {
     throw new Error('notification id must be provided to check access');
   }
-  const NotificationModel = getRepository(Notification);
+  const NotificationModel = getRepository(Notification, connectionName);
   const notification = await NotificationModel.findOne(args.id);
   if (!notification) {
     throw new Error(`cannot find notification with id ${args.id}`);

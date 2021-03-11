@@ -11,6 +11,7 @@ import { getSecret, VerifyType } from '../utils/jwt';
 import { PasswordResetTokenData } from '../emails/sendPasswordReset.resolver';
 import { VerifyOptions, verify } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class PasswordResetArgs {
@@ -82,7 +83,7 @@ class PasswordResetResolver {
       throw new Error('invalid recaptcha token');
     }
     const passwordResetData = await decodePasswordReset(args.resetToken);
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     const hashedPassword = await argon2.hash(args.password);
     await UserModel.update({
       email: passwordResetData.email

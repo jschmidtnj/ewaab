@@ -26,6 +26,7 @@ import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import majors from '../shared/majors';
 import universities from '../shared/universities';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class UpdateArgs {
@@ -194,7 +195,7 @@ class UpdateAccountResolver {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
     const userUpdateData: QueryPartialEntity<User> = {};
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
 
     const currentUser = await UserModel.findOne(id, {
       select: ['name', 'avatar']
@@ -317,7 +318,7 @@ class UpdateAccountResolver {
         resumeReadStream.on('error', reject);
         resumeReadStream.on('end', () => {
           const buffer = Buffer.concat(data);
-          const MediaModel = getRepository(Media);
+          const MediaModel = getRepository(Media, connectionName);
           (async () => {
             if (currentUser.resume) {
               await deleteMedia(currentUser.resume);
@@ -369,7 +370,7 @@ class UpdateAccountResolver {
         avatarReadStream.on('error', reject);
         avatarReadStream.on('end', () => {
           const buffer = Buffer.concat(data);
-          const MediaModel = getRepository(Media);
+          const MediaModel = getRepository(Media, connectionName);
           (async () => {
             const newMedia = await MediaModel.save({
               id: uuidv4(),

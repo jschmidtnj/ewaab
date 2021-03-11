@@ -5,6 +5,7 @@ import MessageGroup from '../schema/users/messageGroup.entity';
 import { PaginationArgs } from '../schema/utils/pagination';
 import { GraphQLContext } from '../utils/context';
 import { defaultDBCache } from '../utils/variables';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 export class MessageGroupsArgs extends PaginationArgs {
@@ -12,7 +13,7 @@ export class MessageGroupsArgs extends PaginationArgs {
 }
 
 export const getMessageGroups = async (args: MessageGroupsArgs, userID: string): Promise<MessageGroup[]> => {
-  const MessageGroupModel = getRepository(MessageGroup);
+  const MessageGroupModel = getRepository(MessageGroup, connectionName);
   const data = await MessageGroupModel.createQueryBuilder('messageGroup')
     .where('messageGroup.userIDs @> :userIDs').setParameters({
       userIDs: [userID]

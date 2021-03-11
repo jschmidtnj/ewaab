@@ -17,6 +17,7 @@ import { s3Client, fileBucket, getMediaKey } from '../utils/aws';
 import { imageMime } from '../utils/misc';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class AddPostArgs {
@@ -63,7 +64,7 @@ export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Pr
       mediaReadStream.on('error', reject);
       mediaReadStream.on('end', () => {
         let buffer = Buffer.concat(data);
-        const MediaModel = getRepository(Media);
+        const MediaModel = getRepository(Media, connectionName);
         (async () => {
           const mediaID = uuidv4();
           let mediaType: MediaType;
@@ -131,7 +132,7 @@ class AddPostResolver {
       throw new Error(`user of type ${ctx.auth!.type} not authorized to post ${args.type}`);
     }
 
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     const currentUser = await UserModel.findOne(ctx.auth!.id, {
       select: ['name', 'avatar']
     });
@@ -142,7 +143,7 @@ class AddPostResolver {
     const id = uuidv4();
     const mediaID = await handlePostMedia(id, args.media);
 
-    const PostModel = getRepository(Post);
+    const PostModel = getRepository(Post, connectionName);
     const now = new Date().getTime();
     const searchPost: BaseSearchPost = {
       title: args.title,

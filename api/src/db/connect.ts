@@ -6,13 +6,16 @@ import { nanoid } from 'nanoid';
 
 const logger = getLogger();
 
+export let connectionName: string;
+
 export const initializeDB = async (dbConnectionURI: string): Promise<string> => {
   if (dbConnectionURI.length === 0) {
     throw new Error('cannot find database uri');
   }
+  connectionName = `pg-connect-${nanoid()}`;
   const connection = await createConnection({
     url: dbConnectionURI,
-    name: `pg-connect-${nanoid()}`,
+    name: connectionName,
     type: 'postgres',
     entities: [join(__dirname, '../**/*.entity.{ts,js}')],
     synchronize: true

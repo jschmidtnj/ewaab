@@ -17,6 +17,7 @@ import { bulkWriteToElastic } from './elastic';
 import { WriteType } from './writeType';
 import { removeKeys } from '../utils/misc';
 import { keys } from 'ts-transformer-keys';
+import { connectionName } from '../db/connect';
 
 const logger = getLogger();
 
@@ -62,7 +63,7 @@ const initializeMapping = async (indexName: string, indexSettings: Record<string
 export const initializeMappings = async (): Promise<string> => {
   // users
   await initializeMapping(settings.userIndexName, settings.userIndexSettings, userMappings, settings.userType);
-  const UserModel = getRepository(User);
+  const UserModel = getRepository(User, connectionName);
   const users: BaseSearchUser[] = (await UserModel.find({
     select: keys<BaseSearchUser>()
   }));
@@ -77,7 +78,7 @@ export const initializeMappings = async (): Promise<string> => {
 
   // posts
   await initializeMapping(settings.postIndexName, settings.postIndexSettings, postMappings, settings.postType);
-  const PostModel = getRepository(Post);
+  const PostModel = getRepository(Post, connectionName);
   const posts: BaseSearchPost[] = (await PostModel.find({
     select: keys<BaseSearchPost>()
   }));
@@ -92,7 +93,7 @@ export const initializeMappings = async (): Promise<string> => {
 
   // comments
   await initializeMapping(settings.commentIndexName, settings.commentIndexSettings, commentMappings, settings.commentType);
-  const CommentModel = getRepository(Comment);
+  const CommentModel = getRepository(Comment, connectionName);
   const comments: BaseSearchComment[] = (await CommentModel.find({
     select: keys<BaseSearchComment>()
   }));
@@ -107,7 +108,7 @@ export const initializeMappings = async (): Promise<string> => {
 
   // messages
   await initializeMapping(settings.messageIndexName, settings.messageIndexSettings, messageMappings, settings.messageType);
-  const MessageModel = getRepository(Message);
+  const MessageModel = getRepository(Message, connectionName);
   const messages: BaseSearchMessage[] = (await MessageModel.find({
     select: keys<BaseSearchMessage>()
   }));

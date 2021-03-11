@@ -9,6 +9,7 @@ import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import Message, { BaseSearchMessage } from '../schema/users/message.entity';
 import User from '../schema/users/user.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class SendMessageArgs {
@@ -37,14 +38,14 @@ class SendMessageResolver {
       throw new Error('user cannot message themselves');
     }
 
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     if (await UserModel.count({
       id: args.group
     }) === 0) {
       throw new Error(`no user found with id ${args.group}`);
     }
 
-    const MessageModel = getRepository(Message);
+    const MessageModel = getRepository(Message, connectionName);
     const now = new Date().getTime();
     const searchMessage: BaseSearchMessage = {
       content: args.content,

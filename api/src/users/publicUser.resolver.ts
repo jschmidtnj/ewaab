@@ -6,6 +6,7 @@ import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { getRepository } from 'typeorm';
 import { keys } from 'ts-transformer-keys';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class PublicUserArgs {
@@ -24,7 +25,7 @@ class PublicUserResolver {
       throw new Error('user must be logged in to view public user data');
     }
     let user: PublicUser | undefined;
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     if (args.id) {
       user = await UserModel.findOne(args.id, {
         select: keys<PublicUser>()

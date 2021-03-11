@@ -3,6 +3,7 @@ import { Resolver, Ctx, Query, ArgsType, Field, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
 import { getRepository } from 'typeorm';
 import Comment from '../schema/posts/comment.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class CommentArgs {
@@ -17,7 +18,7 @@ class CommentResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
-    const CommentModel = getRepository(Comment);
+    const CommentModel = getRepository(Comment, connectionName);
     const comment = await CommentModel.findOne(args.id);
     if (!comment) {
       throw new Error(`cannot find comment with id ${args.id}`);

@@ -9,6 +9,7 @@ import statusCodes from 'http-status-codes';
 import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
 import User from '../schema/users/user.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class VerifyEmailArgs {
@@ -58,7 +59,7 @@ class VerifyEmailResolver {
   @Mutation(_returns => String)
   async verifyEmail(@Args() args: VerifyEmailArgs): Promise<string> {
     const verificationData = await decodeVerify(args.token);
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     const user = await UserModel.findOne(verificationData.id, {
       select: ['id', 'email', 'emailVerified']
     });

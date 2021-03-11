@@ -8,6 +8,7 @@ import { GraphQLContext } from '../utils/context';
 import UserCode from '../schema/users/userCode.entity';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { generate } from 'generate-password';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class NewUserCodeArgs {
@@ -37,7 +38,7 @@ class UserCodeResolver {
     if (!verifyAdmin(ctx, args.executeAdmin)) {
       throw new Error('user must be admin');
     }
-    const UserCodeModel = getRepository(UserCode);
+    const UserCodeModel = getRepository(UserCode, connectionName);
     const id = uuidv4();
     const password = generate({
       length: 30,
@@ -61,7 +62,7 @@ class UserCodeResolver {
     if (!verifyAdmin(ctx) || !ctx.auth) {
       throw new Error('user must be admin');
     }
-    const UserCodeModel = getRepository(UserCode);
+    const UserCodeModel = getRepository(UserCode, connectionName);
     const userCodes = await UserCodeModel.find();
     return userCodes;
   }
@@ -71,7 +72,7 @@ class UserCodeResolver {
     if (!verifyAdmin(ctx) || !ctx.auth) {
       throw new Error('user must be admin');
     }
-    const UserCodeModel = getRepository(UserCode);
+    const UserCodeModel = getRepository(UserCode, connectionName);
     if (await UserCodeModel.count({
       id: args.id
     }) === 0) {

@@ -15,6 +15,7 @@ import { getPublisherData } from '../posts/searchResults.resolver';
 import { Converter } from 'showdown';
 import { generateJWTMediaAccess } from '../utils/jwt';
 import { sanitize } from '../utils/sanitizeHTML';
+import { connectionName } from '../db/connect';
 
 const logger = getLogger();
 
@@ -34,7 +35,7 @@ const getAvatarURL = (avatar: string | null | undefined, authToken?: string): st
 };
 
 export const sendNotification = async (id: string): Promise<string> => {
-  const UserModel = getRepository(User);
+  const UserModel = getRepository(User, connectionName);
   const userData = await UserModel.findOne(id, {
     select: ['id', 'name', 'username', 'avatar', 'email', 'type']
   });

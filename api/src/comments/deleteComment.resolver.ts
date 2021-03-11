@@ -12,6 +12,7 @@ import Post from '../schema/posts/post.entity';
 import esb from 'elastic-builder';
 import { deleteReactions } from '../reactions/deleteReaction.resolver';
 import { ReactionParentType } from '../schema/reactions/reaction.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class DeleteArgs {
@@ -29,7 +30,7 @@ class DeleteCommentResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('cannot find auth data');
     }
-    const CommentModel = getRepository(Comment);
+    const CommentModel = getRepository(Comment, connectionName);
     const commentData = await CommentModel.findOne(id, {
       select: ['id', 'publisher', 'post']
     });
@@ -52,7 +53,7 @@ class DeleteCommentResolver {
 
     const updateCommentsScript = esb.script('source', 'ctx._source.commentCount--').lang('painless');
 
-    const PostModel = getRepository(Post);
+    const PostModel = getRepository(Post, connectionName);
     await PostModel.decrement({
       id: commentData.post
     }, 'commentCount', 1);

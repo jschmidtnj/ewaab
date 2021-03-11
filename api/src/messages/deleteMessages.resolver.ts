@@ -10,6 +10,7 @@ import { bulkWriteToElastic } from '../elastic/elastic';
 import { WriteType } from '../elastic/writeType';
 import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
 import { arrayHash } from '../utils/misc';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 export class DeleteArgs {
@@ -21,7 +22,7 @@ export class DeleteArgs {
 }
 
 export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise<void> => {
-  const MessageModel = getRepository(Message);
+  const MessageModel = getRepository(Message, connectionName);
   const messages = await MessageModel.find({
     select: ['id'],
     where: {
@@ -43,7 +44,7 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
     await MessageModel.delete(messageData.id);
   }
 
-  const MessageGroupModel = getRepository(MessageGroup);
+  const MessageGroupModel = getRepository(MessageGroup, connectionName);
 
   // if there's no sender, the whole group gets deleted
   let deleteMessageGroup = !sender;
@@ -72,7 +73,7 @@ export const deleteMessages = async (args: DeleteArgs, sender?: string): Promise
   }
 
   if (deleteMessageGroup) {
-    const MessageGroupUserModel = getRepository(MessageGroupUser);
+    const MessageGroupUserModel = getRepository(MessageGroupUser, connectionName);
     for (const messageGroupUserData of await MessageGroupUserModel.find({
       where: {
         groupID: args.group

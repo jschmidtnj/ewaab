@@ -9,6 +9,7 @@ import { uuidRegex } from '../shared/variables';
 import { GraphQLContext, SubscriptionContext } from '../utils/context';
 import { deleteNotificationQueue } from '../utils/redis';
 import { defaultDBCache, notificationTopic } from '../utils/variables';
+import { connectionName } from '../db/connect';
 
 const expiresIn = 7; // days
 
@@ -19,7 +20,7 @@ export class NotificationsArgs extends PaginationArgs {
 
 export const getNotifications = async (args: NotificationsArgs, userID: string):
   Promise<Notification[]> => {
-  const NotificationModel = getRepository(Notification);
+  const NotificationModel = getRepository(Notification, connectionName);
   const data = await NotificationModel.find({
     where: {
       user: userID
@@ -38,7 +39,7 @@ class AddNotificationArgs {
 }
 
 export const addNotification = async (args: AddNotificationArgs, user: string, type: NotificationType): Promise<void> => {
-  const NotificationModel = getRepository(Notification);
+  const NotificationModel = getRepository(Notification, connectionName);
   const now = new Date();
   const expires = new Date();
   expires.setDate(now.getDate() + expiresIn);
@@ -65,7 +66,7 @@ class DeleteArgs {
 }
 
 export const deleteNotification = async (args: DeleteArgs): Promise<void> => {
-  const NotificationModel = getRepository(Notification);
+  const NotificationModel = getRepository(Notification, connectionName);
   await NotificationModel.delete(args.id);
 };
 
@@ -98,7 +99,7 @@ class NotificationsResolver {
     }))) {
       throw new Error('current user does not have access to send new global notification');
     }
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     for (const user of await UserModel.find({
       select: ['id']
     })) {
@@ -129,7 +130,7 @@ class NotificationsResolver {
     }))) {
       throw new Error(`current user does not have access to mark notification ${args.id} as read`);
     }
-    const NotificationModel = getRepository(Notification);
+    const NotificationModel = getRepository(Notification, connectionName);
     await NotificationModel.update({
       id: args.id
     }, {

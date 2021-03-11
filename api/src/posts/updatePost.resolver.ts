@@ -15,6 +15,7 @@ import { ApolloError } from 'apollo-server-express';
 import { deleteMedia } from '../users/media.resolver';
 import { handlePostMedia } from './addPost.resolver';
 import { removeKeys } from '../utils/misc';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class UpdatePostArgs {
@@ -65,7 +66,7 @@ class UpdatePostResolver {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
 
-    const PostModel = getRepository(Post);
+    const PostModel = getRepository(Post, connectionName);
     const postData = await PostModel.findOne(args.id, {
       select: ['id', 'publisher', 'media']
     });

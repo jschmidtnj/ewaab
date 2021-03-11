@@ -9,6 +9,7 @@ import { setCookies } from '../utils/cookies';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { getRepository } from 'typeorm';
 import UserCode from '../schema/users/userCode.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class LoginVisitorArgs {
@@ -29,7 +30,7 @@ class LoginResolvers {
     if (!(await verifyRecaptcha(args.recaptchaToken))) {
       throw new Error('invalid recaptcha token');
     }
-    const UserCodeModel = getRepository(UserCode);
+    const UserCodeModel = getRepository(UserCode, connectionName);
     const codeSplit = args.code.split(':');
     if (codeSplit.length !== 2) {
       throw new Error('invalid code provided');

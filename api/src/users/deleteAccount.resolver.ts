@@ -11,6 +11,7 @@ import { userIndexName } from '../elastic/settings';
 import { deleteMessages } from '../messages/deleteMessages.resolver';
 import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
 import { defaultDBCache } from '../utils/variables';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 class DeleteArgs {
@@ -39,7 +40,7 @@ class DeleteResolver {
         throw new Error('user not logged in');
       }
     }
-    const UserModel = getRepository(User);
+    const UserModel = getRepository(User, connectionName);
     let userFindRes: User | undefined;
     const findOptions: FindOneOptions<User> = {
       select: ['id']
@@ -55,7 +56,7 @@ class DeleteResolver {
       throw new Error('no user found');
     }
 
-    const MessageGroupModel = getRepository(MessageGroup);
+    const MessageGroupModel = getRepository(MessageGroup, connectionName);
     const messageGroups = await MessageGroupModel.createQueryBuilder('messageGroup')
       .where('messageGroup.userIDs @> :userIDs').setParameters({
         userIDs: [userFindRes.id]
@@ -68,7 +69,7 @@ class DeleteResolver {
       }
     }
 
-    const MessageGroupUserModel = getRepository(MessageGroupUser);
+    const MessageGroupUserModel = getRepository(MessageGroupUser, connectionName);
     for (const messageGroupUserData of await MessageGroupUserModel.find({
       where: {
         userID: userFindRes.id

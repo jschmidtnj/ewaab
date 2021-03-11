@@ -3,6 +3,7 @@ import { Resolver, Ctx, Query, ArgsType, Field, Args } from 'type-graphql';
 import { GraphQLContext } from '../utils/context';
 import { getRepository } from 'typeorm';
 import Post from '../schema/posts/post.entity';
+import { connectionName } from '../db/connect';
 
 @ArgsType()
 export class PostArgs {
@@ -17,7 +18,7 @@ class PostResolver {
     if (!verifyLoggedIn(ctx) || !ctx.auth) {
       throw new Error('user not logged in');
     }
-    const PostModel = getRepository(Post);
+    const PostModel = getRepository(Post, connectionName);
     const post = await PostModel.findOne(args.id);
     if (!post) {
       throw new Error(`cannot find post with id ${args.id}`);
