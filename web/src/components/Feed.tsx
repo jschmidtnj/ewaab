@@ -94,7 +94,10 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
   );
   const [currentPage, setCurrentPage] = useState<number>(0);
 
-  const runQuery = async (useCache = !isDebug()): Promise<void> => {
+  const runQuery = async (
+    useCache = !isDebug(),
+    init = false
+  ): Promise<void> => {
     try {
       const res = await client.query<PostsQuery, PostsQueryVariables>({
         query: Posts,
@@ -109,6 +112,9 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
       });
       if (res.errors) {
         throw new Error(res.errors.join(', '));
+      }
+      if (init) {
+        await sleep(50);
       }
       setPosts(res);
     } catch (err) {
@@ -141,7 +147,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
 
   useEffect(() => {
     (async () => {
-      await runQuery();
+      await runQuery(!isDebug(), true);
     })();
   }, []);
 

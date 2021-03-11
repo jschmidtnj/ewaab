@@ -27,6 +27,7 @@ import majors from 'shared/majors';
 import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
 import Avatar from 'components/Avatar';
 import PrivateRoute from 'components/PrivateRoute';
+import sleep from 'shared/sleep';
 
 const avatarWidth = 40;
 
@@ -89,7 +90,10 @@ const UsersPage: FunctionComponent = () => {
 
   const [defaultQuery, setDefaultQuery] = useState<string>('');
 
-  const runQuery = async (variables: UsersQueryVariables): Promise<void> => {
+  const runQuery = async (
+    variables: UsersQueryVariables,
+    init = false
+  ): Promise<void> => {
     if (variables.majors?.length === 0) {
       variables.majors = undefined;
     }
@@ -104,6 +108,9 @@ const UsersPage: FunctionComponent = () => {
     });
     if (res.errors) {
       throw new Error(res.errors.join(', '));
+    }
+    if (init) {
+      await sleep(50);
     }
     setUsers(res);
   };
@@ -131,7 +138,7 @@ const UsersPage: FunctionComponent = () => {
     }
     (async () => {
       try {
-        await runQuery(initialValues);
+        await runQuery(initialValues, true);
       } catch (err) {
         // console.log(JSON.stringify(err));
         toast((err as ApolloError).message, {
@@ -340,7 +347,7 @@ const UsersPage: FunctionComponent = () => {
           {!users ||
           users.loading ||
           !users.data ||
-          !formRef.current ||
+          !formRef?.current ||
           users.data.users.results.length === 0 ? (
             <p className="text-md pt-4">No users found</p>
           ) : (
@@ -429,10 +436,7 @@ const UsersPage: FunctionComponent = () => {
                                 formRef.current.values.page - 1
                               );
                             }}
-                            disabled={
-                              formRef?.current &&
-                              formRef.current.values.page === 0
-                            }
+                            disabled={formRef.current.values.page === 0}
                           >
                             Prev
                           </button>
@@ -446,11 +450,10 @@ const UsersPage: FunctionComponent = () => {
                               );
                             }}
                             disabled={
-                              formRef?.current &&
                               formRef.current.values.page *
                                 formRef.current.values.perpage +
                                 users.data.users.results.length ===
-                                users.data.users.count
+                              users.data.users.count
                             }
                           >
                             Next

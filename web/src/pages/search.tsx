@@ -49,7 +49,8 @@ const SearchPage: FunctionComponent = () => {
 
   const runQuery = async (
     variables: PostsQueryVariables,
-    useCache = !isDebug()
+    useCache = !isDebug(),
+    init = false
   ): Promise<void> => {
     if (variables.query?.length === 0) {
       variables.query = undefined;
@@ -61,6 +62,9 @@ const SearchPage: FunctionComponent = () => {
     });
     if (res.errors) {
       throw new Error(res.errors.join(', '));
+    }
+    if (init) {
+      await sleep(50);
     }
     setPosts(res);
   };
@@ -108,7 +112,7 @@ const SearchPage: FunctionComponent = () => {
     }
     (async () => {
       try {
-        await runQuery(initialValues);
+        await runQuery(initialValues, !isDebug(), true);
       } catch (err) {
         // console.log(JSON.stringify(err));
         toast((err as ApolloError).message, {
@@ -270,7 +274,7 @@ const SearchPage: FunctionComponent = () => {
               </form>
             )}
           </Formik>
-          {!writePostModalIsOpen ? null : (
+          {!writePostModalIsOpen || !formRef?.current ? null : (
             <WritePostModal
               toggleModal={toggleWritePost}
               postType={
@@ -294,7 +298,7 @@ const SearchPage: FunctionComponent = () => {
                   {!posts ||
                   posts.loading ||
                   !posts.data ||
-                  !formRef.current ? null : (
+                  !formRef?.current ? null : (
                     <div className="lg:ml-12 lg:w-64 col-start-1 col-span-2 mb-4 rounded-lg">
                       <ul className="flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md">
                         {posts.data.posts.postCounts.map((countData, i) => (
@@ -383,7 +387,7 @@ const SearchPage: FunctionComponent = () => {
                   )}
 
                   <div className="col-span-3 lg:mx-4">
-                    {!posts || posts.loading || !formRef.current ? (
+                    {!posts || posts.loading || !formRef?.current ? (
                       <p className="text-md pt-4">Loading...</p>
                     ) : !posts.data || posts.data.posts.results.length === 0 ? (
                       <p className="text-md pt-4">No posts found</p>
