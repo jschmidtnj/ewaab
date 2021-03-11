@@ -44,6 +44,6 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: us-east-1
           function_name: ewaab-send-post-notifications
-          zip_file: aws/lambda/update-sitemap/dist.zip
+          zip_file: aws/lambda/send-post-notifications/dist.zip
       - name: finish
         run: echo "finished!"
