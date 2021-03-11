@@ -14,9 +14,9 @@ mkdir "$dist_folder"
 cp package.json "$dist_folder"
 cp yarn.lock "$dist_folder"
 
-count=`ls -1 .*.yml 2>/dev/null | wc -l`
-if [ $count != 0 ]
-then 
+zip_count=`ls -1 .*.yml 2>/dev/null | wc -l`
+if [ "$zip_count" != 0 ]
+then
   cp .*.yml "$dist_folder"
 fi 
 
@@ -25,6 +25,10 @@ cp -R lib/* "$dist_folder"
 cd "$dist_folder"
 yarn install --prod
 zip -r "$output" *
+if [ "$zip_count" != 0 ]
+then
+  zip -r "$output" .*.yml
+fi 
 mv "$output" ..
 
 cd -
