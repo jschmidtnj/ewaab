@@ -18,6 +18,13 @@
         "arn:aws:s3:::ewaab-files",
         "arn:aws:s3:::ewaab-files/*"
       ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ses:*"
+      ],
+      "Resource": "*"
     }
   ]
 }

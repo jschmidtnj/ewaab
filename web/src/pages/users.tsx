@@ -340,6 +340,7 @@ const UsersPage: FunctionComponent = () => {
           {!users ||
           users.loading ||
           !users.data ||
+          !formRef.current ||
           users.data.users.results.length === 0 ? (
             <p className="text-md pt-4">No users found</p>
           ) : (

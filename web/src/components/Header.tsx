@@ -184,14 +184,14 @@ const Header: FunctionComponent = () => {
                 <h1 className="hidden ml-4 text-2xl">EWAAB</h1>
               </a>
             </Link>
-            <div className="hidden md:flex ml-14">
+            <div className="hidden md:flex ml-8">
               <div className="mt-auto mb-auto">{allPathElements}</div>
             </div>
           </div>
           {loggedIn ? (
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
               <span className="sr-only">Open user menu</span>
-              <div className="ml-3 relative">
+              <div className="relative">
                 <div>
                   <button
                     onClick={(evt) => {
