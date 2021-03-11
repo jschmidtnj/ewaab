@@ -2,6 +2,7 @@ import { createConnection } from 'typeorm';
 import exitHook from 'exit-hook';
 import { getLogger } from 'log4js';
 import { join } from 'path';
+import { nanoid } from 'nanoid';
 
 const logger = getLogger();
 
@@ -11,6 +12,7 @@ export const initializeDB = async (dbConnectionURI: string): Promise<string> => 
   }
   const connection = await createConnection({
     url: dbConnectionURI,
+    name: `pg-connect-${nanoid()}`,
     type: 'postgres',
     entities: [join(__dirname, '../**/*.entity.{ts,js}')],
     synchronize: true
