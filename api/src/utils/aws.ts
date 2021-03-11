@@ -75,18 +75,13 @@ export const initializeAWS = async (): Promise<void> => {
 
   AWS.config = new AWS.Config();
 
-  let setCredentials = false;
-  if (configData.AWS_ACCESS_KEY_ID.length === 0 && !isProduction()) {
-    throw new Error('no aws access key id provided');
-  } else if (configData.AWS_ACCESS_KEY_ID.length > 0) {
-    setCredentials = true;
-  }
-  if (configData.AWS_SECRET_ACCESS_KEY.length === 0 && !isProduction()) {
-    throw new Error('no aws secret access key provided');
-  } else if (configData.AWS_SECRET_ACCESS_KEY.length > 0) {
-    setCredentials = true;
-  }
-  if (setCredentials) {
+  if (!isProduction()) {
+    if (configData.AWS_ACCESS_KEY_ID.length === 0) {
+      throw new Error('no aws access key id provided');
+    }
+    if (configData.AWS_SECRET_ACCESS_KEY.length === 0) {
+      throw new Error('no aws secret access key provided');
+    }
     AWS.config.credentials = new AWS.Credentials({
       accessKeyId: configData.AWS_ACCESS_KEY_ID,
       secretAccessKey: configData.AWS_SECRET_ACCESS_KEY

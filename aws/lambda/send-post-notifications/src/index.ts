@@ -39,12 +39,11 @@ const sendAllNotifications = async (): Promise<void> => {
   }
 };
 
-export const handler: EventBridgeHandler<string, null, void> = async (_event, _context, callback): Promise<void> => {
+export const handler: EventBridgeHandler<string, null, string> = async (_event, _context, _callback): Promise<string> => {
   await initializeConfig(appName);
   initializeLogger();
   await sendAllNotifications();
-  callback();
-  process.exit(0);
+  return 'finished sending all email notifications';
 };
 
 const sendPostsNotifications = async (): Promise<void> => {
