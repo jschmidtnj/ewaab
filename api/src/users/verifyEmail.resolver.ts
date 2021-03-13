@@ -22,19 +22,13 @@ class VerifyEmailArgs {
 
 export const decodeVerify = (token: string): Promise<VerifyTokenData> => {
   return new Promise((resolve, reject) => {
-    let secret: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-    } catch (err) {
-      const errObj = err as Error;
-      reject(new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`));
-      return;
-    }
-    const jwtConfig: VerifyOptions = {
-      algorithms: ['HS256']
-    };
-    verify(token, secret, jwtConfig, (err, res: any) => {
-      try {
+      const secret = getSecret(loginType.LOCAL);
+
+      const jwtConfig: VerifyOptions = {
+        algorithms: ['HS256']
+      };
+      verify(token, secret, jwtConfig, (err, res: any) => {
         if (err) {
           const errObj = err as Error;
           throw new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`);
@@ -47,10 +41,11 @@ export const decodeVerify = (token: string): Promise<VerifyTokenData> => {
           throw new ApolloError(`invalid verify type ${type} provided`, `${statusCodes.BAD_REQUEST}`);
         }
         resolve(res as VerifyTokenData);
-      } catch (err) {
-        reject(err);
-      }
-    });
+      });
+    } catch (err) {
+      const errObj = err as Error;
+      reject(new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`));
+    }
   });
 };
 

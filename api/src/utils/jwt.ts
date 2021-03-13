@@ -71,31 +71,27 @@ interface GenerateJWTArgs {
 
 export const generateJWTAccess = (args: GenerateJWTArgs): Promise<string> => {
   return new Promise(async (resolve, reject) => {
-    let secret: string;
-    let jwtIssuer: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-      jwtIssuer = getJWTIssuer();
+      const secret = getSecret(loginType.LOCAL);
+      const jwtIssuer = getJWTIssuer();
+      const authData: JWTAuthData = {
+        id: args.id,
+        type: args.type,
+        emailVerified: args.emailVerified
+      };
+      const signOptions: SignOptions = {
+        issuer: jwtIssuer,
+        expiresIn: accessJWTExpiration
+      };
+      sign(authData, secret, signOptions, (err, token) => {
+        if (err) {
+          throw err as Error;
+        }
+        resolve(token as string);
+      });
     } catch (err) {
       reject(err as Error);
-      return;
     }
-    const authData: JWTAuthData = {
-      id: args.id,
-      type: args.type,
-      emailVerified: args.emailVerified
-    };
-    const signOptions: SignOptions = {
-      issuer: jwtIssuer,
-      expiresIn: accessJWTExpiration
-    };
-    sign(authData, secret, signOptions, (err, token) => {
-      if (err) {
-        reject(err as Error);
-      } else {
-        resolve(token as string);
-      }
-    });
   });
 };
 
@@ -114,83 +110,69 @@ interface GenerateJWTMediaArgs {
 
 export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs, expiration?: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    let secret: string;
-    let jwtIssuer: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-      jwtIssuer = getJWTIssuer();
+      const secret = getSecret(loginType.LOCAL);
+      const jwtIssuer = getJWTIssuer();
+      const authData: MediaAccessTokenData = {
+        id: args.id,
+        userType: args.type,
+        type: MediaAccessType.media,
+        media: args.media
+      };
+      const signOptions: SignOptions = {
+        issuer: jwtIssuer,
+        expiresIn: expiration
+      };
+      sign(authData, secret, signOptions, (err, token) => {
+        if (err) {
+          throw err as Error;
+        }
+        resolve(token as string);
+      });
     } catch (err) {
       reject(err as Error);
-      return;
     }
-    const authData: MediaAccessTokenData = {
-      id: args.id,
-      userType: args.type,
-      type: MediaAccessType.media,
-      media: args.media
-    };
-    const signOptions: SignOptions = {
-      issuer: jwtIssuer,
-      expiresIn: expiration
-    };
-    sign(authData, secret, signOptions, (err, token) => {
-      if (err) {
-        reject(err as Error);
-      } else {
-        resolve(token as string);
-      }
-    });
   });
 };
 
 export const generateJWTRefresh = (authData: RefreshTokenData): Promise<string> => {
   return new Promise((resolve, reject) => {
-    let secret: string;
-    let jwtIssuer: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-      jwtIssuer = getJWTIssuer();
+      const secret = getSecret(loginType.LOCAL);
+      const jwtIssuer = getJWTIssuer();
+      const signOptions: SignOptions = {
+        issuer: jwtIssuer,
+        expiresIn: refreshJWTExpiration
+      };
+      sign({
+        ...authData
+      }, secret, signOptions, (err, token) => {
+        if (err) {
+          throw err as Error;
+        }
+        resolve(token as string);
+      });
     } catch (err) {
       reject(err as Error);
-      return;
     }
-    const signOptions: SignOptions = {
-      issuer: jwtIssuer,
-      expiresIn: refreshJWTExpiration
-    };
-    sign({
-      ...authData
-    }, secret, signOptions, (err, token) => {
-      if (err) {
-        reject(err as Error);
-      } else {
-        resolve(token as string);
-      }
-    });
   });
 };
 
 export const handleRefreshToken = (req: Request): Promise<string> => {
   return new Promise((resolve, reject) => {
-    if (!req.cookies) {
-      throw new Error('no cookies found');
-    }
-    const token = req.cookies.refreshToken as string | undefined;
-    if (!token || token.length === 0) {
-      throw new Error('no token provided');
-    }
-    let secret: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-    } catch (err) {
-      reject(err as Error);
-      return;
-    }
-    const jwtConfig: VerifyOptions = {
-      algorithms: ['HS256']
-    };
-    verify(token, secret, jwtConfig, async (err, res) => {
-      try {
+      if (!req.cookies) {
+        throw new Error('no cookies found');
+      }
+      const token = req.cookies.refreshToken as string | undefined;
+      if (!token || token.length === 0) {
+        throw new Error('no token provided');
+      }
+      const secret = getSecret(loginType.LOCAL);
+      const jwtConfig: VerifyOptions = {
+        algorithms: ['HS256']
+      };
+      verify(token, secret, jwtConfig, async (err, res) => {
         if (err) {
           throw err as Error;
         }
@@ -230,11 +212,10 @@ export const handleRefreshToken = (req: Request): Promise<string> => {
           throw new Error('invalid token version');
         }
         resolve(await generateJWTAccess(generateArgs));
-      } catch (err) {
-        const errObj = err as Error;
-        reject(errObj);
-      }
-    });
+      });
+    } catch (err) {
+      reject(err as Error);
+    }
   });
 };
 
@@ -251,25 +232,20 @@ export const decodeAuth = (type: loginType, token: string): Promise<AuthData> =>
         throw new Error('invalid type for jwt');
       }
       verify(token, secret, jwtConfig, async (err, res: any) => {
-        try {
-          if (err) {
-            throw err as Error;
-          }
-          let data: AuthData;
-          if (type === loginType.LOCAL) {
-            const inputData = res as JWTAuthData;
-            data = {
-              ...inputData,
-              loginType: type,
-            };
-          } else {
-            throw new Error('invalid type for jwt in verify');
-          }
-          resolve(data);
-        } catch (err) {
-          const errObj = err as Error;
-          reject(errObj);
+        if (err) {
+          throw err as Error;
         }
+        let data: AuthData;
+        if (type === loginType.LOCAL) {
+          const inputData = res as JWTAuthData;
+          data = {
+            ...inputData,
+            loginType: type,
+          };
+        } else {
+          throw new Error('invalid type for jwt in verify');
+        }
+        resolve(data);
       });
     } catch (err) {
       const errObj = err as Error;

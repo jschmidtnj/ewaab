@@ -77,48 +77,38 @@ export interface VerifyTokenData {
 
 export const generateJWTVerifyEmail = (userID: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    let secret: string;
-    let jwtIssuer: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-      jwtIssuer = getJWTIssuer();
+      const secret = getSecret(loginType.LOCAL);
+      const jwtIssuer = getJWTIssuer();
+      const authData: VerifyTokenData = {
+        id: userID,
+        type: VerifyType.verify
+      };
+      const signOptions: SignOptions = {
+        issuer: jwtIssuer,
+        expiresIn: verifyJWTExpiration
+      };
+      sign(authData, secret, signOptions, (err, token) => {
+        if (err) {
+          throw err as Error;
+        }
+        resolve(token as string);
+      });
     } catch (err) {
       reject(err as Error);
-      return;
     }
-    const authData: VerifyTokenData = {
-      id: userID,
-      type: VerifyType.verify
-    };
-    const signOptions: SignOptions = {
-      issuer: jwtIssuer,
-      expiresIn: verifyJWTExpiration
-    };
-    sign(authData, secret, signOptions, (err, token) => {
-      if (err) {
-        reject(err as Error);
-      } else {
-        resolve(token as string);
-      }
-    });
   });
 };
 
 export const decodeInvite = (token: string): Promise<InviteUserTokenData> => {
   return new Promise((resolve, reject) => {
-    let secret: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-    } catch (err) {
-      const errObj = err as Error;
-      reject(new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`));
-      return;
-    }
-    const jwtConfig: VerifyOptions = {
-      algorithms: ['HS256']
-    };
-    verify(token, secret, jwtConfig, (err, res: any) => {
-      try {
+      const secret = getSecret(loginType.LOCAL);
+
+      const jwtConfig: VerifyOptions = {
+        algorithms: ['HS256']
+      };
+      verify(token, secret, jwtConfig, (err, res: any) => {
         if (err) {
           const errObj = err as Error;
           throw new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`);
@@ -131,10 +121,11 @@ export const decodeInvite = (token: string): Promise<InviteUserTokenData> => {
           throw new ApolloError(`invalid verify type ${type} provided`, `${statusCodes.BAD_REQUEST}`);
         }
         resolve(res as InviteUserTokenData);
-      } catch (err) {
-        reject(err);
-      }
-    });
+      });
+    } catch (err) {
+      const errObj = err as Error;
+      reject(new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`));
+    }
   });
 };
 

@@ -31,30 +31,26 @@ export interface PasswordResetTokenData {
 
 export const generateJWTPasswordReset = (email: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    let secret: string;
-    let jwtIssuer: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-      jwtIssuer = getJWTIssuer();
+      const secret = getSecret(loginType.LOCAL);
+      const jwtIssuer = getJWTIssuer();
+      const authData: PasswordResetTokenData = {
+        email,
+        type: VerifyType.resetPassword
+      };
+      const signOptions: SignOptions = {
+        issuer: jwtIssuer,
+        expiresIn: verifyJWTExpiration
+      };
+      sign(authData, secret, signOptions, (err, token) => {
+        if (err) {
+          throw err as Error;
+        }
+        resolve(token as string);
+      });
     } catch (err) {
       reject(err as Error);
-      return;
     }
-    const authData: PasswordResetTokenData = {
-      email,
-      type: VerifyType.resetPassword
-    };
-    const signOptions: SignOptions = {
-      issuer: jwtIssuer,
-      expiresIn: verifyJWTExpiration
-    };
-    sign(authData, secret, signOptions, (err, token) => {
-      if (err) {
-        reject(err as Error);
-      } else {
-        resolve(token as string);
-      }
-    });
   });
 };
 

@@ -428,14 +428,14 @@ type Mutation {
   ): String!
   updateComment(
     """comment content"""
-    content: String
+    content: String!
 
     """post id"""
     id: String!
   ): String!
   updateMessage(
     """message content"""
-    content: String
+    content: String!
 
     """post id"""
     id: String!

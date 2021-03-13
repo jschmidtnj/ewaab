@@ -15,35 +15,28 @@ import { mediaCookieName } from '../utils/cookies';
 
 export const decodeMediaAuth = (token: string): Promise<MediaAccessTokenData> => {
   return new Promise((resolve, reject) => {
-    let secret: string;
     try {
-      secret = getSecret(loginType.LOCAL);
-    } catch (err) {
-      const errObj = err as Error;
-      reject(new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`));
-      return;
-    }
-    const jwtConfig: VerifyOptions = {
-      algorithms: ['HS256']
-    };
-    verify(token, secret, jwtConfig, (err, res: any) => {
-      try {
+      const secret = getSecret(loginType.LOCAL);
+      const jwtConfig: VerifyOptions = {
+        algorithms: ['HS256']
+      };
+      verify(token, secret, jwtConfig, (err, res: any) => {
         if (err) {
-          const errObj = err as Error;
-          throw new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`);
+          throw err as Error;
         }
         if (!('type' in res)) {
-          throw new ApolloError('no type provided', `${statusCodes.BAD_REQUEST}`);
+          throw new Error('no type provided');
         }
         const type: MediaAccessType = res.type;
         if (type !== MediaAccessType.media) {
-          throw new ApolloError(`invalid media type ${type} provided`, `${statusCodes.BAD_REQUEST}`);
+          throw new Error(`invalid media type ${type} provided`);
         }
         resolve(res as MediaAccessTokenData);
-      } catch (err) {
-        reject(err);
-      }
-    });
+      });
+    } catch (err) {
+      const errObj = err as Error;
+      reject(new ApolloError(errObj.message, `${statusCodes.BAD_REQUEST}`));
+    }
   });
 };
 
@@ -116,8 +109,14 @@ export const getFile = async (args: {
     args.res.setHeader('content-disposition', `attachment; filename=${fileName}`);
   }
   return new Promise<void>((resolve, reject) => {
-    s3FileData.file.on('end', () => resolve());
-    s3FileData.file.on('error', _err => reject(new InternalServerError('problem writing file')));
-    s3FileData.file.pipe(args.res);
+    try {
+      s3FileData.file.on('end', () => resolve());
+      s3FileData.file.on('error', _err => {
+        throw new InternalServerError('problem writing file')
+      });
+      s3FileData.file.pipe(args.res);
+    } catch (err) {
+      reject(err as Error);
+    }
   });
 };

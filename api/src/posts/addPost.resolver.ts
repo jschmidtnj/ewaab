@@ -51,71 +51,74 @@ class AddPostArgs {
 export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Promise<string | undefined> => {
   let numReading = 0;
   return new Promise<string | undefined>(async (resolve, reject) => {
-    if (media) {
-      numReading++;
-      const mediaFile = await media;
-      const mediaReadStream = mediaFile.createReadStream();
-      if (mediaReadStream.readableLength > maxFileUploadSize) {
-        reject(new Error(`media file ${mediaFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
-        return;
-      }
-      const data: Uint8Array[] = [];
-      mediaReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
-      mediaReadStream.on('error', reject);
-      mediaReadStream.on('end', () => {
-        let buffer = Buffer.concat(data);
-        const MediaModel = getRepository(Media, connectionName);
-        (async () => {
-          const mediaID = uuidv4();
-          let mediaType: MediaType;
-
-          if (mediaFile.mimetype.startsWith(imageMime)) {
-            mediaType = MediaType.image;
-
-            const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
-            // upload blurred
+    try {
+      if (media) {
+        numReading++;
+        const mediaFile = await media;
+        const mediaReadStream = mediaFile.createReadStream();
+        if (mediaReadStream.readableLength > maxFileUploadSize) {
+          throw new Error(`media file ${mediaFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`);
+        }
+        const data: Uint8Array[] = [];
+        mediaReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
+        mediaReadStream.on('error', reject);
+        mediaReadStream.on('end', () => {
+          let buffer = Buffer.concat(data);
+          const MediaModel = getRepository(Media, connectionName);
+          (async () => {
+            const mediaID = uuidv4();
+            let mediaType: MediaType;
+  
+            if (mediaFile.mimetype.startsWith(imageMime)) {
+              mediaType = MediaType.image;
+  
+              const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
+              // upload blurred
+              await s3Client.upload({
+                Bucket: fileBucket,
+                Key: getMediaKey(mediaID, true),
+                Body: blurred,
+                ContentType: mediaFile.mimetype,
+                ContentEncoding: mediaFile.encoding,
+              }).promise();
+  
+              const original = await sharp(buffer).resize(postMediaWidth).toBuffer();
+              buffer = original;
+            } else {
+              mediaType = MediaType.file;
+            }
+  
+            // upload original / buffer
             await s3Client.upload({
               Bucket: fileBucket,
-              Key: getMediaKey(mediaID, true),
-              Body: blurred,
+              Key: getMediaKey(mediaID),
+              Body: buffer,
               ContentType: mediaFile.mimetype,
               ContentEncoding: mediaFile.encoding,
             }).promise();
-
-            const original = await sharp(buffer).resize(postMediaWidth).toBuffer();
-            buffer = original;
-          } else {
-            mediaType = MediaType.file;
-          }
-
-          // upload original / buffer
-          await s3Client.upload({
-            Bucket: fileBucket,
-            Key: getMediaKey(mediaID),
-            Body: buffer,
-            ContentType: mediaFile.mimetype,
-            ContentEncoding: mediaFile.encoding,
-          }).promise();
-
-          const newMedia = await MediaModel.save({
-            id: mediaID,
-            fileSize: mediaReadStream.readableLength,
-            mime: mediaFile.mimetype,
-            name: mediaFile.filename,
-            parent: postID,
-            parentType: MediaParentType.post,
-            type: mediaType,
-          });
-
-          numReading--;
-          if (numReading === 0) {
-            resolve(newMedia.id);
-          }
-        })();
-      });
-      mediaReadStream.read();
-    } else {
-      resolve(undefined);
+  
+            const newMedia = await MediaModel.save({
+              id: mediaID,
+              fileSize: mediaReadStream.readableLength,
+              mime: mediaFile.mimetype,
+              name: mediaFile.filename,
+              parent: postID,
+              parentType: MediaParentType.post,
+              type: mediaType,
+            });
+  
+            numReading--;
+            if (numReading === 0) {
+              resolve(newMedia.id);
+            }
+          })();
+        });
+        mediaReadStream.read();
+      } else {
+        resolve(undefined);
+      }
+    } catch (err) {
+      reject(err as Error);
     }
   });
 };

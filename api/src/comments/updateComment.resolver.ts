@@ -1,12 +1,12 @@
 import { Resolver, ArgsType, Field, Args, Mutation, Ctx } from 'type-graphql';
-import { MinLength, IsOptional, Matches } from 'class-validator';
+import { MinLength, Matches } from 'class-validator';
 import { getRepository } from 'typeorm';
 import { elasticClient } from '../elastic/init';
 import { commentIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import Comment from '../schema/posts/comment.entity';
+import Comment, { BaseSearchComment } from '../schema/posts/comment.entity';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -22,12 +22,11 @@ class UpdateCommentArgs {
   })
   id: string;
 
-  @Field(_type => String, { description: 'comment content', nullable: true })
-  @IsOptional()
+  @Field(_type => String, { description: 'comment content' })
   @MinLength(strMinLen, {
     message: `comment content must contain at least ${strMinLen} characters`
   })
-  content?: string;
+  content: string;
 }
 
 @Resolver()
@@ -55,18 +54,21 @@ class UpdateCommentResolver {
     }
 
     const commentUpdateData: QueryPartialEntity<Comment> = {};
-    if (args.content !== undefined) {
-      commentUpdateData.content = args.content;
-    }
+    const commentSearchUpdateData: QueryPartialEntity<BaseSearchComment> = {};
+
+    commentUpdateData.content = args.content;
+    commentSearchUpdateData.content = args.content;
+
     const now = new Date().getTime();
     commentUpdateData.updated = now;
+    commentSearchUpdateData.updated = now;
 
     await CommentModel.update(args.id, commentUpdateData);
     await elasticClient.update({
       id: args.id,
       index: commentIndexName,
       body: {
-        doc: commentUpdateData
+        doc: commentSearchUpdateData
       }
     });
 

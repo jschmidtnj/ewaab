@@ -5,7 +5,7 @@ import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn, Min, 
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen, ewaabFounded, uuidRegex } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
-import User from '../schema/users/user.entity';
+import User, { BaseSearchUser } from '../schema/users/user.entity';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
@@ -195,6 +195,7 @@ class UpdateAccountResolver {
       throw new ApolloError('no updates found', `${statusCodes.BAD_REQUEST}`);
     }
     const userUpdateData: QueryPartialEntity<User> = {};
+    const userElasticUpdateData: QueryPartialEntity<BaseSearchUser> = {};
     const UserModel = getRepository(User, connectionName);
 
     const currentUser = await UserModel.findOne(id, {
@@ -206,12 +207,14 @@ class UpdateAccountResolver {
 
     if (args.name && args.name.length > 0) {
       userUpdateData.name = args.name;
+      userElasticUpdateData.name = args.name;
     } else {
       args.name = currentUser.name;
     }
 
     if (args.email) {
       userUpdateData.email = args.email;
+      userElasticUpdateData.email = args.email;
       userUpdateData.emailVerified = false;
       const emailTemplateData = emailTemplateFiles.verifyEmail;
       const template = emailTemplateData.template;
@@ -238,15 +241,19 @@ class UpdateAccountResolver {
     }
     if (args.location !== undefined) {
       userUpdateData.location = args.location;
+      userElasticUpdateData.location = args.location;
       userUpdateData.locationName = args.locationName;
+      userElasticUpdateData.locationName = args.locationName;
     }
 
     const now = new Date().getTime();
     userUpdateData.updated = now;
+    userElasticUpdateData.updated = now;
 
     // other fields
     if (args.major !== undefined) {
       userUpdateData.major = args.major;
+      userElasticUpdateData.major = args.major;
     }
     if (args.pronouns !== undefined) {
       userUpdateData.pronouns = args.pronouns;
@@ -268,153 +275,157 @@ class UpdateAccountResolver {
     }
     if (args.description !== undefined) {
       userUpdateData.description = args.description;
+      userElasticUpdateData.description = args.description;
     }
     if (args.bio !== undefined) {
       userUpdateData.bio = args.bio;
     }
     if (args.university !== undefined) {
       userUpdateData.university = args.university;
+      userElasticUpdateData.university = args.university;
     }
     if (args.alumniYear !== undefined) {
       userUpdateData.alumniYear = args.alumniYear;
+      userElasticUpdateData.alumniYear = args.alumniYear;
     }
     if (args.mentor !== undefined) {
       userUpdateData.mentor = args.mentor;
     }
 
     return new Promise<string>(async (resolve, reject) => {
-      const callback = async () => {
-        await UserModel.update(id, userUpdateData);
-        await elasticClient.update({
-          id,
-          index: userIndexName,
-          body: {
-            doc: userUpdateData
+      try {
+        const callback = async () => {
+          await UserModel.update(id, userUpdateData);
+          await elasticClient.update({
+            id,
+            index: userIndexName,
+            body: {
+              doc: userElasticUpdateData
+            }
+          });
+          // delete at the end, after new avatar is created
+          if (args.avatar && currentUser.avatar) {
+            await deleteMedia(currentUser.avatar);
           }
-        });
-        // delete at the end, after new avatar is created
-        if (args.avatar && currentUser.avatar) {
-          await deleteMedia(currentUser.avatar);
+          return `updated user ${id}`;
+        };
+  
+        let numReading = 0;
+  
+        if (args.resume) {
+          numReading++;
+          const resumeFile = await args.resume;
+          if (!checkTextFile(resumeFile.mimetype)) {
+            throw new Error('invalid text file provided for resume');
+          }
+          const resumeReadStream = resumeFile.createReadStream();
+          if (resumeReadStream.readableLength > maxFileUploadSize) {
+            throw new Error(`resume file ${resumeFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`);
+          }
+          const data: Uint8Array[] = [];
+          resumeReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
+          resumeReadStream.on('error', reject);
+          resumeReadStream.on('end', () => {
+            const buffer = Buffer.concat(data);
+            const MediaModel = getRepository(Media, connectionName);
+            (async () => {
+              if (currentUser.resume) {
+                await deleteMedia(currentUser.resume);
+              }
+              const newMedia = await MediaModel.save({
+                id: uuidv4(),
+                fileSize: resumeReadStream.readableLength,
+                mime: resumeFile.mimetype,
+                name: resumeFile.filename,
+                parent: id,
+                parentType: MediaParentType.user,
+                type: MediaType.file,
+              });
+  
+              // upload original
+              await s3Client.upload({
+                Bucket: fileBucket,
+                Key: getMediaKey(newMedia.id),
+                Body: buffer,
+                ContentType: resumeFile.mimetype,
+                ContentEncoding: resumeFile.encoding,
+              }).promise();
+  
+              userUpdateData.resume = newMedia.id;
+  
+              numReading--;
+              if (numReading === 0) {
+                resolve(await callback());
+              }
+            })();
+          });
+          resumeReadStream.read();
         }
-        return `updated user ${id}`;
-      };
-
-      let numReading = 0;
-
-      if (args.resume) {
-        numReading++;
-        const resumeFile = await args.resume;
-        if (!checkTextFile(resumeFile.mimetype)) {
-          reject(new Error('invalid text file provided for resume'));
-          return;
+  
+        if (args.avatar) {
+          numReading++;
+          const avatarFile = await args.avatar;
+          if (!avatarFile.mimetype.startsWith(imageMime)) {
+            throw new Error('invalid image provided for avatar');
+          }
+          const avatarReadStream = avatarFile.createReadStream();
+          if (avatarReadStream.readableLength > maxFileUploadSize) {
+            throw new Error(`avatar file ${avatarFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`);
+          }
+          const data: Uint8Array[] = [];
+          avatarReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
+          avatarReadStream.on('error', reject);
+          avatarReadStream.on('end', () => {
+            const buffer = Buffer.concat(data);
+            const MediaModel = getRepository(Media, connectionName);
+            (async () => {
+              const newMedia = await MediaModel.save({
+                id: uuidv4(),
+                fileSize: avatarReadStream.readableLength,
+                mime: avatarFile.mimetype,
+                name: avatarFile.filename,
+                parent: id,
+                parentType: MediaParentType.user,
+                type: MediaType.image,
+              });
+              const original = await sharp(buffer).resize(avatarWidth).toBuffer();
+  
+              // upload original
+              await s3Client.upload({
+                Bucket: fileBucket,
+                Key: getMediaKey(newMedia.id),
+                Body: original,
+                ContentType: avatarFile.mimetype,
+                ContentEncoding: avatarFile.encoding,
+              }).promise();
+  
+              const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
+              // upload blurred
+              await s3Client.upload({
+                Bucket: fileBucket,
+                Key: getMediaKey(newMedia.id, true),
+                Body: blurred,
+                ContentType: avatarFile.mimetype,
+                ContentEncoding: avatarFile.encoding,
+              }).promise();
+  
+              userUpdateData.avatar = newMedia.id;
+              userElasticUpdateData.avatar = newMedia.id;
+  
+              numReading--;
+              if (numReading === 0) {
+                resolve(await callback());
+              }
+            })();
+          });
+          avatarReadStream.read();
         }
-        const resumeReadStream = resumeFile.createReadStream();
-        if (resumeReadStream.readableLength > maxFileUploadSize) {
-          reject(new Error(`resume file ${resumeFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
-          return;
+  
+        if (numReading === 0) {
+          resolve(await callback());
         }
-        const data: Uint8Array[] = [];
-        resumeReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
-        resumeReadStream.on('error', reject);
-        resumeReadStream.on('end', () => {
-          const buffer = Buffer.concat(data);
-          const MediaModel = getRepository(Media, connectionName);
-          (async () => {
-            if (currentUser.resume) {
-              await deleteMedia(currentUser.resume);
-            }
-            const newMedia = await MediaModel.save({
-              id: uuidv4(),
-              fileSize: resumeReadStream.readableLength,
-              mime: resumeFile.mimetype,
-              name: resumeFile.filename,
-              parent: id,
-              parentType: MediaParentType.user,
-              type: MediaType.file,
-            });
-
-            // upload original
-            await s3Client.upload({
-              Bucket: fileBucket,
-              Key: getMediaKey(newMedia.id),
-              Body: buffer,
-              ContentType: resumeFile.mimetype,
-              ContentEncoding: resumeFile.encoding,
-            }).promise();
-
-            userUpdateData.resume = newMedia.id;
-
-            numReading--;
-            if (numReading === 0) {
-              resolve(await callback());
-            }
-          })();
-        });
-        resumeReadStream.read();
-      }
-
-      if (args.avatar) {
-        numReading++;
-        const avatarFile = await args.avatar;
-        if (!avatarFile.mimetype.startsWith(imageMime)) {
-          reject(new Error('invalid image provided for avatar'));
-          return;
-        }
-        const avatarReadStream = avatarFile.createReadStream();
-        if (avatarReadStream.readableLength > maxFileUploadSize) {
-          reject(new Error(`avatar file ${avatarFile.filename} is larger than the max file size of ${maxFileUploadSize} bytes`));
-          return;
-        }
-        const data: Uint8Array[] = [];
-        avatarReadStream.on('data', (chunk: Uint8Array) => data.push(chunk));
-        avatarReadStream.on('error', reject);
-        avatarReadStream.on('end', () => {
-          const buffer = Buffer.concat(data);
-          const MediaModel = getRepository(Media, connectionName);
-          (async () => {
-            const newMedia = await MediaModel.save({
-              id: uuidv4(),
-              fileSize: avatarReadStream.readableLength,
-              mime: avatarFile.mimetype,
-              name: avatarFile.filename,
-              parent: id,
-              parentType: MediaParentType.user,
-              type: MediaType.image,
-            });
-            const original = await sharp(buffer).resize(avatarWidth).toBuffer();
-
-            // upload original
-            await s3Client.upload({
-              Bucket: fileBucket,
-              Key: getMediaKey(newMedia.id),
-              Body: original,
-              ContentType: avatarFile.mimetype,
-              ContentEncoding: avatarFile.encoding,
-            }).promise();
-
-            const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();
-            // upload blurred
-            await s3Client.upload({
-              Bucket: fileBucket,
-              Key: getMediaKey(newMedia.id, true),
-              Body: blurred,
-              ContentType: avatarFile.mimetype,
-              ContentEncoding: avatarFile.encoding,
-            }).promise();
-
-            userUpdateData.avatar = newMedia.id;
-
-            numReading--;
-            if (numReading === 0) {
-              resolve(await callback());
-            }
-          })();
-        });
-        avatarReadStream.read();
-      }
-
-      if (numReading === 0) {
-        resolve(await callback());
+      } catch (err) {
+        reject(err as Error);
       }
     });
   }

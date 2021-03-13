@@ -9,7 +9,7 @@ import statusCodes from 'http-status-codes';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
-import Post from '../schema/posts/post.entity';
+import Post, { BaseSearchPost } from '../schema/posts/post.entity';
 import { UserType } from '../schema/users/user.entity';
 import { ApolloError } from 'apollo-server-express';
 import { deleteMedia } from '../users/media.resolver';
@@ -81,39 +81,48 @@ class UpdatePostResolver {
     }
 
     const postUpdateData: QueryPartialEntity<Post> = {};
+    const postSearchUpdateData: QueryPartialEntity<BaseSearchPost> = {};
     if (args.title !== undefined) {
       postUpdateData.title = args.title;
+      postSearchUpdateData.title = args.title;
     }
     if (args.content !== undefined) {
       postUpdateData.content = args.content;
+      postSearchUpdateData.content = args.content;
     }
     if (args.link !== undefined) {
       postUpdateData.link = args.link;
+      postSearchUpdateData.link = args.link;
     }
     if (args.deleteMedia) {
       postUpdateData.media = null;
+      postSearchUpdateData.media = null;
     }
     const now = new Date().getTime();
     postUpdateData.updated = now;
+    postSearchUpdateData.updated = now;
 
-    const mediaID = await handlePostMedia(args.id, args.media);
-    if (mediaID) {
-      postUpdateData.media = mediaID;
+    if (args.deleteMedia) {
+      postUpdateData.media = null;
+      postSearchUpdateData.media = null;
+    } else {
+      const mediaID = await handlePostMedia(args.id, args.media);
+      if (mediaID) {
+        postUpdateData.media = mediaID;
+        postSearchUpdateData.media = mediaID;
+      }
     }
 
     await PostModel.update(args.id, postUpdateData);
-    if (args.deleteMedia) {
-      postUpdateData.media = '';
-    }
     await elasticClient.update({
       id: args.id,
       index: postIndexName,
       body: {
-        doc: postUpdateData
+        doc: postSearchUpdateData
       }
     });
 
-    if (postData.media) {
+    if (args.deleteMedia && postData.media) {
       await deleteMedia(postData.media);
     }
 

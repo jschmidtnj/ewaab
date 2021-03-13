@@ -1,12 +1,12 @@
 import { Resolver, ArgsType, Field, Args, Mutation, Ctx } from 'type-graphql';
-import { MinLength, IsOptional, Matches } from 'class-validator';
+import { MinLength, Matches } from 'class-validator';
 import { getRepository } from 'typeorm';
 import { elasticClient } from '../elastic/init';
 import { messageIndexName } from '../elastic/settings';
 import { strMinLen, uuidRegex } from '../shared/variables';
 import { verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
-import Message from '../schema/users/message.entity';
+import Message, { BaseSearchMessage } from '../schema/users/message.entity';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -22,12 +22,11 @@ class UpdateMessageArgs {
   })
   id: string;
 
-  @Field(_type => String, { description: 'message content', nullable: true })
-  @IsOptional()
+  @Field(_type => String, { description: 'message content' })
   @MinLength(strMinLen, {
     message: `message content must contain at least ${strMinLen} characters`
   })
-  content?: string;
+  content: string;
 }
 
 @Resolver()
@@ -55,18 +54,20 @@ class UpdateMessageResolver {
     }
 
     const messageUpdateData: QueryPartialEntity<Message> = {};
-    if (args.content !== undefined) {
-      messageUpdateData.content = args.content;
-    }
+    const messageSearchUpdateData: QueryPartialEntity<BaseSearchMessage> = {};
+    messageUpdateData.content = args.content;
+    messageSearchUpdateData.content = args.content;
+
     const now = new Date().getTime();
     messageUpdateData.updated = now;
+    messageSearchUpdateData.updated = now;
 
     await MessageModel.update(args.id, messageUpdateData);
     await elasticClient.update({
       id: args.id,
       index: messageIndexName,
       body: {
-        doc: messageUpdateData
+        doc: messageSearchUpdateData
       }
     });
 
