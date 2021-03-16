@@ -1,4 +1,4 @@
-import { sign, verify, SignOptions, VerifyOptions } from 'jsonwebtoken';
+import { sign, verify, SignOptions, VerifyOptions, Secret } from 'jsonwebtoken';
 import { Request } from 'express';
 import User, { UserType } from '../schema/users/user.entity';
 import { configData } from './config';
@@ -6,6 +6,12 @@ import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
 import UserCode from '../schema/users/userCode.entity';
 import { connectionName } from '../db/connect';
+import { promisify } from 'util';
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const signPromise = promisify<string | Buffer | object, Secret, SignOptions | undefined, string>(sign);
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const verifyPromise = promisify<string, Secret, VerifyOptions | undefined, object | string>(verify);
 
 export const verifyJWTExpiration = '1h';
 
@@ -69,30 +75,20 @@ interface GenerateJWTArgs {
   emailVerified: boolean;
 }
 
-export const generateJWTAccess = (args: GenerateJWTArgs): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtIssuer = getJWTIssuer();
-      const authData: JWTAuthData = {
-        id: args.id,
-        type: args.type,
-        emailVerified: args.emailVerified
-      };
-      const signOptions: SignOptions = {
-        issuer: jwtIssuer,
-        expiresIn: accessJWTExpiration
-      };
-      sign(authData, secret, signOptions, (err, token) => {
-        if (err) {
-          throw err as Error;
-        }
-        resolve(token as string);
-      });
-    } catch (err) {
-      reject(err as Error);
-    }
-  });
+export const generateJWTAccess = async (args: GenerateJWTArgs): Promise<string> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtIssuer = getJWTIssuer();
+  const authData: JWTAuthData = {
+    id: args.id,
+    type: args.type,
+    emailVerified: args.emailVerified
+  };
+  const signOptions: SignOptions = {
+    issuer: jwtIssuer,
+    expiresIn: accessJWTExpiration
+  };
+  const token = await signPromise(authData, secret, signOptions);
+  return token;
 };
 
 export interface MediaAccessTokenData {
@@ -107,149 +103,107 @@ interface GenerateJWTMediaArgs {
   type: UserType;
   media?: string;
 }
-
-export const generateJWTMediaAccess = (args: GenerateJWTMediaArgs, expiration?: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtIssuer = getJWTIssuer();
-      const authData: MediaAccessTokenData = {
-        id: args.id,
-        userType: args.type,
-        type: MediaAccessType.media,
-        media: args.media
-      };
-      const signOptions: SignOptions = {
-        issuer: jwtIssuer,
-        expiresIn: expiration
-      };
-      sign(authData, secret, signOptions, (err, token) => {
-        if (err) {
-          throw err as Error;
-        }
-        resolve(token as string);
-      });
-    } catch (err) {
-      reject(err as Error);
-    }
-  });
+export const generateJWTMediaAccess = async (args: GenerateJWTMediaArgs, expiration?: string): Promise<string> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtIssuer = getJWTIssuer();
+  const authData: MediaAccessTokenData = {
+    id: args.id,
+    userType: args.type,
+    type: MediaAccessType.media,
+    media: args.media
+  };
+  const signOptions: SignOptions = {
+    issuer: jwtIssuer
+  };
+  if (expiration) {
+    signOptions.expiresIn = expiration;
+  }
+  const token = await signPromise(authData, secret, signOptions);
+  return token;
 };
 
-export const generateJWTRefresh = (authData: RefreshTokenData): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtIssuer = getJWTIssuer();
-      const signOptions: SignOptions = {
-        issuer: jwtIssuer,
-        expiresIn: refreshJWTExpiration
-      };
-      sign({
-        ...authData
-      }, secret, signOptions, (err, token) => {
-        if (err) {
-          throw err as Error;
-        }
-        resolve(token as string);
-      });
-    } catch (err) {
-      reject(err as Error);
-    }
-  });
+export const generateJWTRefresh = async (authData: RefreshTokenData): Promise<string> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtIssuer = getJWTIssuer();
+  const signOptions: SignOptions = {
+    issuer: jwtIssuer,
+    expiresIn: refreshJWTExpiration
+  };
+  return await signPromise({
+    ...authData
+  }, secret, signOptions);
 };
 
-export const handleRefreshToken = (req: Request): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    try {
-      if (!req.cookies) {
-        throw new Error('no cookies found');
-      }
-      const token = req.cookies.refreshToken as string | undefined;
-      if (!token || token.length === 0) {
-        throw new Error('no token provided');
-      }
-      const secret = getSecret(loginType.LOCAL);
-      const jwtConfig: VerifyOptions = {
-        algorithms: ['HS256']
-      };
-      verify(token, secret, jwtConfig, async (err, res) => {
-        if (err) {
-          throw err as Error;
-        }
-        const data = res as RefreshTokenData;
-        let generateArgs: GenerateJWTArgs;
-        let tokenVersion: number;
-        if (data.type === UserType.visitor) {
-          const UserCodeModel = getRepository(UserCode, connectionName);
-          const userCodeData = await UserCodeModel.findOne(data.id, {
-            select: ['tokenVersion', 'id']
-          });
-          if (!userCodeData) {
-            throw new Error(`cannot find user code data with id ${data.id}`);
-          }
-          tokenVersion = userCodeData.tokenVersion;
-          generateArgs = {
-            emailVerified: true,
-            id: userCodeData.id,
-            type: UserType.visitor
-          };
-        } else {
-          const UserModel = getRepository(User, connectionName);
-          const user = await UserModel.findOne(data.id, {
-            select: ['tokenVersion', 'id', 'type', 'emailVerified']
-          });
-          if (!user) {
-            throw new Error('user not found');
-          }
-          tokenVersion = user.tokenVersion;
-          generateArgs = {
-            emailVerified: user.emailVerified,
-            id: user.id,
-            type: user.type
-          };
-        }
-        if (tokenVersion !== data.tokenVersion) {
-          throw new Error('invalid token version');
-        }
-        resolve(await generateJWTAccess(generateArgs));
-      });
-    } catch (err) {
-      reject(err as Error);
+export const handleRefreshToken = async (req: Request): Promise<string> => {
+  if (!req.cookies) {
+    throw new Error('no cookies found');
+  }
+  const token = req.cookies.refreshToken as string | undefined;
+  if (!token || token.length === 0) {
+    throw new Error('no token provided');
+  }
+  const secret = getSecret(loginType.LOCAL);
+  const jwtConfig: VerifyOptions = {
+    algorithms: ['HS256']
+  };
+  const data = await verifyPromise(token, secret, jwtConfig) as RefreshTokenData;
+  let generateArgs: GenerateJWTArgs;
+  let tokenVersion: number;
+  if (data.type === UserType.visitor) {
+    const UserCodeModel = getRepository(UserCode, connectionName);
+    const userCodeData = await UserCodeModel.findOne(data.id, {
+      select: ['tokenVersion', 'id']
+    });
+    if (!userCodeData) {
+      throw new Error(`cannot find user code data with id ${data.id}`);
     }
-  });
+    tokenVersion = userCodeData.tokenVersion;
+    generateArgs = {
+      emailVerified: true,
+      id: userCodeData.id,
+      type: UserType.visitor
+    };
+  } else {
+    const UserModel = getRepository(User, connectionName);
+    const user = await UserModel.findOne(data.id, {
+      select: ['tokenVersion', 'id', 'type', 'emailVerified']
+    });
+    if (!user) {
+      throw new Error('user not found');
+    }
+    tokenVersion = user.tokenVersion;
+    generateArgs = {
+      emailVerified: user.emailVerified,
+      id: user.id,
+      type: user.type
+    };
+  }
+  if (tokenVersion !== data.tokenVersion) {
+    throw new Error('invalid token version');
+  }
+  return await generateJWTAccess(generateArgs);
 };
 
-export const decodeAuth = (type: loginType, token: string): Promise<AuthData> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(type);
-      let jwtConfig: VerifyOptions;
-      if (type === loginType.LOCAL) {
-        jwtConfig = {
-          algorithms: ['HS256']
-        };
-      } else {
-        throw new Error('invalid type for jwt');
-      }
-      verify(token, secret, jwtConfig, async (err, res: any) => {
-        if (err) {
-          throw err as Error;
-        }
-        let data: AuthData;
-        if (type === loginType.LOCAL) {
-          const inputData = res as JWTAuthData;
-          data = {
-            ...inputData,
-            loginType: type,
-          };
-        } else {
-          throw new Error('invalid type for jwt in verify');
-        }
-        resolve(data);
-      });
-    } catch (err) {
-      const errObj = err as Error;
-      reject(errObj);
-    }
-  });
+export const decodeAuth = async (type: loginType, token: string): Promise<AuthData> => {
+  const secret = getSecret(type);
+  let jwtConfig: VerifyOptions;
+  if (type === loginType.LOCAL) {
+    jwtConfig = {
+      algorithms: ['HS256']
+    };
+  } else {
+    throw new Error('invalid type for jwt');
+  }
+  const jwtData = await verifyPromise(token, secret, jwtConfig);
+  let data: AuthData;
+  if (type === loginType.LOCAL) {
+    const inputData = jwtData as JWTAuthData;
+    data = {
+      ...inputData,
+      loginType: type,
+    };
+  } else {
+    throw new Error('invalid type for jwt in verify');
+  }
+  return data;
 };

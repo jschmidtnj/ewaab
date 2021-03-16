@@ -8,8 +8,8 @@ import { verifyRecaptcha } from '../utils/recaptcha';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
 import { configData } from '../utils/config';
-import { VerifyType, getSecret, getJWTIssuer, verifyJWTExpiration } from '../utils/jwt';
-import { SignOptions, sign, verify, VerifyOptions } from 'jsonwebtoken';
+import { VerifyType, getSecret, getJWTIssuer, verifyJWTExpiration, signPromise, verifyPromise } from '../utils/jwt';
+import type { SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
 import { getRepository } from 'typeorm';
 import { ApolloError } from 'apollo-server-express';
@@ -75,58 +75,35 @@ export interface VerifyTokenData {
   type: VerifyType.verify;
 }
 
-export const generateJWTVerifyEmail = (userID: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtIssuer = getJWTIssuer();
-      const authData: VerifyTokenData = {
-        id: userID,
-        type: VerifyType.verify
-      };
-      const signOptions: SignOptions = {
-        issuer: jwtIssuer,
-        expiresIn: verifyJWTExpiration
-      };
-      sign(authData, secret, signOptions, (err, token) => {
-        if (err) {
-          throw err as Error;
-        }
-        resolve(token as string);
-      });
-    } catch (err) {
-      reject(err as Error);
-    }
-  });
+export const generateJWTVerifyEmail = async (userID: string): Promise<string> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtIssuer = getJWTIssuer();
+  const authData: VerifyTokenData = {
+    id: userID,
+    type: VerifyType.verify
+  };
+  const signOptions: SignOptions = {
+    issuer: jwtIssuer,
+    expiresIn: verifyJWTExpiration
+  };
+  const token = await signPromise(authData, secret, signOptions);
+  return token;
 };
 
-export const decodeInvite = (token: string): Promise<InviteUserTokenData> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-
-      const jwtConfig: VerifyOptions = {
-        algorithms: ['HS256']
-      };
-      verify(token, secret, jwtConfig, (err, res: any) => {
-        if (err) {
-          const errObj = err as Error;
-          throw new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`);
-        }
-        if (!('type' in res)) {
-          throw new ApolloError('no type provided', `${statusCodes.BAD_REQUEST}`);
-        }
-        const type: VerifyType = res.type;
-        if (type !== VerifyType.invite) {
-          throw new ApolloError(`invalid verify type ${type} provided`, `${statusCodes.BAD_REQUEST}`);
-        }
-        resolve(res as InviteUserTokenData);
-      });
-    } catch (err) {
-      const errObj = err as Error;
-      reject(new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`));
-    }
-  });
+export const decodeInvite = async (token: string): Promise<InviteUserTokenData> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtConfig: VerifyOptions = {
+    algorithms: ['HS256']
+  };
+  const jwtData = await verifyPromise(token, secret, jwtConfig) as Record<string, any>;
+  if (!('type' in jwtData)) {
+    throw new ApolloError('no type provided', `${statusCodes.BAD_REQUEST}`);
+  }
+  const type: VerifyType = jwtData.type as VerifyType;
+  if (type !== VerifyType.invite) {
+    throw new ApolloError(`invalid verify type ${type} provided`, `${statusCodes.BAD_REQUEST}`);
+  }
+  return jwtData as InviteUserTokenData;
 };
 
 @Resolver()
@@ -182,6 +159,7 @@ class RegisterResolver {
       facebook: '',
       github: '',
       twitter: '',
+      emailNotifications: true,
       bio: '',
       mentor: ''
     });

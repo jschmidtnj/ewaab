@@ -14,8 +14,10 @@ const Avatar: FunctionComponent<AvatarArgs> = (args) => {
   const className = args.className ? args.className + ' ' : '';
   return args.avatar ? (
     <LazyLoadImage
+      effect={'blur'}
       className={className + 'h-10 w-10 rounded-full'}
-      alt={`${apiURL}/media/${args.avatar}/blur`}
+      alt="avatar"
+      placeholderSrc={`${apiURL}/media/${args.avatar}?blur`}
       src={`${apiURL}/media/${args.avatar}`}
       width={args.avatarWidth}
     />

@@ -2,8 +2,8 @@ import { Resolver, ArgsType, Field, Args, Mutation, Ctx, Int } from 'type-graphq
 import { IsEmail, Max, Min } from 'class-validator';
 import { configData } from '../utils/config';
 import { emailTemplateFiles } from './compileEmailTemplates';
-import { getSecret, VerifyType, getJWTIssuer, verifyJWTExpiration } from '../utils/jwt';
-import { sign, SignOptions } from 'jsonwebtoken';
+import { getSecret, VerifyType, getJWTIssuer, verifyJWTExpiration, signPromise } from '../utils/jwt';
+import type { SignOptions } from 'jsonwebtoken';
 import { verifyAdmin } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import { sendEmailUtil } from './sendEmail.resolver';
@@ -47,33 +47,23 @@ export interface InviteUserTokenData {
   alumniYear: number;
 }
 
-export const generateJWTInviteUser = (email: string, name: string,
+export const generateJWTInviteUser = async (email: string, name: string,
   type: UserType, alumniYear: number): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtIssuer = getJWTIssuer();
-      const authData: InviteUserTokenData = {
-        email,
-        name,
-        type: VerifyType.invite,
-        userType: type,
-        alumniYear
-      };
-      const signOptions: SignOptions = {
-        issuer: jwtIssuer,
-        expiresIn: verifyJWTExpiration
-      };
-      sign(authData, secret, signOptions, (err, token) => {
-        if (err) {
-          throw err as Error;
-        }
-        resolve(token as string);
-      });
-    } catch (err) {
-      reject(err as Error);
-    }
-  });
+  const secret = getSecret(loginType.LOCAL);
+  const jwtIssuer = getJWTIssuer();
+  const authData: InviteUserTokenData = {
+    email,
+    name,
+    type: VerifyType.invite,
+    userType: type,
+    alumniYear
+  };
+  const signOptions: SignOptions = {
+    issuer: jwtIssuer,
+    expiresIn: verifyJWTExpiration
+  };
+  const token = await signPromise(authData, secret, signOptions);
+  return token;
 };
 
 @Resolver()

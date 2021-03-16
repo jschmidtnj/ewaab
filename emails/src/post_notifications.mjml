@@ -270,10 +270,10 @@
     <mj-section padding-top="30px" padding-bottom="30px" padding-left="30px" padding-right="30px">
       <mj-group>
         <mj-column>
-          <mj-image align="left" padding-top="18px" padding-left="5px" padding-right="0" src="{{websiteURL}}/assets/img/ewaab/logo.png" href="{{websiteURL}}" target="_blank" alt="ewaab" width="100px"></mj-image>
+          <mj-image align="left" padding-top="18px" padding-left="5px" padding-right="0" src="{{{websiteURL}}}/assets/img/ewaab/logo.png" href="{{{websiteURL}}}" target="_blank" alt="ewaab" width="100px"></mj-image>
         </mj-column>
         <mj-column>
-          <mj-image align="right" src="{{avatarURL}}" padding-right="5px" border-radius="1000px" href="{{websiteURL}}/{{username}}" target="_blank" alt="avatar" width="40px"></mj-image>
+          <mj-image align="right" src="{{{avatarURL}}}" padding-right="5px" border-radius="1000px" href="{{{websiteURL}}}/{{username}}" target="_blank" alt="avatar" width="40px"></mj-image>
         </mj-column>
       </mj-group>
     </mj-section>
@@ -284,14 +284,18 @@
       <mj-section background-color="#ffffff" border-radius="10px">
         <mj-group width="100%">
           <mj-column width="20%" padding-left="20px" padding-right="0" padding-top="0">
-            <mj-image align="left" css-class="post-avatar" padding-left="0" padding-right="0" src="{{this.avatarURL}}" border-radius="1000px" href="{{authorURL}}" target="_blank" alt="avatar" width="45px"></mj-image>
+            <mj-image align="left" css-class="post-avatar" padding-left="0" padding-right="0" src="{{{this.avatarURL}}}" border-radius="1000px" href="{{{authorURL}}}" target="_blank" alt="avatar" width="45px"></mj-image>
           </mj-column>
           <mj-column padding="0">
             <mj-text align="left" padding="0" css-class="card-header">
               <h3 padding="0">{{this.name}}</h3>
-              {{#if this.username}}
-                <a target="_blank" href="{{@root.websiteURL}}/{{this.username}}" padding="0">@{{this.username}}</p>
-              {{/if}}
+              <mj-raw>
+                {{#if this.username}}
+              </mj-raw>
+              <a target="_blank" href="{{{@root.websiteURL}}}/{{this.username}}" padding="0">@{{this.username}}</a>
+              <mj-raw>
+                {{/if}}
+              </mj-raw>
             </mj-text>
           </mj-column>
         </mj-group>
@@ -300,10 +304,92 @@
             {{{this.content}}}
           </mj-raw>
         </mj-column>
+        <mj-raw>
+          {{#if this.link}}
+        </mj-raw>
+        <mj-column width="100%" padding-left="25px" padding-right="25px">
+          <mj-text align="left" padding="0">
+            <a target="_blank" href="{{{this.link}}}" padding="0">{{{this.link}}}</a>
+          </mj-text>
+        </mj-column>
+        <mj-raw>
+          {{/if}}
+        </mj-raw>
+        <mj-raw>
+          {{#if this.media}}
+        </mj-raw>
+        <mj-raw>
+          {{#if (eq this.media.type "image")}}
+        </mj-raw>
+        <mj-column width="100%" padding-left="25px" padding-right="25px">
+          <mj-image align="center" padding-left="0" padding-right="0" src="{{{this.media.url}}}" href="{{{this.media.url}}}" target="_blank" alt="this.name" width="250px"></mj-image>
+        </mj-column>
+        <mj-raw>
+          {{else if (eq this.media.type "file")}}
+        </mj-raw>
+        <mj-group width="100%">
+          <mj-column padding-right="25px">
+            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/like.png" alt="like" width="45px"></mj-image>
+          </mj-column>
+          <mj-column padding="0">
+            <mj-text align="left" padding="0">
+              <a target="_blank" href="{{{this.media.url}}}" padding="0">{{this.media.name}}</a>
+            </mj-text>
+          </mj-column>
+        </mj-group>
+        <mj-raw>
+          {{else}}
+        </mj-raw>
+        <mj-column width="100%" padding-left="25px" padding-right="25px">
+          <mj-text align="center">
+            <p>Invalid media type {{this.media.type}} provided.</p>
+          </mj-text>
+        </mj-column>
+        <mj-raw>
+          {{/if}}
+        </mj-raw>
+        <mj-raw>
+          {{/if}}
+        </mj-raw>
+        <mj-group width="100%">
+          <mj-column padding="0">
+            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/like.png" alt="like" width="45px"></mj-image>
+          </mj-column>
+          <mj-column padding="0">
+            <mj-text align="left" padding="0">
+              <p>
+                {{this.reactionCount}}
+              </p>
+            </mj-text>
+          </mj-column>
+          <mj-column padding="0">
+            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/comment.png" alt="comment" width="45px"></mj-image>
+          </mj-column>
+          <mj-column padding="0">
+            <mj-text align="left" padding="0">
+              <p>
+                {{this.commentCount}}
+              </p>
+            </mj-text>
+          </mj-column>
+          <mj-column width="80%">
+            <mj-spacer />
+          </mj-column>
+        </mj-group>
       </mj-section>
       <mj-section padding="0">
         <mj-column padding="0">
           <mj-spacer height="50px" />
+        </mj-column>
+      </mj-section>
+      <mj-raw>
+        {{else}}
+      </mj-raw>
+      <mj-section padding="10px">
+        <mj-column>
+          <mj-text align="center">
+            <h3>No Posts found</h3>
+          </mj-text>
         </mj-column>
       </mj-section>
       <mj-raw>

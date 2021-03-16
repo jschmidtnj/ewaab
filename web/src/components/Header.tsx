@@ -27,6 +27,7 @@ import {
   usersLink,
 } from 'utils/variables';
 import VisibilitySensor from 'react-visibility-sensor';
+import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 
 const Header: FunctionComponent = () => {
   const dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
@@ -138,36 +139,11 @@ const Header: FunctionComponent = () => {
                 aria-expanded="false"
               >
                 <span className="sr-only">Open main menu</span>
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-                <svg
-                  className="hidden h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                {!mobileMenuOpen ? (
+                  <AiOutlineMenu className="block h-6 w-6" />
+                ) : (
+                  <AiOutlineClose className="block h-6 w-6" />
+                )}
               </button>
             </VisibilitySensor>
           </div>
@@ -185,7 +161,7 @@ const Header: FunctionComponent = () => {
               </a>
             </Link>
             <div className="hidden md:flex ml-8">
-              <div className="mt-auto mb-auto">{allPathElements}</div>
+              <div className="my-auto">{allPathElements}</div>
             </div>
           </div>
           {loggedIn ? (

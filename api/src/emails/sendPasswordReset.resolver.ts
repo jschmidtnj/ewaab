@@ -2,8 +2,8 @@ import { Resolver, ArgsType, Field, Args, Mutation } from 'type-graphql';
 import { IsEmail } from 'class-validator';
 import { configData } from '../utils/config';
 import { emailTemplateFiles } from './compileEmailTemplates';
-import { getSecret, VerifyType, getJWTIssuer, verifyJWTExpiration } from '../utils/jwt';
-import { sign, SignOptions } from 'jsonwebtoken';
+import { getSecret, VerifyType, getJWTIssuer, verifyJWTExpiration, signPromise } from '../utils/jwt';
+import type { SignOptions } from 'jsonwebtoken';
 import { sendEmailUtil } from './sendEmail.resolver';
 import { loginType } from '../auth/shared';
 import { accountExistsEmail } from '../users/shared';
@@ -29,29 +29,19 @@ export interface PasswordResetTokenData {
   type: VerifyType.resetPassword;
 }
 
-export const generateJWTPasswordReset = (email: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtIssuer = getJWTIssuer();
-      const authData: PasswordResetTokenData = {
-        email,
-        type: VerifyType.resetPassword
-      };
-      const signOptions: SignOptions = {
-        issuer: jwtIssuer,
-        expiresIn: verifyJWTExpiration
-      };
-      sign(authData, secret, signOptions, (err, token) => {
-        if (err) {
-          throw err as Error;
-        }
-        resolve(token as string);
-      });
-    } catch (err) {
-      reject(err as Error);
-    }
-  });
+export const generateJWTPasswordReset = async (email: string): Promise<string> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtIssuer = getJWTIssuer();
+  const authData: PasswordResetTokenData = {
+    email,
+    type: VerifyType.resetPassword
+  };
+  const signOptions: SignOptions = {
+    issuer: jwtIssuer,
+    expiresIn: verifyJWTExpiration
+  };
+  const token = await signPromise(authData, secret, signOptions);
+  return token;
 };
 
 @Resolver()

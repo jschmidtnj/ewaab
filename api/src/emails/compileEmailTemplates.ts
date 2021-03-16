@@ -1,5 +1,14 @@
 import { getS3EmailData, getEmailKey } from '../utils/aws';
 import Handlebars from 'handlebars';
+import { MediaType } from '../schema/media/media.entity';
+import helpers from 'handlebars-helpers';
+
+interface PostMediaData {
+  id: string;
+  name: string;
+  type: MediaType;
+  url: string;
+}
 
 export interface PostEmailData {
   name: string;
@@ -7,6 +16,10 @@ export interface PostEmailData {
   avatarURL: string;
   authorURL: string;
   content: string;
+  link?: string;
+  media?: PostMediaData;
+  reactionCount: number;
+  commentCount: number;
 }
 
 interface TemplateFiles {
@@ -84,6 +97,8 @@ export const emailTemplateFiles: TemplateFiles = {
 };
 
 const compileEmailTemplates = async (): Promise<void> => {
+  const { eq } = helpers('comparison');
+  Handlebars.registerHelper('eq', eq);
   for (const emailTemplateKey in emailTemplateFiles) {
     const currentTemplateElement = emailTemplateFiles[propertyOf<TemplateFiles>(emailTemplateKey)];
     const emailTemplate = await getS3EmailData(getEmailKey(currentTemplateElement.file), false);

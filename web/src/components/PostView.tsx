@@ -53,7 +53,9 @@ const MediaView: FunctionComponent<MediaViewArgs> = (args) => {
     return (
       <div className="flex text-center justify-center mt-4">
         <LazyLoadImage
-          alt={`${apiURL}/media/${args.id}/blur`}
+          effect={'blur'}
+          placeholderSrc={`${apiURL}/media/${args.id}?blur`}
+          alt={args.name}
           src={`${apiURL}/media/${args.id}`}
           width={postMediaWidth}
         />

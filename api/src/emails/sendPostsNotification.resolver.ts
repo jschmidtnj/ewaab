@@ -11,7 +11,7 @@ import { verifyAdmin } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import { PostSortOption } from '../schema/posts/post.entity';
 import { getPosts } from '../posts/posts.resolver';
-import { getPublisherData } from '../posts/searchResults.resolver';
+import { getMediaData, getPublisherData } from '../posts/searchResults.resolver';
 import { Converter } from 'showdown';
 import { generateJWTMediaAccess } from '../utils/jwt';
 import { sanitize } from '../utils/sanitizeHTML';
@@ -30,8 +30,12 @@ class SendPostNotificationArgs {
   id?: string;
 }
 
+const getMediaURL = (id: string, authToken: string): string => {
+  return `${getAPIURL()}/media/${id}?t=${authToken}`;
+};
+
 const getAvatarURL = (avatar: string | null | undefined, authToken?: string): string => {
-  return avatar && authToken ? `${getAPIURL()}/media/${avatar}?auth=${authToken}` : `${configData.WEBSITE_URL}/assets/img/default_avatar.png`;
+  return avatar && authToken ? getMediaURL(avatar, authToken) : `${configData.WEBSITE_URL}/assets/img/default_avatar.png`;
 };
 
 export const sendNotification = async (id: string): Promise<string> => {
@@ -53,17 +57,29 @@ export const sendNotification = async (id: string): Promise<string> => {
 
   const postEmailData: PostEmailData[] = await Promise.all(postData.results.map(async (post): Promise<PostEmailData> => {
     const publisherData = await getPublisherData(post.publisher);
-    const authToken = publisherData?.avatar ? await generateJWTMediaAccess({
-      id: userData.id,
-      type: userData.type,
-      media: post.id
-    }) : undefined;
+    const mediaData = post.media ? await getMediaData(post.media) : undefined;
     return {
-      avatarURL: getAvatarURL(publisherData ? publisherData.avatar : null, authToken),
+      avatarURL: getAvatarURL(publisherData ? publisherData.avatar : null,
+        publisherData?.avatar ? await generateJWTMediaAccess({
+          id: userData.id,
+          type: userData.type,
+          media: publisherData.avatar
+        }) : undefined),
       authorURL: publisherData ? `${configData.WEBSITE_URL}/${publisherData.username}` : `${configData.WEBSITE_URL}/404`,
       name: publisherData ? publisherData.name : 'Deleted',
       username: publisherData ? publisherData.username : undefined,
       content: sanitize(markdownConverter.makeHtml(post.content)),
+      link: post.link ? post.link : undefined,
+      media: mediaData ? {
+        ...mediaData,
+        url: getMediaURL(mediaData.id, await generateJWTMediaAccess({
+          id: userData.id,
+          type: userData.type,
+          media: mediaData.id
+        }))
+      } : undefined,
+      reactionCount: post.reactionCount,
+      commentCount: post.commentCount
     };
   }));
   const emailTemplateData = emailTemplateFiles.postNotifications;
@@ -71,14 +87,14 @@ export const sendNotification = async (id: string): Promise<string> => {
   if (!template) {
     throw new Error('cannot find posts notification email template');
   }
-  const authToken = userData.avatar ? await generateJWTMediaAccess({
-    id: userData.id,
-    type: userData.type,
-    media: userData.avatar
-  }) : undefined;
   const emailData = template({
     websiteURL: configData.WEBSITE_URL,
-    avatarURL: getAvatarURL(userData.avatar, authToken),
+    avatarURL: getAvatarURL(userData.avatar, userData.avatar ?
+      await generateJWTMediaAccess({
+        id: userData.id,
+        type: userData.type,
+        media: userData.avatar
+      }) : undefined),
     username: userData.username,
     name: userData.name,
     posts: postEmailData

@@ -120,6 +120,10 @@ class UpdateArgs {
   })
   twitter?: string;
 
+  @Field(_type => Boolean, { description: 'email notifications', nullable: true })
+  @IsOptional()
+  emailNotifications?: boolean;
+
   @Field(_type => String, { description: 'description', nullable: true })
   @IsOptional()
   description?: string;
@@ -272,6 +276,9 @@ class UpdateAccountResolver {
     }
     if (args.twitter !== undefined) {
       userUpdateData.twitter = args.twitter;
+    }
+    if (args.emailNotifications !== undefined) {
+      userUpdateData.emailNotifications = args.emailNotifications;
     }
     if (args.description !== undefined) {
       userUpdateData.description = args.description;

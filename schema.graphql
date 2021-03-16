@@ -381,6 +381,9 @@ type Mutation {
     """email"""
     email: String
 
+    """email notifications"""
+    emailNotifications: Boolean
+
     """facebook"""
     facebook: String
 
@@ -1142,6 +1145,9 @@ type User {
 
   """email"""
   email: String!
+
+  """email notifications"""
+  emailNotifications: Boolean!
 
   """email verified"""
   emailVerified: Boolean!

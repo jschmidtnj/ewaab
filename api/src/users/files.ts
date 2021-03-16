@@ -4,40 +4,26 @@ import { InternalServerError, NotFoundError } from 'typescript-rest/dist/server/
 import { getMediaKey, getS3FileData, S3Data } from '../utils/aws';
 import { getContext } from '../utils/context';
 import { getMediaAuthenticated } from './media.resolver';
-import { ApolloError } from 'apollo-server-express';
-import { verify } from 'jsonwebtoken';
-import { VerifyOptions } from 'jsonwebtoken';
+import type { VerifyOptions } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
-import { getSecret, MediaAccessTokenData, MediaAccessType } from '../utils/jwt';
-import statusCodes from 'http-status-codes';
+import { getSecret, MediaAccessTokenData, MediaAccessType, verifyPromise } from '../utils/jwt';
 import Media from '../schema/media/media.entity';
 import { mediaCookieName } from '../utils/cookies';
 
-export const decodeMediaAuth = (token: string): Promise<MediaAccessTokenData> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtConfig: VerifyOptions = {
-        algorithms: ['HS256']
-      };
-      verify(token, secret, jwtConfig, (err, res: any) => {
-        if (err) {
-          throw err as Error;
-        }
-        if (!('type' in res)) {
-          throw new Error('no type provided');
-        }
-        const type: MediaAccessType = res.type;
-        if (type !== MediaAccessType.media) {
-          throw new Error(`invalid media type ${type} provided`);
-        }
-        resolve(res as MediaAccessTokenData);
-      });
-    } catch (err) {
-      const errObj = err as Error;
-      reject(new ApolloError(errObj.message, `${statusCodes.BAD_REQUEST}`));
-    }
-  });
+export const decodeMediaAuth = async (token: string): Promise<MediaAccessTokenData> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtConfig: VerifyOptions = {
+    algorithms: ['HS256']
+  };
+  const jwtData = await verifyPromise(token, secret, jwtConfig) as Record<string, any>;
+  if (!('type' in jwtData)) {
+    throw new Error('no type provided');
+  }
+  const type: MediaAccessType = jwtData.type;
+  if (type !== MediaAccessType.media) {
+    throw new Error(`invalid media type ${type} provided`);
+  }
+  return jwtData as MediaAccessTokenData;
 };
 
 export const getFile = async (args: {
@@ -109,14 +95,10 @@ export const getFile = async (args: {
     args.res.setHeader('content-disposition', `attachment; filename=${fileName}`);
   }
   return new Promise<void>((resolve, reject) => {
-    try {
-      s3FileData.file.on('end', () => resolve());
-      s3FileData.file.on('error', _err => {
-        throw new InternalServerError('problem writing file')
-      });
-      s3FileData.file.pipe(args.res);
-    } catch (err) {
-      reject(err as Error);
-    }
+    s3FileData.file.on('end', () => resolve());
+    s3FileData.file.on('error', _err => {
+      reject(new InternalServerError('problem writing file'));
+    });
+    s3FileData.file.pipe(args.res);
   });
 };

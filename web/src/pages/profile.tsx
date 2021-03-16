@@ -185,13 +185,11 @@ const ProfilePage: FunctionComponent = () => {
           ) : (
             <div className="md:grid md:grid-cols-4 md:gap-6">
               <div className="md:col-span-1">
-                <div className="px-4 sm:px-0">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">
-                    {user.name}
-                    {"'"}s Profile
-                  </h3>
-                </div>
-                <div className="mt-2 ml-3 float-left sm:float-right">
+                <h3 className="w-48 text-lg font-medium leading-6 text-gray-900">
+                  {user.name}
+                  {"'"}s Profile
+                </h3>
+                <div className="mt-2 mr-3 float-left md:float-right">
                   <Link href={`/${user.username}`}>
                     <a className="font-medium text-indigo-600 hover:text-indigo-500">
                       @ {user.username}
@@ -199,7 +197,7 @@ const ProfilePage: FunctionComponent = () => {
                   </Link>
                 </div>
               </div>
-              <div className="mt-12 sm:mt-5 md:mt-0 md:col-span-3">
+              <div className="mt-12 md:mt-5 md:col-span-2">
                 <Formik
                   initialValues={{
                     email: user.email,
@@ -209,6 +207,7 @@ const ProfilePage: FunctionComponent = () => {
                     facebook: user.facebook,
                     github: user.github,
                     twitter: user.twitter,
+                    emailNotifications: user.emailNotifications,
                     description: user.description,
                     bio: user.bio,
                     major: user.major,
@@ -232,6 +231,7 @@ const ProfilePage: FunctionComponent = () => {
                     twitter: yup
                       .string()
                       .matches(validUsername, 'invalid twitter account'),
+                    emailNotifications: yup.boolean(),
                     description: yup.string(),
                     bio: yup.string(),
                     password: yup
@@ -304,6 +304,13 @@ const ProfilePage: FunctionComponent = () => {
                       }
                       if (formData.twitter !== user.twitter) {
                         updates.twitter = formData.twitter;
+                        foundUpdate = true;
+                      }
+                      if (
+                        formData.emailNotifications !== user.emailNotifications
+                      ) {
+                        updates.emailNotifications =
+                          formData.emailNotifications;
                         foundUpdate = true;
                       }
                       if (formData.description !== user.description) {
@@ -822,6 +829,42 @@ const ProfilePage: FunctionComponent = () => {
                             >
                               {errors.twitter}
                             </p>
+                          </div>
+
+                          <div
+                            className="flex flex-row items-center justify-start"
+                            onClick={(evt) => {
+                              evt.preventDefault();
+                              setFieldValue(
+                                'emailNotifications',
+                                !values.emailNotifications
+                              );
+                            }}
+                          >
+                            <label
+                              htmlFor="emailNotifications"
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              Email Notifications
+                            </label>
+                            <div
+                              id="emailNotifications"
+                              className={
+                                'ml-2 w-10 h-6 bg-gray-300 rounded-full p-1 duration-300 ease-in-out' +
+                                (values.emailNotifications
+                                  ? ' bg-green-400'
+                                  : '')
+                              }
+                            >
+                              <div
+                                className={
+                                  'bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out' +
+                                  (values.emailNotifications
+                                    ? ' translate-x-4'
+                                    : '')
+                                }
+                              ></div>
+                            </div>
                           </div>
 
                           <div>

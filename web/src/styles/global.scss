@@ -13,6 +13,10 @@ button:focus {
   @apply outline-none;
 }
 
+a:focus {
+  @apply outline-none;
+}
+
 input:focus {
   @apply outline-none;
 }
@@ -78,6 +82,7 @@ input:focus {
 
 @import "./markdown.scss";
 @import "~emoji-mart/css/emoji-mart.css";
+@import "~react-lazy-load-image-component/src/effects/blur.css";
 
 /* utilities */
 

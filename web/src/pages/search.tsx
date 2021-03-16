@@ -24,7 +24,7 @@ import {
 } from 'utils/variables';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
-import { AiOutlinePlus } from 'react-icons/ai';
+import { AiOutlinePlus, AiOutlineSearch } from 'react-icons/ai';
 import WritePostModal from 'components/modals/WritePostModal';
 import PostView from 'components/PostView';
 import DeletePostModal from 'components/modals/DeletePostModal';
@@ -112,7 +112,7 @@ const SearchPage: FunctionComponent = () => {
     }
     (async () => {
       try {
-        await runQuery(initialValues, !isDebug(), true);
+        await runQuery(initialValues, false, true);
       } catch (err) {
         // console.log(JSON.stringify(err));
         toast((err as ApolloError).message, {
@@ -174,12 +174,7 @@ const SearchPage: FunctionComponent = () => {
                     <div>
                       <div className="mt-1 flex rounded-md shadow-sm">
                         <span className="h-full absolute inset-y-0 left-0 pl-2">
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="mt-5 h-4 w-4 fill-current text-gray-500"
-                          >
-                            <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z"></path>
-                          </svg>
+                          <AiOutlineSearch className="mt-5 h-4 w-4 fill-current text-gray-500" />
                         </span>
                         <input
                           onChange={handleChange}

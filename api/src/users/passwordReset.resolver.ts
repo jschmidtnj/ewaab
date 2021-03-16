@@ -4,12 +4,10 @@ import { MinLength, Matches, IsOptional } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex } from '../shared/variables';
 import { getRepository } from 'typeorm';
 import User from '../schema/users/user.entity';
-import statusCodes from 'http-status-codes';
-import { ApolloError } from 'apollo-server-express';
 import { verifyRecaptcha } from '../utils/recaptcha';
-import { getSecret, VerifyType } from '../utils/jwt';
+import { getSecret, verifyPromise, VerifyType } from '../utils/jwt';
 import { PasswordResetTokenData } from '../emails/sendPasswordReset.resolver';
-import { VerifyOptions, verify } from 'jsonwebtoken';
+import type { VerifyOptions } from 'jsonwebtoken';
 import { loginType } from '../auth/shared';
 import { connectionName } from '../db/connect';
 
@@ -41,31 +39,20 @@ class PasswordResetArgs {
   password: string;
 }
 
-export const decodePasswordReset = (token: string): Promise<PasswordResetTokenData> => {
-  return new Promise((resolve, reject) => {
-    try {
-      const secret = getSecret(loginType.LOCAL);
-      const jwtConfig: VerifyOptions = {
-        algorithms: ['HS256']
-      };
-      verify(token, secret, jwtConfig, (err, res: any) => {
-        if (err) {
-          throw err as Error;
-        }
-        if (!('type' in res)) {
-          throw new Error('no type provided');
-        }
-        const type: VerifyType = res.type;
-        if (type !== VerifyType.resetPassword) {
-          throw new Error(`invalid verify type ${type} provided`);
-        }
-        resolve(res as PasswordResetTokenData);
-      });
-    } catch (err) {
-      const errObj = err as Error;
-      reject(new ApolloError(errObj.message, `${statusCodes.FORBIDDEN}`));
-    }
-  });
+export const decodePasswordReset = async (token: string): Promise<PasswordResetTokenData> => {
+  const secret = getSecret(loginType.LOCAL);
+  const jwtConfig: VerifyOptions = {
+    algorithms: ['HS256']
+  };
+  const jwtData = await verifyPromise(token, secret, jwtConfig) as Record<string, any>;
+  if (!('type' in jwtData)) {
+    throw new Error('no type provided');
+  }
+  const type: VerifyType = jwtData.type;
+  if (type !== VerifyType.resetPassword) {
+    throw new Error(`invalid verify type ${type} provided`);
+  }
+  return jwtData as PasswordResetTokenData;
 };
 
 @Resolver()
