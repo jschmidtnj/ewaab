@@ -182,6 +182,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
                   `cannot find post with id ${deletePostVariables.id}`
                 );
               }
+              // delete current post
               const newResults = [...posts.data.posts.results];
               newResults.splice(currentPostIndex, 1);
               const newPostsData: PostsQuery = {
@@ -190,10 +191,20 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
                   results: newResults,
                 },
               };
+              // fix counts
+              newPostsData.posts.count--;
+              const postType = posts.data.posts.results[currentPostIndex].type;
+              const postCount = newPostsData.posts.postCounts.find(
+                (elem) => elem.type === postType
+              );
+              if (postCount) {
+                postCount.count--;
+              }
               setPosts({
                 ...posts,
                 data: newPostsData,
               });
+              // update cache
               client.cache.writeQuery<PostsQuery, PostsQueryVariables>({
                 query: Posts,
                 variables: getVariables(),
