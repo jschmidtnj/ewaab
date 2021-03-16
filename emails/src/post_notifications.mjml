@@ -328,13 +328,16 @@
           {{else if (eq this.media.type "file")}}
         </mj-raw>
         <mj-group width="100%">
-          <mj-column padding-right="25px">
-            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/like.png" alt="like" width="45px"></mj-image>
+          <mj-column width="10%" padding="0" padding-right="25px">
+            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/file.png" alt="file" width="45px"></mj-image>
           </mj-column>
-          <mj-column padding="0">
+          <mj-column width="10%" padding="0">
             <mj-text align="left" padding="0">
               <a target="_blank" href="{{{this.media.url}}}" padding="0">{{this.media.name}}</a>
             </mj-text>
+          </mj-column>
+          <mj-column padding="0" width="80%">
+            <mj-spacer />
           </mj-column>
         </mj-group>
         <mj-raw>
@@ -352,20 +355,20 @@
           {{/if}}
         </mj-raw>
         <mj-group width="100%">
-          <mj-column padding="0">
+          <mj-column width="10%" padding="0">
             <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/like.png" alt="like" width="45px"></mj-image>
           </mj-column>
-          <mj-column padding="0">
+          <mj-column width="10%" padding="0">
             <mj-text align="left" padding="0">
               <p>
                 {{this.reactionCount}}
               </p>
             </mj-text>
           </mj-column>
-          <mj-column padding="0">
+          <mj-column width="10%" padding="0">
             <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/comment.png" alt="comment" width="45px"></mj-image>
           </mj-column>
-          <mj-column padding="0">
+          <mj-column width="10%" padding="0">
             <mj-text align="left" padding="0">
               <p>
                 {{this.commentCount}}
