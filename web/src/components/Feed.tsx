@@ -94,6 +94,16 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
   );
   const [currentPage, setCurrentPage] = useState<number>(0);
 
+  const getVariables = (): PostsQueryVariables => {
+    return {
+      sortBy: PostSortOption.Created,
+      perpage: numPerPage,
+      ascending: false,
+      page: currentPage,
+      type: args.postType,
+    };
+  };
+
   const runQuery = async (
     useCache = !isDebug(),
     init = false
@@ -101,13 +111,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
     try {
       const res = await client.query<PostsQuery, PostsQueryVariables>({
         query: Posts,
-        variables: {
-          sortBy: PostSortOption.Created,
-          perpage: numPerPage,
-          ascending: false,
-          page: currentPage,
-          type: args.postType,
-        },
+        variables: getVariables(),
         fetchPolicy: !useCache ? 'network-only' : 'cache-first',
       });
       if (res.errors) {
@@ -147,7 +151,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
 
   useEffect(() => {
     (async () => {
-      await runQuery(!isDebug(), true);
+      await runQuery(false, true);
     })();
   }, []);
 
@@ -169,25 +173,37 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
         <DeletePostModal
           toggleModal={toggleDeletePostModal}
           onSubmit={async () => {
-            const currentPostIndex = posts.data.posts.results.findIndex(
-              (elem) => elem.id === deletePostVariables.id
-            );
-            if (currentPostIndex < 0) {
-              throw new Error(
-                `cannot find post with id ${deletePostVariables.id}`
+            try {
+              const currentPostIndex = posts.data.posts.results.findIndex(
+                (elem) => elem.id === deletePostVariables.id
               );
-            }
-            const newResults = [...posts.data.posts.results];
-            newResults.splice(currentPostIndex, 1);
-            setPosts({
-              ...posts,
-              data: {
+              if (currentPostIndex < 0) {
+                throw new Error(
+                  `cannot find post with id ${deletePostVariables.id}`
+                );
+              }
+              const newResults = [...posts.data.posts.results];
+              newResults.splice(currentPostIndex, 1);
+              const newPostsData: PostsQuery = {
                 posts: {
                   ...posts.data.posts,
                   results: newResults,
                 },
-              },
-            });
+              };
+              setPosts({
+                ...posts,
+                data: newPostsData,
+              });
+              client.cache.writeQuery<PostsQuery, PostsQueryVariables>({
+                query: Posts,
+                variables: getVariables(),
+                data: newPostsData,
+              });
+            } catch (err) {
+              toast((err as Error).message, {
+                type: 'error',
+              });
+            }
           }}
           variables={deletePostVariables}
         />

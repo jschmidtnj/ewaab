@@ -49,7 +49,7 @@ const SearchPage: FunctionComponent = () => {
 
   const runQuery = async (
     variables: PostsQueryVariables,
-    useCache = !isDebug(),
+    useCache = isDebug(),
     init = false
   ): Promise<void> => {
     if (variables.query?.length === 0) {
@@ -147,7 +147,7 @@ const SearchPage: FunctionComponent = () => {
                 setSubmitting(false);
               };
               try {
-                await runQuery(formData, false);
+                await runQuery(formData);
               } catch (err) {
                 console.error(JSON.stringify(err, null, 2));
                 toast(err.message, {
@@ -279,8 +279,14 @@ const SearchPage: FunctionComponent = () => {
               }
               onSubmit={async () => {
                 // wait for elasticsearch to update
-                await sleep(1000);
-                formRef.current.handleSubmit();
+                await sleep(elasticWaitTime);
+                try {
+                  await runQuery(formRef.current.values, false);
+                } catch (err) {
+                  toast((err as Error).message, {
+                    type: 'error',
+                  });
+                }
               }}
               updateID={updatePostID}
             />
@@ -375,7 +381,13 @@ const SearchPage: FunctionComponent = () => {
                       onSubmit={async () => {
                         // wait for elasticsearch to update
                         await sleep(elasticWaitTime);
-                        formRef.current.handleSubmit();
+                        try {
+                          await runQuery(formRef.current.values, false);
+                        } catch (err) {
+                          toast((err as Error).message, {
+                            type: 'error',
+                          });
+                        }
                       }}
                       variables={deletePostVariables}
                     />
