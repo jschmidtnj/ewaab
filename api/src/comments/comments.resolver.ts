@@ -38,7 +38,7 @@ export const searchComments = async (args: PostCommentsArgs, post: string): Prom
 
   if (args.query) {
     args.query = args.query.toLowerCase();
-    mustShouldParams.push(esb.matchQuery('content', args.query).fuzziness('AUTO'));
+    mustShouldParams.push(esb.queryStringQuery('content').query(args.query).fuzziness('AUTO'));
   }
 
   filterMustParams.push(esb.termQuery('post', post));

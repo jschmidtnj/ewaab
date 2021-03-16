@@ -34,7 +34,7 @@ export const searchMessages = async (args: SearchMessagesArgs): Promise<SearchMe
   const mustShouldParams: esb.Query[] = [];
   if (args.query) {
     args.query = args.query.toLowerCase();
-    mustShouldParams.push(esb.matchQuery('content', args.query).fuzziness('AUTO'));
+    mustShouldParams.push(esb.queryStringQuery('content').query(args.query).fuzziness('AUTO'));
   }
 
   const filterShouldParams: esb.Query[] = [

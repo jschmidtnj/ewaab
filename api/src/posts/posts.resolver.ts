@@ -68,8 +68,8 @@ export const getPosts = async (args: PostsArgs, ctx?: GraphQLContext): Promise<S
 
   if (args.query) {
     args.query = args.query.toLowerCase();
-    mustShouldParams.push(esb.matchQuery('title', args.query).fuzziness('AUTO'));
-    mustShouldParams.push(esb.matchQuery('content', args.query).fuzziness('AUTO'));
+    mustShouldParams.push(esb.queryStringQuery('title').query(args.query).fuzziness('AUTO'));
+    mustShouldParams.push(esb.queryStringQuery('content').query(args.query).fuzziness('AUTO'));
   }
 
   if (args.publisher !== undefined) {
