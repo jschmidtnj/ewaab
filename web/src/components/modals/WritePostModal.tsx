@@ -308,6 +308,8 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                             (!args.updateID ? 'Added' : 'Updated') + ' Post',
                             {
                               type: 'success',
+                              autoClose: 2000,
+                              hideProgressBar: true
                             }
                           );
                           args.onSubmit();
@@ -329,8 +331,9 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                         handleChange,
                         setFieldValue,
                         isSubmitting,
+                        handleSubmit,
                       }) => (
-                        <form>
+                        <form onSubmit={handleSubmit}>
                           <div className="rounded-md">
                             <div>
                               <label htmlFor="title" className="sr-only">
@@ -369,6 +372,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                                   onChange={(newVal) =>
                                     setFieldValue('content', newVal)
                                   }
+                                  onSubmit={handleSubmit}
                                 />
                               </div>
                               <p
@@ -526,8 +530,8 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                   </div>
                 </>
               )}
-              <div className="bg-gray-50 px-4 py-3 grid grid-cols-2 items-center">
-                <div className="col-start-1 col-auto text-left">
+              <div className="bg-gray-50 px-4 py-3 grid grid-cols-3 items-center">
+                <div className="col-start-1 text-left">
                   <button
                     onClick={(evt) => {
                       evt.preventDefault();
@@ -549,7 +553,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                     <FiFileText />
                   </button>
                 </div>
-                <div className="col-start-2 col-auto text-right">
+                <div className="col-start-2 col-span-2 text-right">
                   <button
                     type="button"
                     onClick={(evt) => {

@@ -1,16 +1,19 @@
 import { FunctionComponent } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
 import { AiOutlineWarning } from 'react-icons/ai';
+import { toast } from 'react-toastify';
 
 interface ModalArgs {
   toggleModal: () => void;
   onSubmit: () => Promise<void>;
+  title: string;
+  infoMessage: string;
 }
 
-const DeleteAccount: FunctionComponent<ModalArgs> = (args) => {
+const DeleteModal: FunctionComponent<ModalArgs> = (args) => {
   return (
     <div className="fixed z-50 inset-0 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen px-4 pb-52 text-center">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
@@ -35,14 +38,10 @@ const DeleteAccount: FunctionComponent<ModalArgs> = (args) => {
                     className="text-lg leading-6 font-medium text-gray-900"
                     id="modal-headline"
                   >
-                    Delete account
+                    {args.title}
                   </h3>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Are you sure you want to delete your account? All of your
-                      data will be permanently removed. This action cannot be
-                      undone.
-                    </p>
+                    <p className="text-sm text-gray-500">{args.infoMessage}</p>
                   </div>
                 </div>
               </div>
@@ -52,8 +51,14 @@ const DeleteAccount: FunctionComponent<ModalArgs> = (args) => {
                 type="button"
                 onClick={async (evt) => {
                   evt.preventDefault();
-                  await args.onSubmit();
-                  args.toggleModal();
+                  try {
+                    await args.onSubmit();
+                    args.toggleModal();
+                  } catch (err) {
+                    toast((err as Error).message, {
+                      type: 'error',
+                    });
+                  }
                 }}
                 className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
               >
@@ -77,4 +82,4 @@ const DeleteAccount: FunctionComponent<ModalArgs> = (args) => {
   );
 };
 
-export default DeleteAccount;
+export default DeleteModal;

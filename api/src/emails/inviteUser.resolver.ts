@@ -84,7 +84,7 @@ class InviteUserResolver {
     const invite_token = await generateJWTInviteUser(args.email, args.name, args.type, args.alumniYear);
     const emailData = template({
       name: args.name,
-      verify_url: `${configData.WEBSITE_URL}/register?token=${invite_token}&email=${encodeURIComponent(args.email)}&name=${encodeURIComponent(args.name)}`,
+      verify_url: `${configData.WEBSITE_URL}/register?t=${invite_token}&email=${encodeURIComponent(args.email)}&name=${encodeURIComponent(args.name)}`,
     });
     await sendEmailUtil({
       content: emailData,

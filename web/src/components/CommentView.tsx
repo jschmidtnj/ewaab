@@ -30,7 +30,6 @@ interface CommentsViewArgs {
   updateSingleComment: (commentID: string, useCache: boolean) => Promise<void>;
   onDelete: () => Promise<void>;
   comment: CommentFieldsFragment;
-  key: string;
 }
 
 const CommentView: FunctionComponent<CommentsViewArgs> = (args) => {
@@ -61,7 +60,7 @@ const CommentView: FunctionComponent<CommentsViewArgs> = (args) => {
   }, []);
 
   return (
-    <div className="flex items-start justify-center" key={args.key}>
+    <div className="flex items-start justify-center">
       <div className="inline-block">
         <Link
           href={

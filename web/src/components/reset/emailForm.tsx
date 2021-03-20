@@ -92,7 +92,7 @@ const EmailForm: FunctionComponent = () => {
         handleSubmit,
         isSubmitting,
       }) => (
-        <form className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">

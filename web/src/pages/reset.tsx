@@ -14,8 +14,8 @@ const ResetPage: FunctionComponent = () => {
     (async () => {
       const urlParams = new URLSearchParams(window.location.search);
       try {
-        if (urlParams.has('token')) {
-          const givenToken = urlParams.get('token') as string;
+        if (urlParams.has('t')) {
+          const givenToken = urlParams.get('t') as string;
           if (givenToken.length < minJWTLen) {
             throw new Error('invalid reset token provided');
           }

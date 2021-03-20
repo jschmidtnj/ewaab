@@ -35,7 +35,7 @@ import { RootState } from 'state';
 import Image from 'next/image';
 import Avatar from 'components/Avatar';
 import { getAPIURL } from 'utils/axios';
-import DeleteAccountModal from 'components/modals/DeleteAccount';
+import DeleteModal from 'components/modals/DeleteModal';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import majors from 'shared/majors';
@@ -44,23 +44,19 @@ import Select, { ValueType } from 'react-select';
 import { capitalizeFirstLetter } from 'utils/misc';
 import universities from 'shared/universities';
 import Editor from 'components/markdown/Editor';
-
-interface SelectMajorObject {
-  value: string;
-  label: string;
-}
+import { SelectStringObject } from 'utils/variables';
 
 const minSelectSearchLen = 3;
 
 const universityOptions = universities.map(
-  (university): SelectMajorObject => ({
+  (university): SelectStringObject => ({
     label: university,
     value: university,
   })
 );
 
 const majorOptions = majors.map(
-  (major): SelectMajorObject => ({
+  (major): SelectStringObject => ({
     label: capitalizeFirstLetter(major),
     value: major,
   })
@@ -93,7 +89,7 @@ const LinkSpan = ({ link }: LinkSpanArgs): JSX.Element => {
   );
 };
 
-const ProfilePage: FunctionComponent = () => {
+const AccountPage: FunctionComponent = () => {
   let dispatchAuthThunk: AppThunkDispatch<AuthActionTypes>;
   if (!isSSR) {
     dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
@@ -183,9 +179,9 @@ const ProfilePage: FunctionComponent = () => {
           {user === undefined ? (
             <p className="text-sm">loading...</p>
           ) : (
-            <div className="md:grid md:grid-cols-4 md:gap-6">
+            <div className="md:grid md:grid-cols-4 w-full sm:w-auto md:gap-6">
               <div className="md:col-span-1">
-                <h3 className="w-48 text-lg font-medium leading-6 text-gray-900">
+                <h3 className="sm:w-48 text-lg font-medium leading-6 text-gray-900">
                   {user.name}
                   {"'"}s Profile
                 </h3>
@@ -394,7 +390,7 @@ const ProfilePage: FunctionComponent = () => {
                     setFieldValue,
                     setFieldTouched,
                   }) => (
-                    <form>
+                    <form onSubmit={handleSubmit}>
                       <div className="shadow sm:rounded-md sm:overflow-hidden">
                         <div className="px-4 py-5 bg-white space-y-6 sm:p-6">
                           <div>
@@ -583,7 +579,7 @@ const ProfilePage: FunctionComponent = () => {
                                 }
                                 onChange={(
                                   selectedOption: ValueType<
-                                    SelectMajorObject,
+                                    SelectStringObject,
                                     false
                                   >
                                 ) => {
@@ -656,7 +652,7 @@ const ProfilePage: FunctionComponent = () => {
                                 }}
                                 onChange={(
                                   selectedOption: ValueType<
-                                    SelectMajorObject,
+                                    SelectStringObject,
                                     false
                                   >
                                 ) => {
@@ -957,7 +953,7 @@ const ProfilePage: FunctionComponent = () => {
                             <label className="block text-sm font-medium text-gray-700">
                               Avatar
                             </label>
-                            <div className="mt-2 flex items-center">
+                            <div className="mt-2 ml-1 flex items-center">
                               {previewImage.length > 0 ? (
                                 <Image
                                   className="rounded-full"
@@ -977,7 +973,7 @@ const ProfilePage: FunctionComponent = () => {
                                   avatarInputElem.click();
                                 }}
                                 type="button"
-                                className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="ml-6 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                               >
                                 Change
                               </button>
@@ -1056,31 +1052,29 @@ const ProfilePage: FunctionComponent = () => {
 
                             <div className="text-center sm:px-6">
                               {!deleteAccountModalIsOpen ? null : (
-                                <DeleteAccountModal
+                                <DeleteModal
+                                  title="Delete account"
+                                  infoMessage="Are you sure you want to delete your account? All of your
+                                    data will be permanently removed. This action cannot be
+                                    undone."
                                   toggleModal={toggleDeleteAccountModal}
                                   onSubmit={async () => {
-                                    try {
-                                      const deleteAccountRes = await client.mutate<
-                                        DeleteAccountMutation,
-                                        DeleteAccountMutationVariables
-                                      >({
-                                        mutation: DeleteAccount,
-                                        variables: {},
-                                      });
-                                      if (deleteAccountRes.errors) {
-                                        throw new Error(
-                                          deleteAccountRes.errors.join(', ')
-                                        );
-                                      }
-                                      toast('Deleted Account', {
-                                        type: 'error',
-                                      });
-                                      dispatchAuthThunk(thunkLogout());
-                                    } catch (err) {
-                                      toast(err.message, {
-                                        type: 'error',
-                                      });
+                                    const deleteAccountRes = await client.mutate<
+                                      DeleteAccountMutation,
+                                      DeleteAccountMutationVariables
+                                    >({
+                                      mutation: DeleteAccount,
+                                      variables: {},
+                                    });
+                                    if (deleteAccountRes.errors) {
+                                      throw new Error(
+                                        deleteAccountRes.errors.join(', ')
+                                      );
                                     }
+                                    toast('Deleted Account', {
+                                      type: 'error',
+                                    });
+                                    dispatchAuthThunk(thunkLogout());
                                   }}
                                 />
                               )}
@@ -1110,4 +1104,4 @@ const ProfilePage: FunctionComponent = () => {
   );
 };
 
-export default ProfilePage;
+export default AccountPage;

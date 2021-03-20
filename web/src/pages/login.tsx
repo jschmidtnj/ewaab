@@ -55,11 +55,11 @@ const Login: FunctionComponent = () => {
       let verifyEmail = false;
       let localToken: string | undefined = undefined;
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('token')) {
-        localToken = urlParams.get('token') as string;
+      if (urlParams.has('t')) {
+        localToken = urlParams.get('t') as string;
       }
-      if (urlParams.has('redirect')) {
-        setRedirect(decodeURIComponent(urlParams.get('redirect') as string));
+      if (urlParams.has('r')) {
+        setRedirect(decodeURIComponent(urlParams.get('r') as string));
       }
       if (urlParams.has('verify_email')) {
         verifyEmail = true;
@@ -189,7 +189,7 @@ const Login: FunctionComponent = () => {
                 handleSubmit,
                 isSubmitting,
               }) => (
-                <form className="mt-8 space-y-6">
+                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                   <input type="hidden" name="remember" value="true" />
                   <div className="rounded-md shadow-sm -space-y-px">
                     <div>
@@ -353,7 +353,7 @@ const Login: FunctionComponent = () => {
                 handleSubmit,
                 isSubmitting,
               }) => (
-                <form className="mt-8 space-y-6">
+                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                   <input type="hidden" name="remember" value="true" />
                   <div className="rounded-md shadow-sm -space-y-px">
                     <div>

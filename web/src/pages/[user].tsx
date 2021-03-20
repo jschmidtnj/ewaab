@@ -37,6 +37,7 @@ import Avatar from 'components/Avatar';
 import Markdown from 'components/markdown/Markdown';
 import { defaultUniversity } from 'shared/universities';
 import PrivateRoute from 'components/PrivateRoute';
+import { isLoggedIn } from 'state/auth/getters';
 
 const avatarWidth = 40;
 
@@ -54,36 +55,45 @@ const UserPage: FunctionComponent = () => {
   const apiURL = getAPIURL();
 
   useEffect(() => {
-    const splitPath = window.location.pathname.split('/');
-    let username: string | undefined = undefined;
-    if (splitPath.length === 2) {
-      username = splitPath[1];
-    } else if (splitPath.length === 3) {
-      username = splitPath[2];
-    }
-    if (currentUser && username === currentUser.username) {
-      setUser((currentUser as unknown) as PublicUserFieldsFragment);
-    } else if (!isSSR) {
-      client
-        .query<PublicUserQuery | undefined, PublicUserQueryVariables>({
-          query: PublicUser,
-          variables: {
-            username: username as string,
-          },
-          fetchPolicy: 'no-cache', // disable cache
-        })
-        .then((res) => setUser(res.data?.publicUser))
-        .catch((err: ApolloError) => {
-          const errorCode = getErrorCode(err);
-          if (errorCode === statusCodes.NOT_FOUND) {
-            router.push('/404');
-          } else {
-            toast(err.message, {
-              type: 'error',
-            });
-          }
-        });
-    }
+    (async () => {
+      try {
+        if (!(await isLoggedIn())) {
+          return;
+        }
+        const splitPath = window.location.pathname.split('/');
+        let username: string | undefined = undefined;
+        if (splitPath.length === 2) {
+          username = splitPath[1];
+        } else if (splitPath.length === 3) {
+          username = splitPath[2];
+        }
+        if (currentUser && username === currentUser.username) {
+          setUser((currentUser as unknown) as PublicUserFieldsFragment);
+        } else {
+          const userRes = await client.query<
+            PublicUserQuery | undefined,
+            PublicUserQueryVariables
+          >({
+            query: PublicUser,
+            variables: {
+              username: username as string,
+            },
+            fetchPolicy: 'no-cache', // disable cache
+          });
+          setUser(userRes.data.publicUser);
+        }
+      } catch (err) {
+        const errObj = err as ApolloError;
+        const errorCode = getErrorCode(errObj);
+        if (errorCode === statusCodes.NOT_FOUND) {
+          router.replace('/404');
+        } else {
+          toast(errObj.message, {
+            type: 'error',
+          });
+        }
+      }
+    })();
   }, []);
   return (
     <PrivateRoute>

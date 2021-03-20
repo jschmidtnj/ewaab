@@ -28,15 +28,18 @@ import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
 import Avatar from 'components/Avatar';
 import PrivateRoute from 'components/PrivateRoute';
 import sleep from 'shared/sleep';
+import { capitalizeFirstLetter } from 'utils/misc';
 
 const avatarWidth = 40;
 
 const minSelectSearchLen = 2;
 
-const majorsOptions: SelectStringObject[] = majors.map((major) => ({
-  label: major,
-  value: major,
-}));
+const majorsOptions = majors.map(
+  (major): SelectStringObject => ({
+    label: capitalizeFirstLetter(major),
+    value: major,
+  })
+);
 
 const userTypeLabels: Record<UserType, string> = {
   [UserType.User]: 'EH Participant',
@@ -94,13 +97,16 @@ const UsersPage: FunctionComponent = () => {
     variables: UsersQueryVariables,
     init = false
   ): Promise<void> => {
-    if (variables.majors?.length === 0) {
-      variables.majors = undefined;
+    const currentVariables = {
+      ...variables
+    };
+    if (currentVariables.majors?.length === 0) {
+      currentVariables.majors = undefined;
     }
-    if (variables.query?.length === 0) {
-      variables.query = undefined;
+    if (currentVariables.query?.length === 0) {
+      currentVariables.query = undefined;
     }
-    variables.types = [UserType.Mentor, UserType.User];
+    currentVariables.types = [UserType.Mentor, UserType.User];
     const res = await client.query<UsersQuery, UsersQueryVariables>({
       query: Users,
       variables,
@@ -190,7 +196,7 @@ const UsersPage: FunctionComponent = () => {
               setFieldValue,
               setFieldTouched,
             }) => (
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="my-2 flex sm:flex-row flex-col">
                   <div className="block relative">
                     <div>
@@ -206,6 +212,7 @@ const UsersPage: FunctionComponent = () => {
                         <input
                           onChange={handleChange}
                           onKeyDown={(evt) => {
+                            console.log(evt.key);
                             if (evt.key === 'Enter') {
                               handleSubmit();
                             }
@@ -217,7 +224,7 @@ const UsersPage: FunctionComponent = () => {
                           name="query"
                           id="query"
                           placeholder="Search"
-                          className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none rounded-l"
+                          className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none sm:rounded-l"
                         />
                       </div>
                     </div>
@@ -408,7 +415,7 @@ const UsersPage: FunctionComponent = () => {
                               {user.name}
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {user.major}
+                              {capitalizeFirstLetter(user.major)}
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               {userTypeLabels[user.type]}

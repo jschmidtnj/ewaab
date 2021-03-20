@@ -2,9 +2,11 @@ import SEO from 'components/SEO';
 import { FunctionComponent } from 'react';
 import Layout from 'layouts/main';
 import CatSVG from 'svg/cat.svg';
-import Link from 'next/link';
+import { useRouter } from 'next/dist/client/router';
 
 const NotFoundPage: FunctionComponent = () => {
+  const router = useRouter();
+
   return (
     <Layout>
       <SEO page="home" />
@@ -20,11 +22,12 @@ const NotFoundPage: FunctionComponent = () => {
               homepage.
             </p>
 
-            <Link href="/">
-              <a className="px-4 inline py-2 text-sm font-medium leading-5 shadow text-white transition-colors duration-150 border border-transparent rounded-lg focus:shadow-outline-blue bg-blue-600 active:bg-blue-600 hover:bg-blue-700">
-                go to homepage
-              </a>
-            </Link>
+            <button
+              onClick={() => router.back()}
+              className="px-4 inline py-2 text-sm font-medium leading-5 shadow text-white transition-colors duration-150 border border-transparent rounded-lg focus:shadow-outline-blue bg-blue-600 active:bg-blue-600 hover:bg-blue-700"
+            >
+              go back
+            </button>
           </div>
           <div className="max-w-lg w-full">
             <CatSVG />

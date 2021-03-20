@@ -172,7 +172,7 @@ class RegisterResolver {
     const verify_token = await generateJWTVerifyEmail(id);
     const emailData = template({
       name: newUser.name,
-      verify_url: `${configData.WEBSITE_URL}/login?token=${verify_token}&verify_email=true`
+      verify_url: `${configData.WEBSITE_URL}/login?t=${verify_token}&verify_email=true`
     });
     await sendEmailUtil({
       content: emailData,

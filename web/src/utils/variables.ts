@@ -71,9 +71,9 @@ export const linkMap: Record<PostType, LinkData> = {
   },
 };
 
-export const profileLink: LinkData = {
-  name: 'profile',
-  href: '/profile',
+export const accountLink: LinkData = {
+  name: 'account',
+  href: '/account',
 };
 export const usersLink: LinkData = {
   name: 'students',
@@ -94,7 +94,8 @@ export const feedPaths: string[] = Object.values(linkMap).map(
 
 export const allDefinedPaths: string[] = [
   ...feedPaths,
-  ...[profileLink, usersLink, loginLink, searchLink].map((elem) => elem.href),
+  ...[accountLink, usersLink, loginLink, searchLink].map((elem) => elem.href),
 ];
 
 export const allowedVisitorPaths: LinkData[] = [usersLink];
+export const dynamicAllowedVisitorPaths: string[] = ['/[user]'];

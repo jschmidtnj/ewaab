@@ -22,7 +22,7 @@ import {
   linkMap,
   loginLink,
   postViewMap,
-  profileLink,
+  accountLink,
   searchLink,
   usersLink,
 } from 'utils/variables';
@@ -79,10 +79,10 @@ const Header: FunctionComponent = () => {
         const username = getUsername();
         setUserPaths([
           {
-            name: 'account',
+            name: 'profile',
             href: `/${username}`,
           },
-          profileLink,
+          accountLink,
         ]);
       }
     })();

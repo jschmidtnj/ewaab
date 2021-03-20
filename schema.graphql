@@ -423,6 +423,9 @@ type Mutation {
     """twitter"""
     twitter: String
 
+    """user type"""
+    type: UserType
+
     """university"""
     university: String
 

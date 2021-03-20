@@ -61,7 +61,7 @@ class SendPasswordResetResolver {
     }
     const passwordResetToken = await generateJWTPasswordReset(args.email);
     const emailData = template({
-      verify_url: `${configData.WEBSITE_URL}/reset?token=${passwordResetToken}`,
+      verify_url: `${configData.WEBSITE_URL}/reset?t=${passwordResetToken}`,
     });
     await sendEmailUtil({
       content: emailData,

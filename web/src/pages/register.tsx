@@ -51,10 +51,10 @@ const RegisterPage: FunctionComponent = () => {
       }
       const urlParams = new URLSearchParams(window.location.search);
       try {
-        if (!urlParams.has('token')) {
+        if (!urlParams.has('t')) {
           throw new Error('no registration token found!');
         }
-        const givenToken = urlParams.get('token') as string;
+        const givenToken = urlParams.get('t') as string;
         if (givenToken.length < minJWTLen) {
           throw new Error('invalid registration token provided');
         }
@@ -214,7 +214,7 @@ const RegisterPage: FunctionComponent = () => {
                 handleSubmit,
                 isSubmitting,
               }) => (
-                <form className="mt-8 space-y-6">
+                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                   <div className="rounded-md shadow-sm -space-y-px">
                     <div>
                       <label htmlFor="email" className="sr-only">

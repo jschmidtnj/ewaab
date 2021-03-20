@@ -30,6 +30,8 @@ import { elasticWaitTime } from 'utils/variables';
 import { ApolloError } from '@apollo/client';
 import isDebug from 'utils/mode';
 import { cloneDeep } from '@apollo/client/utilities';
+import type { Editor as SimpleMDEEditor } from 'codemirror';
+import type { KeyboardEvent } from 'react';
 import CommentView from './CommentView';
 
 const numPerPage = 5;
@@ -160,17 +162,27 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
           }}
         >
           {({ values, errors, handleSubmit, setFieldValue }) => (
-            <form className="inline-block w-full">
+            <form onSubmit={handleSubmit} className="inline-block w-full">
               <div className="space-x-2 flex items-start justify-center">
-                <label htmlFor="comment" className="sr-only">
+                <label htmlFor={`comment-editor-${args.post}`} className="sr-only">
                   Comment
                 </label>
                 <div className="inline-block w-full">
                   <SimpleMDE
-                    id="comment"
+                    id={`comment-editor-${args.post}`}
                     className="editor-min w-full"
                     onChange={(val) => setFieldValue('comment', val)}
                     value={values.comment}
+                    events={{
+                      // @ts-ignore
+                      keydown: (_instance: SimpleMDEEditor, evt: KeyboardEvent<HTMLDivElement>) => {
+                        if (evt.key === 'Enter' && evt.ctrlKey) {
+                          setTimeout(() => {
+                            handleSubmit();
+                          }, 0);
+                        }
+                      }
+                    }}
                     options={{
                       toolbar: false,
                       spellChecker: false,
@@ -205,83 +217,84 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
           </p>
         ) : (
           comments.map((comment, i) => (
-            <CommentView
-              key={`comment-${args.post}-${i}`}
-              comment={comment}
-              post={args.post}
-              updateSingleComment={async (
-                commentID: string,
-                useCache = !isDebug()
-              ) => {
-                try {
-                  const currentCommentIndex = comments.findIndex(
-                    (elem) => elem.id === commentID
-                  );
-                  if (currentCommentIndex < 0) {
-                    throw new Error(`comment with id ${commentID} not found`);
-                  }
-                  const res = await client.query<
-                    CommentUpdatesQuery,
-                    CommentUpdatesQueryVariables
-                  >({
-                    query: CommentUpdates,
-                    variables: {
-                      id: commentID,
-                    },
-                    fetchPolicy: !useCache ? 'network-only' : 'cache-first',
-                  });
-                  if (res.errors) {
-                    throw new Error(res.errors.join(', '));
-                  }
-                  const commentCopy = cloneDeep(comments[currentCommentIndex]);
-                  for (const key in res.data.comment) {
-                    commentCopy[key] = res.data.comment[key];
-                  }
-                  const newComments = [...comments];
-                  newComments[currentCommentIndex] = commentCopy;
-                  setComments(newComments);
-                } catch (err) {
-                  // console.log(JSON.stringify(err));
-                  toast((err as ApolloError).message, {
-                    type: 'error',
-                  });
-                }
-              }}
-              onDelete={async () => {
-                try {
-                  const deleteCommentRes = await client.mutate<
-                    DeleteCommentMutation,
-                    DeleteCommentMutationVariables
-                  >({
-                    mutation: DeleteComment,
-                    variables: {
-                      id: comment.id,
-                    },
-                  });
-                  if (deleteCommentRes.errors) {
-                    throw new Error(deleteCommentRes.errors.join(', '));
-                  }
-                  const currentCommentIndex = comments.findIndex(
-                    (elem) => elem.id === comment.id
-                  );
-                  if (currentCommentIndex < 0) {
-                    throw new Error(
-                      `cannot find comment with id ${comment.id}`
+            <div key={`comment-${args.post}-${i}`}>
+              <CommentView
+                comment={comment}
+                post={args.post}
+                updateSingleComment={async (
+                  commentID: string,
+                  useCache = !isDebug()
+                ) => {
+                  try {
+                    const currentCommentIndex = comments.findIndex(
+                      (elem) => elem.id === commentID
                     );
+                    if (currentCommentIndex < 0) {
+                      throw new Error(`comment with id ${commentID} not found`);
+                    }
+                    const res = await client.query<
+                      CommentUpdatesQuery,
+                      CommentUpdatesQueryVariables
+                    >({
+                      query: CommentUpdates,
+                      variables: {
+                        id: commentID,
+                      },
+                      fetchPolicy: !useCache ? 'network-only' : 'cache-first',
+                    });
+                    if (res.errors) {
+                      throw new Error(res.errors.join(', '));
+                    }
+                    const commentCopy = cloneDeep(comments[currentCommentIndex]);
+                    for (const key in res.data.comment) {
+                      commentCopy[key] = res.data.comment[key];
+                    }
+                    const newComments = [...comments];
+                    newComments[currentCommentIndex] = commentCopy;
+                    setComments(newComments);
+                  } catch (err) {
+                    // console.log(JSON.stringify(err));
+                    toast((err as ApolloError).message, {
+                      type: 'error',
+                    });
                   }
-                  const newComments = [...comments];
-                  newComments.splice(currentCommentIndex, 1);
-                  setComments(newComments);
-                  await sleep(elasticWaitTime);
-                  await args.updateSinglePost(args.post, false);
-                } catch (err) {
-                  const errObj: Error = err;
-                  toast(errObj.message, {
-                    type: 'error',
-                  });
-                }
-              }}
-            />
+                }}
+                onDelete={async () => {
+                  try {
+                    const deleteCommentRes = await client.mutate<
+                      DeleteCommentMutation,
+                      DeleteCommentMutationVariables
+                    >({
+                      mutation: DeleteComment,
+                      variables: {
+                        id: comment.id,
+                      },
+                    });
+                    if (deleteCommentRes.errors) {
+                      throw new Error(deleteCommentRes.errors.join(', '));
+                    }
+                    const currentCommentIndex = comments.findIndex(
+                      (elem) => elem.id === comment.id
+                    );
+                    if (currentCommentIndex < 0) {
+                      throw new Error(
+                        `cannot find comment with id ${comment.id}`
+                      );
+                    }
+                    const newComments = [...comments];
+                    newComments.splice(currentCommentIndex, 1);
+                    setComments(newComments);
+                    await sleep(elasticWaitTime);
+                    await args.updateSinglePost(args.post, false);
+                  } catch (err) {
+                    const errObj: Error = err;
+                    toast(errObj.message, {
+                      type: 'error',
+                    });
+                  }
+                }}
+              />
+            </div>
           ))
         )}
       </div>

@@ -5,7 +5,7 @@ import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn, Min, 
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen, ewaabFounded, uuidRegex } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
-import User, { BaseSearchUser } from '../schema/users/user.entity';
+import User, { BaseSearchUser, UserType } from '../schema/users/user.entity';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
@@ -37,6 +37,10 @@ class UpdateArgs {
     message: 'invalid user id provided, must be uuid v4'
   })
   id?: string;
+
+  @Field(_type => UserType, { description: 'user type', nullable: true })
+  @IsOptional()
+  type?: UserType;
 
   @Field(_type => String, { description: 'name', nullable: true })
   @IsOptional()
@@ -178,21 +182,25 @@ class UpdateArgs {
 class UpdateAccountResolver {
   @Mutation(_returns => String)
   async updateAccount(@Args() args: UpdateArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
+    if (!verifyLoggedIn(ctx) || !ctx.auth) {
+      throw new Error('user not logged in');
+    }
+
     const isAdmin = verifyAdmin(ctx);
+    if (args.id !== undefined && args.id !== ctx.auth.id && !isAdmin) {
+      throw new Error('user must be admin to change other user');
+    }
     if (args.alumniYear !== undefined && !isAdmin) {
       throw new Error('user must be admin to modify alumni year');
+    }
+    if (args.type !== undefined && !isAdmin) {
+      throw new Error('only admins can change user type');
     }
 
     let id: string;
     if (args.id !== undefined) {
-      if (!isAdmin) {
-        throw new Error('user not admin');
-      }
       id = args.id;
     } else {
-      if (!verifyLoggedIn(ctx) || !ctx.auth) {
-        throw new Error('user not logged in');
-      }
       id = ctx.auth.id;
     }
     if (!Object.values(args).some(elem => elem !== undefined)) {
@@ -228,7 +236,7 @@ class UpdateAccountResolver {
       const verify_token = await generateJWTVerifyEmail(id);
       const emailData = template({
         name: args.name,
-        verify_url: `${configData.WEBSITE_URL}/login?token=${verify_token}&verify_email=true`
+        verify_url: `${configData.WEBSITE_URL}/login?t=${verify_token}&verify_email=true`
       });
       await sendEmailUtil({
         content: emailData,
@@ -294,6 +302,10 @@ class UpdateAccountResolver {
     if (args.alumniYear !== undefined) {
       userUpdateData.alumniYear = args.alumniYear;
       userElasticUpdateData.alumniYear = args.alumniYear;
+    }
+    if (args.type !== undefined) {
+      userUpdateData.type = args.type;
+      userElasticUpdateData.type = args.type;
     }
     if (args.mentor !== undefined) {
       userUpdateData.mentor = args.mentor;

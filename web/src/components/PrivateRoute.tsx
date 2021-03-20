@@ -12,6 +12,7 @@ import { isSSR } from 'utils/checkSSR';
 import {
   allDefinedPaths,
   allowedVisitorPaths,
+  dynamicAllowedVisitorPaths,
   feedPaths,
   linkMap,
   postViewMap,
@@ -29,7 +30,7 @@ const PrivateRoute: FunctionComponent<PrivateRouteArgs> = (args) => {
   const router = useRouter();
 
   const getRedirect = (): string =>
-    `?redirect=${encodeURIComponent(router.asPath)}`;
+    `?r=${encodeURIComponent(window.location.pathname)}`;
 
   const checkRoute = (): boolean => {
     const userType = getType();
@@ -41,7 +42,12 @@ const PrivateRoute: FunctionComponent<PrivateRouteArgs> = (args) => {
       return true;
     }
     if (userType === UserType.Visitor) {
-      if (!allowedVisitorPaths.some((elem) => elem.href === router.asPath)) {
+      if (
+        !(
+          dynamicAllowedVisitorPaths.includes(router.asPath) ||
+          allowedVisitorPaths.some((elem) => elem.href === router.asPath)
+        )
+      ) {
         return false;
       }
     } else if (feedPaths.includes(router.asPath)) {

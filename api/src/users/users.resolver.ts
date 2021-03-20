@@ -94,9 +94,9 @@ class UsersResolver {
         )
         .filter(
           esb.boolQuery()
-            .should(filterTypeParams)
-            .should(filterMajorParams)
             .must(filterMustParams)
+            .must(esb.boolQuery().should(filterTypeParams))
+            .must(esb.boolQuery().should(filterMajorParams))
         )
     );
     if (args.sortBy) {

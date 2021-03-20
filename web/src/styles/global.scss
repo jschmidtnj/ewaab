@@ -68,6 +68,10 @@ input:focus {
   overflow-y: auto;
 }
 
+.CodeMirror-code {
+  @apply outline-none;
+}
+
 .editor-min .CodeMirror-scroll {
   @apply h-auto;
 }

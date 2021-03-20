@@ -168,7 +168,7 @@ const SearchPage: FunctionComponent = () => {
               setFieldValue,
               setFieldTouched,
             }) => (
-              <form className="lg:ml-12">
+              <form onSubmit={handleSubmit} className="lg:ml-12">
                 <div className="my-2 flex sm:flex-row flex-col">
                   <div className="block relative">
                     <div>

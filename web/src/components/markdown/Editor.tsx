@@ -1,17 +1,20 @@
 import SimpleMDE from 'react-simplemde-editor';
 import { FunctionComponent, useState } from 'react';
 import Markdown from './Markdown';
+import type { Editor as SimpleMDEEditor } from 'codemirror';
+import type { KeyboardEvent } from 'react';
 
 interface EditorArgs {
   onChange: (newVal: string) => void;
   value: string;
+  onSubmit?: () => void;
 }
 
 const Editor: FunctionComponent<EditorArgs> = (args) => {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   return (
     <div className="flex flex-col w-full">
-      <nav className="flex flex-col sm:flex-row text-sm">
+      <nav className="flex flex-row text-sm">
         <button
           className={
             (!showPreview
@@ -22,6 +25,7 @@ const Editor: FunctionComponent<EditorArgs> = (args) => {
             evt.preventDefault();
             setShowPreview(false);
           }}
+          tabIndex={-1}
         >
           Edit
         </button>
@@ -35,6 +39,7 @@ const Editor: FunctionComponent<EditorArgs> = (args) => {
             evt.preventDefault();
             setShowPreview(true);
           }}
+          tabIndex={-1}
         >
           Preview
         </button>
@@ -44,6 +49,16 @@ const Editor: FunctionComponent<EditorArgs> = (args) => {
           <SimpleMDE
             onChange={args.onChange}
             value={args.value}
+            events={{
+              // @ts-ignore
+              keydown: (_instance: SimpleMDEEditor, evt: KeyboardEvent<HTMLDivElement>) => {
+                if (evt.key === 'Enter' && evt.ctrlKey && args.onSubmit) {
+                  setTimeout(() => {
+                    args.onSubmit();
+                  }, 0);
+                }
+              }
+            }}
             options={{
               toolbar: [
                 'bold',
