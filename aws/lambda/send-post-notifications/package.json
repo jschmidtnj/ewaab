@@ -41,6 +41,7 @@
     "aws-sdk": "^2.819.0",
     "class-validator": "^0.12.2",
     "cosmiconfig": "^7.0.0",
+    "date-fns": "^2.19.0",
     "dompurify": "^2.2.6",
     "dotenv": "^8.2.0",
     "elastic-builder": "^2.11.0",

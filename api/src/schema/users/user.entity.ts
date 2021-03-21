@@ -164,6 +164,11 @@ export default class User extends PublicUser {
   @IsDefined()
   emailVerified: boolean;
 
+  @Field({ description: 'date of last email notification' })
+  @Column({ type: 'bigint' })
+  @IsDefined()
+  lastEmailNotification: number;
+
   @Field({ description: 'email notifications' })
   @Column({ type: 'boolean' })
   @IsDefined()

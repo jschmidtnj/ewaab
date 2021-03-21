@@ -160,6 +160,7 @@ class RegisterResolver {
       github: '',
       twitter: '',
       emailNotifications: true,
+      lastEmailNotification: new Date().getTime(),
       bio: '',
       mentor: ''
     });

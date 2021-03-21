@@ -1,5 +1,5 @@
-import { Resolver, ArgsType, Field, Args, Mutation, Ctx } from 'type-graphql';
-import { IsOptional, Matches, ValidateIf } from 'class-validator';
+import { Resolver, ArgsType, Field, Args, Mutation, Ctx, Int } from 'type-graphql';
+import { IsOptional, IsPositive, Matches, ValidateIf } from 'class-validator';
 import { configData, getAPIURL } from '../utils/config';
 import { emailTemplateFiles, PostEmailData } from './compileEmailTemplates';
 import { sendEmailUtil } from './sendEmail.resolver';
@@ -15,6 +15,7 @@ import { getMediaData, getPublisherData } from '../posts/searchResults.resolver'
 import { Converter } from 'showdown';
 import { generateJWTMediaAccess } from '../utils/jwt';
 import { sanitize } from '../utils/sanitizeHTML';
+import { format } from 'date-fns';
 import { connectionName } from '../db/connect';
 
 const logger = getLogger();
@@ -28,6 +29,12 @@ class SendPostNotificationArgs {
     message: 'invalid user id provided, must be uuid v4'
   })
   id?: string;
+
+  @Field(_type => Int, { description: 'created after this date', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: number) => val !== undefined)
+  @IsPositive({ message: 'utc timestamp must be greater than 0' })
+  created?: number;
 }
 
 const getMediaURL = (id: string, authToken: string): string => {
@@ -38,7 +45,7 @@ const getAvatarURL = (avatar: string | null | undefined, authToken?: string): st
   return avatar && authToken ? getMediaURL(avatar, authToken) : `${configData.WEBSITE_URL}/assets/img/default_avatar.png`;
 };
 
-export const sendNotification = async (id: string): Promise<string> => {
+export const sendNotification = async (id: string, created?: number): Promise<string> => {
   const UserModel = getRepository(User, connectionName);
   const userData = await UserModel.findOne(id, {
     select: ['id', 'name', 'username', 'avatar', 'email', 'type']
@@ -50,8 +57,13 @@ export const sendNotification = async (id: string): Promise<string> => {
     ascending: false,
     page: 0,
     perpage: 10,
-    sortBy: PostSortOption.created
+    sortBy: PostSortOption.created,
+    created
   });
+
+  if (postData.count === 0) {
+    throw new Error('no posts found in given timeframe');
+  }
 
   const markdownConverter = new Converter();
 
@@ -99,10 +111,15 @@ export const sendNotification = async (id: string): Promise<string> => {
     name: userData.name,
     posts: postEmailData
   });
+  const now = new Date();
+  const subject = `${emailTemplateData.subject} ${format(now, "MMM do, 'yy")}`
   await sendEmailUtil({
     content: emailData,
     email: userData.email,
-    subject: emailTemplateData.subject
+    subject
+  });
+  await UserModel.update(id, {
+    lastEmailNotification: now.getTime()
   });
   logger.info('email was sent!');
   return `sent notification email to ${userData.email}`;
@@ -119,7 +136,7 @@ class SendPostsNotificationResolver {
     if (args.id !== undefined) {
       id = args.id;
     }
-    return await sendNotification(id);
+    return await sendNotification(id, args.created);
   }
 }
 

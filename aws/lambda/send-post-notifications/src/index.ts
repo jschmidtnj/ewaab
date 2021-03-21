@@ -33,12 +33,12 @@ const sendAllNotifications = async (): Promise<void> => {
   await initialize();
   const UserModel = getRepository(User, connectionName);
   for (const userData of await UserModel.find({
-    select: ['id'],
+    select: ['id', 'lastEmailNotification'],
     where: {
       emailNotifications: true
     }
   })) {
-    await sendNotification(userData.id);
+    await sendNotification(userData.id, new Date(userData.lastEmailNotification).getTime());
   }
 };
 

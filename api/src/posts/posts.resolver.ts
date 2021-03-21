@@ -3,7 +3,7 @@ import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
-import { IsOptional, Matches, ValidateIf } from 'class-validator';
+import { IsOptional, IsPositive, Matches, ValidateIf } from 'class-validator';
 import { PostCount, PostSortOption, PostType, BaseSearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import esb from 'elastic-builder';
 import { uuidRegex } from '../shared/variables';
@@ -23,6 +23,8 @@ class PostsArgs extends PaginationArgs {
 
   @Field(_type => Int, { description: 'created after this date', nullable: true })
   @IsOptional()
+  @ValidateIf((_obj, val?: number) => val !== undefined)
+  @IsPositive({ message: 'utc timestamp must be greater than 0' })
   created?: number;
 
   @Field(_type => PostSortOption, { description: 'sort by this field', defaultValue: PostSortOption.created })
