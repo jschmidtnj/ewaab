@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
-import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors, { CorsOptions } from 'cors';
 import express from 'express';
@@ -61,7 +60,7 @@ export const initializeServer = async (): Promise<void> => {
   app.use(statusMonitor({
     path: '/status',
     healthChecks: [{
-      host: 'localhost',
+      host: '0.0.0.0',
       path: '/',
       port: configData.PORT,
       protocol: 'http'
@@ -72,15 +71,15 @@ export const initializeServer = async (): Promise<void> => {
     path: server.graphqlPath,
     cors: false
   });
-  app.use(bodyParser.urlencoded({
+  app.use(express.urlencoded({
     extended: true
   }));
-  app.use(bodyParser.json());
+  app.use(express.json());
 
   Server.buildServices(app);
   Server.loadServices(app, '**/*.rest.{ts,js}', __dirname);
   const swaggerSchemes = [];
-  let swaggerHost = `localhost:${configData.PORT}`;
+  let swaggerHost = `0.0.0.0:${configData.PORT}`;
   if (isProduction()) {
     swaggerSchemes.push('https');
     swaggerHost = configData.API_HOST;

@@ -52,12 +52,15 @@ const SearchPage: FunctionComponent = () => {
     useCache = isDebug(),
     init = false
   ): Promise<void> => {
-    if (variables.query?.length === 0) {
-      variables.query = undefined;
+    const currentVariables = {
+      ...variables
+    };
+    if (currentVariables.query?.length === 0) {
+      currentVariables.query = undefined;
     }
     const res = await client.query<PostsQuery, PostsQueryVariables>({
       query: Posts,
-      variables,
+      variables: currentVariables,
       fetchPolicy: !useCache ? 'network-only' : 'cache-first', // disable cache
     });
     if (res.errors) {
@@ -178,11 +181,6 @@ const SearchPage: FunctionComponent = () => {
                         </span>
                         <input
                           onChange={handleChange}
-                          onKeyDown={(evt) => {
-                            if (evt.key === 'Enter') {
-                              handleSubmit();
-                            }
-                          }}
                           onBlur={handleBlur}
                           value={values.query}
                           disabled={isSubmitting}
@@ -190,6 +188,7 @@ const SearchPage: FunctionComponent = () => {
                           name="query"
                           id="query"
                           placeholder="Search"
+                          autoComplete="off"
                           className="lg:w-64 h-12 shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full border-gray-300 rounded-none sm:rounded-l"
                         />
                       </div>
@@ -246,7 +245,9 @@ const SearchPage: FunctionComponent = () => {
                         {errors.perpage}
                       </p>
                     </div>
-
+                    <button type="submit" className="sr-only">
+                      search submit
+                    </button>
                     <button
                       className="disabled:bg-blue-400 mt-1 flex justify-center items-center bg-blue-700 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-none sm:rounded-r"
                       onClick={(evt) => {

@@ -164,7 +164,10 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
           {({ values, errors, handleSubmit, setFieldValue }) => (
             <form onSubmit={handleSubmit} className="inline-block w-full">
               <div className="space-x-2 flex items-start justify-center">
-                <label htmlFor={`comment-editor-${args.post}`} className="sr-only">
+                <label
+                  htmlFor={`comment-editor-${args.post}`}
+                  className="sr-only"
+                >
                   Comment
                 </label>
                 <div className="inline-block w-full">
@@ -175,13 +178,16 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
                     value={values.comment}
                     events={{
                       // @ts-ignore
-                      keydown: (_instance: SimpleMDEEditor, evt: KeyboardEvent<HTMLDivElement>) => {
+                      keydown: (
+                        _instance: SimpleMDEEditor,
+                        evt: KeyboardEvent<HTMLDivElement>
+                      ) => {
                         if (evt.key === 'Enter' && evt.ctrlKey) {
                           setTimeout(() => {
                             handleSubmit();
                           }, 0);
                         }
-                      }
+                      },
                     }}
                     options={{
                       toolbar: false,
@@ -245,7 +251,9 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
                     if (res.errors) {
                       throw new Error(res.errors.join(', '));
                     }
-                    const commentCopy = cloneDeep(comments[currentCommentIndex]);
+                    const commentCopy = cloneDeep(
+                      comments[currentCommentIndex]
+                    );
                     for (const key in res.data.comment) {
                       commentCopy[key] = res.data.comment[key];
                     }

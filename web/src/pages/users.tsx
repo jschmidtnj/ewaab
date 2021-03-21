@@ -98,7 +98,7 @@ const UsersPage: FunctionComponent = () => {
     init = false
   ): Promise<void> => {
     const currentVariables = {
-      ...variables
+      ...variables,
     };
     if (currentVariables.majors?.length === 0) {
       currentVariables.majors = undefined;
@@ -211,16 +211,11 @@ const UsersPage: FunctionComponent = () => {
                         </span>
                         <input
                           onChange={handleChange}
-                          onKeyDown={(evt) => {
-                            console.log(evt.key);
-                            if (evt.key === 'Enter') {
-                              handleSubmit();
-                            }
-                          }}
                           onBlur={handleBlur}
                           value={values.query}
                           disabled={isSubmitting}
-                          type="text"
+                          type="submit"
+                          autoComplete="off"
                           name="query"
                           id="query"
                           placeholder="Search"
@@ -279,6 +274,9 @@ const UsersPage: FunctionComponent = () => {
                         {errors.perpage}
                       </p>
                     </div>
+                    <button type="submit" className="sr-only">
+                      search submit
+                    </button>
 
                     <div>
                       <div className="mt-1 shadow-sm -space-y-px">

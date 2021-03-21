@@ -309,7 +309,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                             {
                               type: 'success',
                               autoClose: 2000,
-                              hideProgressBar: true
+                              hideProgressBar: true,
                             }
                           );
                           args.onSubmit();

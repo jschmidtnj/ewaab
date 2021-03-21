@@ -51,13 +51,16 @@ const Editor: FunctionComponent<EditorArgs> = (args) => {
             value={args.value}
             events={{
               // @ts-ignore
-              keydown: (_instance: SimpleMDEEditor, evt: KeyboardEvent<HTMLDivElement>) => {
+              keydown: (
+                _instance: SimpleMDEEditor,
+                evt: KeyboardEvent<HTMLDivElement>
+              ) => {
                 if (evt.key === 'Enter' && evt.ctrlKey && args.onSubmit) {
                   setTimeout(() => {
                     args.onSubmit();
                   }, 0);
                 }
-              }
+              },
             }}
             options={{
               toolbar: [

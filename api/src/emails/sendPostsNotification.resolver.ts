@@ -112,7 +112,7 @@ export const sendNotification = async (id: string, created?: number): Promise<st
     posts: postEmailData
   });
   const now = new Date();
-  const subject = `${emailTemplateData.subject} ${format(now, "MMM do, 'yy")}`
+  const subject = `${emailTemplateData.subject} ${format(now, "MMM do, 'yy")}`;
   await sendEmailUtil({
     content: emailData,
     email: userData.email,

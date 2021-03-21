@@ -225,7 +225,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
       <div className="flex flex-col mt-4">
         <div className="col-span-3 lg:mx-4">
           {!userType ||
-            !postWriteMap[userType].includes(args.postType) ? null : (
+          !postWriteMap[userType].includes(args.postType) ? null : (
             <div className="bg-white px-4 sm:px-16 py-4 flex items-center justify-center mt-4 mb-8 rounded-md">
               <button
                 className="flex items-center justify-start text-left pl-4 text-gray-700 bg-white border-2 hover:bg-gray-200 font-semibold py-2 w-full rounded-full"
@@ -274,8 +274,8 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
           </div>
 
           {!posts ||
-            posts.loading ||
-            posts.data.posts.results.length === 0 ? null : (
+          posts.loading ||
+          posts.data.posts.results.length === 0 ? null : (
             <div className="rounded-lg mt-4 mb-8">
               <div className="bg-white px-4 py-3 flex items-center justify-between sm:px-6">
                 <div className="sm:flex sm:flex-1 sm:items-center sm:justify-between">
@@ -306,7 +306,7 @@ const Feed: FunctionComponent<FeedArgs> = (args) => {
                       }}
                       disabled={
                         currentPage * numPerPage +
-                        posts.data.posts.results.length ===
+                          posts.data.posts.results.length ===
                         posts.data.posts.count
                       }
                     >

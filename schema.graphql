@@ -349,6 +349,9 @@ type Mutation {
     recaptchaToken: String!
   ): String!
   sendPostsNotification(
+    """created after this date"""
+    created: Int
+
     """user id"""
     id: String
   ): String!
@@ -1166,6 +1169,9 @@ type User {
 
   """job title"""
   jobTitle: String!
+
+  """date of last email notification"""
+  lastEmailNotification: Float!
 
   """location latitude longitude"""
   location: String
