@@ -31,10 +31,10 @@ export class SearchMessagesArgs extends PaginationArgs {
 }
 
 export const searchMessages = async (args: SearchMessagesArgs): Promise<SearchMessagesResult> => {
-  const mustShouldParams: esb.Query[] = [];
+  const mustParams: esb.Query[] = [];
   if (args.query) {
     args.query = args.query.toLowerCase();
-    mustShouldParams.push(esb.queryStringQuery('content').query(args.query).fuzziness('AUTO'));
+    mustParams.push(esb.simpleQueryStringQuery(args.query).field('content'));
   }
 
   const filterShouldParams: esb.Query[] = [
@@ -43,10 +43,7 @@ export const searchMessages = async (args: SearchMessagesArgs): Promise<SearchMe
 
   let requestBody = esb.requestBodySearch().query(
     esb.boolQuery()
-      .must(
-        esb.boolQuery()
-          .should(mustShouldParams)
-      )
+      .must(mustParams)
       .filter(
         esb.boolQuery()
           .should(filterShouldParams)

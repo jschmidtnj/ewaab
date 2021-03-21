@@ -42,11 +42,23 @@ const majorsOptions = majors.map(
 );
 
 const userTypeLabels: Record<UserType, string> = {
-  [UserType.User]: 'EH Participant',
+  [UserType.User]: 'Participant',
   [UserType.Mentor]: 'Recruiter',
   [UserType.Visitor]: '',
   [UserType.Admin]: 'EWAAB Staff',
 };
+
+export interface SelectUserTypeObject {
+  label: string;
+  value: UserType;
+}
+
+const userTypeOptions = [UserType.User, UserType.Mentor, UserType.Admin].map(
+  (userType): SelectUserTypeObject => ({
+    label: userTypeLabels[userType],
+    value: userType,
+  })
+);
 
 interface SortableColumnArgs {
   text: string;
@@ -85,13 +97,23 @@ const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
 };
 
 const UsersPage: FunctionComponent = () => {
+  const [defaultQuery, setDefaultQuery] = useState<string>('');
+
+  const initialValues: UsersQueryVariables = {
+    query: defaultQuery,
+    majors: [],
+    ascending: false,
+    sortBy: UserSortOption.Name,
+    page: 0,
+    perpage: defaultPerPage,
+    types: [UserType.User],
+  };
+
   const [users, setUsers] = useState<ApolloQueryResult<UsersQuery> | undefined>(
     undefined
   );
 
   const [showMajorOptions, setShowMajorOptions] = useState<boolean>(false);
-
-  const [defaultQuery, setDefaultQuery] = useState<string>('');
 
   const runQuery = async (
     variables: UsersQueryVariables,
@@ -121,19 +143,10 @@ const UsersPage: FunctionComponent = () => {
     setUsers(res);
   };
 
-  const initialValues: UsersQueryVariables = {
-    query: defaultQuery,
-    majors: [],
-    ascending: false,
-    sortBy: UserSortOption.Name,
-    page: 0,
-    perpage: defaultPerPage,
-  };
-
   const formRef = useRef<
     FormikHelpers<UsersQueryVariables> &
-      FormikState<UsersQueryVariables> &
-      FormikHandlers
+    FormikState<UsersQueryVariables> &
+    FormikHandlers
   >();
 
   useEffect(() => {
@@ -168,6 +181,7 @@ const UsersPage: FunctionComponent = () => {
               ascending: yup.bool(),
               page: yup.number().integer(),
               perpage: yup.number().integer(),
+              types: yup.array(),
             })}
             onSubmit={async (formData, { setSubmitting, setStatus }) => {
               const onError = () => {
@@ -197,8 +211,8 @@ const UsersPage: FunctionComponent = () => {
               setFieldTouched,
             }) => (
               <form onSubmit={handleSubmit}>
-                <div className="my-2 flex sm:flex-row flex-col">
-                  <div className="block relative">
+                <div className="flex sm:flex-row flex-col sm:max-w-md">
+                  <div className="block relative w-full">
                     <div>
                       <div className="mt-1 flex rounded-md shadow-sm">
                         <span className="h-full absolute inset-y-0 left-0 pl-2">
@@ -214,7 +228,7 @@ const UsersPage: FunctionComponent = () => {
                           onBlur={handleBlur}
                           value={values.query}
                           disabled={isSubmitting}
-                          type="submit"
+                          type="text"
                           autoComplete="off"
                           name="query"
                           id="query"
@@ -222,6 +236,135 @@ const UsersPage: FunctionComponent = () => {
                           className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none sm:rounded-l"
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex sm:flex-row flex-col">
+                  <div className="flex flex-row sm:mb-0">
+                    <div>
+                      <div className="mt-1 shadow-sm -space-y-px">
+                        <Select
+                          id="types"
+                          name="types"
+                          isMulti={true}
+                          isClearable={false}
+                          options={userTypeOptions}
+                          cacheOptions={true}
+                          defaultValue={!initialValues.types ? [] : (initialValues.types as UserType[]).map(
+                            (currType) => (
+                              userTypeOptions.find(elem => elem.value === currType) as SelectUserTypeObject
+                            )
+                          )}
+                          placeholder="User Type"
+                          onChange={(
+                            selectedOptions: ValueType<
+                              SelectUserTypeObject[],
+                              false
+                            > | null
+                          ) => {
+                            setFieldValue(
+                              'types',
+                              selectedOptions
+                                ? selectedOptions.map((elem) => elem.value)
+                                : undefined
+                            );
+                            handleSubmit();
+                          }}
+                          onBlur={(evt) => {
+                            handleBlur(evt);
+                            setFieldTouched('types', true);
+                          }}
+                          className={
+                            (touched.types && errors.types
+                              ? 'is-invalid'
+                              : '') + ' w-44 select-dropdown'
+                          }
+                          styles={{
+                            control: (styles) => ({
+                              ...styles,
+                              borderColor:
+                                touched.types && errors.types
+                                  ? 'red'
+                                  : styles.borderColor,
+                              borderRadius: 0
+                            }),
+                          }}
+                          invalid={!!(touched.types && errors.types)}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <p
+                        className={`${touched.types && errors.types ? '' : 'hidden'
+                          } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                      >
+                        {errors.types}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="mt-1 shadow-sm -space-y-px">
+                        <Select
+                          id="majors"
+                          name="majors"
+                          isMulti={true}
+                          options={showMajorOptions ? majorsOptions : []}
+                          isClearable={false}
+                          noOptionsMessage={() =>
+                            showMajorOptions
+                              ? 'No majors found'
+                              : `Enter at least ${minSelectSearchLen} characters`
+                          }
+                          onInputChange={(newVal) => {
+                            setShowMajorOptions(
+                              newVal.length >= minSelectSearchLen
+                            );
+                          }}
+                          cacheOptions={true}
+                          defaultValue={[]}
+                          placeholder="Major"
+                          onChange={(
+                            selectedOptions: ValueType<
+                              SelectStringObject[],
+                              false
+                            > | null
+                          ) => {
+                            setFieldValue(
+                              'majors',
+                              selectedOptions
+                                ? selectedOptions.map((elem) => elem.value)
+                                : undefined
+                            );
+                            handleSubmit();
+                          }}
+                          onBlur={(evt) => {
+                            handleBlur(evt);
+                            setFieldTouched('majors', true);
+                          }}
+                          className={
+                            (touched.majors && errors.majors
+                              ? 'is-invalid'
+                              : '') + ' w-44 select-dropdown'
+                          }
+                          styles={{
+                            control: (styles) => ({
+                              ...styles,
+                              borderColor:
+                                touched.majors && errors.majors
+                                  ? 'red'
+                                  : styles.borderColor,
+                              borderRadius: 0
+                            }),
+                          }}
+                          invalid={!!(touched.majors && errors.majors)}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <p
+                        className={`${touched.majors && errors.majors ? '' : 'hidden'
+                          } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                      >
+                        {errors.majors}
+                      </p>
                     </div>
                   </div>
 
@@ -267,94 +410,27 @@ const UsersPage: FunctionComponent = () => {
                         />
                       </div>
                       <p
-                        className={`${
-                          touched.perpage && errors.perpage ? '' : 'hidden'
-                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                        className={`${touched.perpage && errors.perpage ? '' : 'hidden'
+                          } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                       >
                         {errors.perpage}
                       </p>
                     </div>
-                    <button type="submit" className="sr-only">
-                      search submit
-                    </button>
-
-                    <div>
-                      <div className="mt-1 shadow-sm -space-y-px">
-                        <Select
-                          id="majors"
-                          name="majors"
-                          isMulti={true}
-                          options={showMajorOptions ? majorsOptions : []}
-                          noOptionsMessage={() =>
-                            showMajorOptions
-                              ? 'No majors found'
-                              : `Enter at least ${minSelectSearchLen} characters`
-                          }
-                          onInputChange={(newVal) => {
-                            setShowMajorOptions(
-                              newVal.length >= minSelectSearchLen
-                            );
-                          }}
-                          cacheOptions={true}
-                          defaultValue={[]}
-                          placeholder="Major"
-                          onChange={(
-                            selectedOptions: ValueType<
-                              SelectStringObject[],
-                              false
-                            > | null
-                          ) => {
-                            setFieldValue(
-                              'majors',
-                              selectedOptions
-                                ? selectedOptions.map((elem) => elem.value)
-                                : undefined
-                            );
-                            handleSubmit();
-                          }}
-                          onBlur={(evt) => {
-                            handleBlur(evt);
-                            setFieldTouched('majors', true);
-                          }}
-                          className={
-                            (touched.majors && errors.majors
-                              ? 'is-invalid'
-                              : '') + ' w-52 select-dropdown'
-                          }
-                          styles={{
-                            control: (styles) => ({
-                              ...styles,
-                              borderColor:
-                                touched.majors && errors.majors
-                                  ? 'red'
-                                  : styles.borderColor,
-                              borderTopLeftRadius: 2,
-                              borderBottomLeftRadius: 2,
-                            }),
-                          }}
-                          invalid={!!(touched.majors && errors.majors)}
-                          disabled={isSubmitting}
-                        />
-                      </div>
-                      <p
-                        className={`${
-                          touched.majors && errors.majors ? '' : 'hidden'
-                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
-                      >
-                        {errors.majors}
-                      </p>
-                    </div>
                   </div>
+
+                  <button type="submit" className="sr-only">
+                    search submit
+                  </button>
                 </div>
               </form>
             )}
           </Formik>
           {!users ||
-          users.loading ||
-          !users.data ||
-          !formRef?.current ||
-          users.data.users.results.length === 0 ? (
-            <p className="text-md pt-4">No users found</p>
+            users.loading ||
+            !users.data ||
+            !formRef?.current ||
+            users.data.users.results.length === 0 ? (
+            <p className="text-md pt-4 ml-2">No users found</p>
           ) : (
             <div className="flex flex-col mt-4">
               <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -456,8 +532,8 @@ const UsersPage: FunctionComponent = () => {
                             }}
                             disabled={
                               formRef.current.values.page *
-                                formRef.current.values.perpage +
-                                users.data.users.results.length ===
+                              formRef.current.values.perpage +
+                              users.data.users.results.length ===
                               users.data.users.count
                             }
                           >

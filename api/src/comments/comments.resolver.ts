@@ -33,22 +33,19 @@ class CommentsArgs extends PostCommentsArgs {
 }
 
 export const searchComments = async (args: PostCommentsArgs, post: string): Promise<BaseSearchComment[]> => {
-  const mustShouldParams: esb.Query[] = [];
+  const mustParams: esb.Query[] = [];
   const filterMustParams: esb.Query[] = [];
 
   if (args.query) {
     args.query = args.query.toLowerCase();
-    mustShouldParams.push(esb.queryStringQuery('content').query(args.query).fuzziness('AUTO'));
+    mustParams.push(esb.simpleQueryStringQuery(args.query).field('content'));
   }
 
   filterMustParams.push(esb.termQuery('post', post));
 
   let requestBody = esb.requestBodySearch().query(
     esb.boolQuery()
-      .must(
-        esb.boolQuery()
-          .should(mustShouldParams)
-      )
+      .must(mustParams)
       .filter(filterMustParams)
   );
   if (args.sortBy) {

@@ -87,7 +87,7 @@ const RegisterPage: FunctionComponent = () => {
           <div className="max-w-md w-full space-y-8">
             <div>
               <h2 className="mt-6 text-center text-4xl font-medium text-gray-900">
-                Register
+                Sign Up
               </h2>
             </div>
             <Formik

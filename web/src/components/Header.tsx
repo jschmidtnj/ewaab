@@ -160,7 +160,7 @@ const Header: FunctionComponent = () => {
                 <h1 className="hidden ml-4 text-2xl">EWAAB</h1>
               </a>
             </Link>
-            <div className="hidden md:flex ml-8">
+            <div className="hidden sm:flex ml-8">
               <div className="my-auto">{allPathElements}</div>
             </div>
           </div>
@@ -218,7 +218,7 @@ const Header: FunctionComponent = () => {
       <div
         className={`${
           !(mobileMenuOpen && hamburgerIsVisible) ? 'hidden' : ''
-        } sm:hidden z-40 relative bg-white`}
+        } sm:hidden z-30 relative bg-white`}
       >
         <div className="px-2 pt-2 pb-3 space-y-1">{allPathElements}</div>
       </div>

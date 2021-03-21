@@ -45,13 +45,10 @@ class PostsArgs extends PaginationArgs {
   publisher?: string;
 }
 
-const buildFilters = (mustShouldParams: esb.Query[], filterMustParams: esb.Query[],
+const buildFilters = (mustParams: esb.Query[], filterMustParams: esb.Query[],
   filterShouldParams: esb.Query[]): esb.BoolQuery => {
   return esb.boolQuery()
-    .must(
-      esb.boolQuery()
-        .should(mustShouldParams)
-    )
+    .must(mustParams)
     .filter(
       esb.boolQuery()
         .should(filterShouldParams)
@@ -64,14 +61,13 @@ export const getPosts = async (args: PostsArgs, ctx?: GraphQLContext): Promise<S
     throw new Error('no auth found for getting posts');
   }
 
-  const mustShouldParams: esb.Query[] = [];
+  const mustParams: esb.Query[] = [];
   const filterMustParams: esb.Query[] = [];
   let filterShouldParams: esb.Query[] = [];
 
   if (args.query) {
     args.query = args.query.toLowerCase();
-    mustShouldParams.push(esb.queryStringQuery('title').query(args.query).fuzziness('AUTO'));
-    mustShouldParams.push(esb.queryStringQuery('content').query(args.query).fuzziness('AUTO'));
+    mustParams.push(esb.simpleQueryStringQuery(args.query).fields(['title', 'content']));
   }
 
   if (args.publisher !== undefined) {
@@ -103,10 +99,10 @@ export const getPosts = async (args: PostsArgs, ctx?: GraphQLContext): Promise<S
 
   for (const postType of postViewMap[userType]) {
     const filters = [...filterMustParams, esb.matchQuery('type', postType)];
-    aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustShouldParams, filters, filterShouldParams)));
+    aggregates.push(esb.filtersAggregation(postType).filter(postType, buildFilters(mustParams, filters, filterShouldParams)));
   }
 
-  let requestBody = esb.requestBodySearch().query(buildFilters(mustShouldParams, filterMustParams, filterShouldParams));
+  let requestBody = esb.requestBodySearch().query(buildFilters(mustParams, filterMustParams, filterShouldParams));
   if (args.sortBy) {
     requestBody = requestBody.sort(esb.sort(args.sortBy,
       args.ascending ? 'asc' : 'desc'));

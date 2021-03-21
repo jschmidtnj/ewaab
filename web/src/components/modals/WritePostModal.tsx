@@ -347,6 +347,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                                   required
                                   className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-white font-semibold rounded-md"
                                   placeholder="Title"
+                                  autoComplete="off"
                                   onChange={handleChange}
                                   onBlur={handleBlur}
                                   value={values.title}
@@ -398,6 +399,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                                   required
                                   className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-white rounded-md"
                                   placeholder="Link"
+                                  autoComplete="off"
                                   onChange={handleChange}
                                   onBlur={handleBlur}
                                   value={values.link}

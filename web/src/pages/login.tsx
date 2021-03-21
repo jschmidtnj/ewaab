@@ -118,7 +118,7 @@ const Login: FunctionComponent = () => {
         <div className="max-w-md w-full space-y-8">
           <div>
             <h2 className="mt-6 text-center text-4xl font-medium text-gray-900">
-              Account Login
+              Login
             </h2>
           </div>
           {useCode ? (
@@ -439,7 +439,7 @@ const Login: FunctionComponent = () => {
                       </button>
                       <Link href="reset">
                         <a className="font-medium text-indigo-600 hover:text-indigo-500">
-                          Forgot your password?
+                          Forgot password?
                         </a>
                       </Link>
                     </div>

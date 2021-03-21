@@ -53,7 +53,7 @@ const SearchPage: FunctionComponent = () => {
     init = false
   ): Promise<void> => {
     const currentVariables = {
-      ...variables
+      ...variables,
     };
     if (currentVariables.query?.length === 0) {
       currentVariables.query = undefined;
