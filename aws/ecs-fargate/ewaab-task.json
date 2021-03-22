@@ -66,12 +66,7 @@
       "image": "557176606917.dkr.ecr.us-east-1.amazonaws.com/ewaab-api:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
-      "dependsOn": [
-        {
-          "containerName": "web",
-          "condition": "START"
-        }
-      ],
+      "dependsOn": [],
       "disableNetworking": null,
       "interactive": null,
       "healthCheck": null,
