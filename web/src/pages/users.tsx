@@ -29,7 +29,11 @@ import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
 import Avatar from 'components/Avatar';
 import PrivateRoute from 'components/PrivateRoute';
 import sleep from 'shared/sleep';
-import { capitalizeFirstLetter, deviceDetect, handleTabInputElemMobile } from 'utils/misc';
+import {
+  capitalizeFirstLetter,
+  deviceDetect,
+  handleTabInputElemMobile,
+} from 'utils/misc';
 import { AiFillQuestionCircle, AiOutlineSearch } from 'react-icons/ai';
 
 const avatarWidth = 40;
@@ -233,7 +237,7 @@ const UsersPage: FunctionComponent = () => {
                           value={values.query}
                           disabled={isSubmitting}
                           type="text"
-                          onKeyDown={
+                          onBlurCapture={
                             isDesktop
                               ? undefined
                               : (evt) =>
