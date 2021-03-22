@@ -11,6 +11,8 @@ interface PostMediaData {
 }
 
 export interface PostEmailData {
+  id: string;
+  title: string;
   name: string;
   username?: string;
   avatarURL: string;
@@ -97,8 +99,9 @@ export const emailTemplateFiles: TemplateFiles = {
 };
 
 const compileEmailTemplates = async (): Promise<void> => {
-  const { eq } = helpers('comparison');
+  const { eq, or } = helpers('comparison');
   Handlebars.registerHelper('eq', eq);
+  Handlebars.registerHelper('or', or);
   for (const emailTemplateKey in emailTemplateFiles) {
     const currentTemplateElement = emailTemplateFiles[propertyOf<TemplateFiles>(emailTemplateKey)];
     const emailTemplate = await getS3EmailData(getEmailKey(currentTemplateElement.file), false);

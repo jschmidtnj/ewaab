@@ -350,7 +350,7 @@ type Mutation {
   ): String!
   sendPostsNotification(
     """created after this date"""
-    created: Int
+    created: Float
 
     """user id"""
     id: String
@@ -756,7 +756,7 @@ type Query {
     ascending: Boolean = true
 
     """created after this date"""
-    created: Int
+    created: Float
 
     """page number"""
     page: Int = 0

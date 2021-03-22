@@ -1,6 +1,15 @@
 <mjml>
   <mj-head>
     <mj-style inline="inline">
+      .text-link a {
+      text-decoration: none;
+      color: inherit;
+      }
+
+      .bg-gray-600 {
+        background-color: rgba(75, 85, 99, 1);
+      }
+
       .card-header * {
       font-family: Helvetica, Arial, sans-serif;
       }
@@ -270,10 +279,10 @@
     <mj-section padding-top="30px" padding-bottom="30px" padding-left="30px" padding-right="30px">
       <mj-group>
         <mj-column>
-          <mj-image align="left" padding-top="18px" padding-left="5px" padding-right="0" src="{{{websiteURL}}}/assets/img/ewaab/logo.png" href="{{{websiteURL}}}" target="_blank" alt="ewaab" width="100px"></mj-image>
+          <mj-image align="left" padding-top="18px" padding-left="5px" padding-right="0" src="{{{websiteURL}}}/assets/img/ewaab/logo.png" href="{{{websiteURL}}}" target="_blank" rel="noreferrer" alt="ewaab" width="100px"></mj-image>
         </mj-column>
         <mj-column>
-          <mj-image align="right" src="{{{avatarURL}}}" padding-right="5px" border-radius="1000px" href="{{{websiteURL}}}/{{username}}" target="_blank" alt="avatar" width="40px"></mj-image>
+          <mj-image align="right" src="{{{avatarURL}}}" padding-right="5px" border-radius="1000px" href="{{{websiteURL}}}/{{username}}" target="_blank" rel="noreferrer" alt="avatar" width="40px"></mj-image>
         </mj-column>
       </mj-group>
     </mj-section>
@@ -284,7 +293,7 @@
       <mj-section background-color="#ffffff" border-radius="10px">
         <mj-group width="100%">
           <mj-column width="20%" padding-left="20px" padding-right="0" padding-top="0">
-            <mj-image align="left" css-class="post-avatar" padding-left="0" padding-right="0" src="{{{this.avatarURL}}}" border-radius="1000px" href="{{{authorURL}}}" target="_blank" alt="avatar" width="45px"></mj-image>
+            <mj-image align="left" css-class="post-avatar" padding-left="0" padding-right="0" src="{{{this.avatarURL}}}" border-radius="1000px" href="{{{authorURL}}}" target="_blank" rel="noreferrer" alt="avatar" width="45px"></mj-image>
           </mj-column>
           <mj-column padding="0">
             <mj-text align="left" padding="0" css-class="card-header">
@@ -292,26 +301,59 @@
               <mj-raw>
                 {{#if this.username}}
               </mj-raw>
-              <a target="_blank" href="{{{@root.websiteURL}}}/{{this.username}}" padding="0">@{{this.username}}</a>
+              <a target="_blank" rel="noreferrer" href="{{{@root.websiteURL}}}/{{this.username}}" padding="0">@{{this.username}}</a>
               <mj-raw>
                 {{/if}}
               </mj-raw>
             </mj-text>
           </mj-column>
         </mj-group>
+        <mj-column width="100%" padding-left="25px" padding-right="25px">
+          <mj-text align="left" padding="0">
+            <h2 padding="0" class="text-link">
+              <a href="{{{@root.websiteURL}}}/post/{{{this.id}}}" target="_blank" rel="noreferrer">
+                {{this.title}}
+              </a>
+            </h2>
+          </mj-text>
+        </mj-column>
         <mj-column width="100%" padding-left="25px" padding-right="25px" css-class="markdown">
           <mj-raw>
             {{{this.content}}}
           </mj-raw>
         </mj-column>
         <mj-raw>
-          {{#if this.link}}
+          {{#or this.link this.media}}
         </mj-raw>
-        <mj-column width="100%" padding-left="25px" padding-right="25px">
-          <mj-text align="left" padding="0">
-            <a target="_blank" href="{{{this.link}}}" padding="0">{{{this.link}}}</a>
+        <mj-column width="100%" padding-left="20px" padding-right="20px">
+          <mj-text padding="0">
+            <hr class="bg-gray-600" />
           </mj-text>
         </mj-column>
+        <mj-raw>
+          {{/or}}
+        </mj-raw>
+        <mj-raw>
+          {{#if this.link}}
+        </mj-raw>
+        <mj-group width="100%">
+          <mj-column width="4%" padding="0">
+            <mj-spacer height="2px" />
+          </mj-column>
+          <mj-column width="5%" padding="0">
+            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/icons/link.png" alt="file" width="25px"></mj-image>
+          </mj-column>
+          <mj-column width="30%" padding="0">
+            <mj-text align="left" padding="0">
+              <p class="text-link">
+                <a target="_blank" rel="noreferrer" href="{{{this.link}}}" padding="0">{{{this.link}}}</a>
+              </p>
+            </mj-text>
+          </mj-column>
+          <mj-column padding="0" width="61%">
+            <mj-spacer />
+          </mj-column>
+        </mj-group>
         <mj-raw>
           {{/if}}
         </mj-raw>
@@ -322,21 +364,26 @@
           {{#if (eq this.media.type "image")}}
         </mj-raw>
         <mj-column width="100%" padding-left="25px" padding-right="25px">
-          <mj-image align="center" padding-left="0" padding-right="0" src="{{{this.media.url}}}" href="{{{this.media.url}}}" target="_blank" alt="this.name" width="250px"></mj-image>
+          <mj-image align="center" padding-left="0" padding-right="0" src="{{{this.media.url}}}" href="{{{this.media.url}}}" target="_blank" rel="noreferrer" alt="this.name" width="250px"></mj-image>
         </mj-column>
         <mj-raw>
           {{else if (eq this.media.type "file")}}
         </mj-raw>
         <mj-group width="100%">
-          <mj-column width="10%" padding="0" padding-right="25px">
-            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/file.png" alt="file" width="45px"></mj-image>
+          <mj-column width="4%" padding="0">
+            <mj-spacer height="2px" />
           </mj-column>
-          <mj-column width="10%" padding="0">
+          <mj-column width="5%" padding="0">
+            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/icons/file.png" alt="file" width="25px"></mj-image>
+          </mj-column>
+          <mj-column width="30%" padding="0">
             <mj-text align="left" padding="0">
-              <a target="_blank" href="{{{this.media.url}}}" padding="0">{{this.media.name}}</a>
+              <p class="text-link">
+                <a target="_blank" rel="noreferrer" href="{{{this.media.url}}}" padding="0">{{this.media.name}}</a>
+              </p>
             </mj-text>
           </mj-column>
-          <mj-column padding="0" width="80%">
+          <mj-column padding="0" width="61%">
             <mj-spacer />
           </mj-column>
         </mj-group>
@@ -354,22 +401,30 @@
         <mj-raw>
           {{/if}}
         </mj-raw>
+        <mj-column width="100%" padding="0" padding-left="20px" padding-right="20px">
+          <mj-text padding="0">
+            <hr class="bg-gray-600" />
+          </mj-text>
+        </mj-column>
         <mj-group width="100%">
-          <mj-column width="10%" padding="0">
-            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/like.png" alt="like" width="45px"></mj-image>
+          <mj-column width="4%" padding="0">
+            <mj-spacer height="2px" />
           </mj-column>
-          <mj-column width="10%" padding="0">
-            <mj-text align="left" padding="0">
+          <mj-column width="5%" padding="0" vertical-align="middle">
+            <mj-image align="center" padding="0" src="{{{@root.websiteURL}}}/assets/icons/like.png" alt="like" width="25px" href="{{{@root.websiteURL}}}/post/{{{this.id}}}" target="_blank" rel="noreferrer"></mj-image>
+          </mj-column>
+          <mj-column width="5%" padding="0" vertical-align="middle">
+            <mj-text align="left" padding="0" padding-left="5px">
               <p>
                 {{this.reactionCount}}
               </p>
             </mj-text>
           </mj-column>
-          <mj-column width="10%" padding="0">
-            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/img/comment.png" alt="comment" width="45px"></mj-image>
+          <mj-column width="5%" padding="0" vertical-align="middle">
+            <mj-image align="center" padding="0" src="{{{@root.websiteURL}}}/assets/icons/comment.png" alt="comment" width="25px" href="{{{@root.websiteURL}}}/post/{{{this.id}}}" target="_blank" rel="noreferrer"></mj-image>
           </mj-column>
-          <mj-column width="10%" padding="0">
-            <mj-text align="left" padding="0">
+          <mj-column width="5%" padding="0" vertical-align="middle">
+            <mj-text align="left" padding="0" padding-left="5px">
               <p>
                 {{this.commentCount}}
               </p>

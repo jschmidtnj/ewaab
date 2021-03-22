@@ -60,12 +60,9 @@ const UserPage: FunctionComponent = () => {
         if (!(await isLoggedIn())) {
           return;
         }
-        const splitPath = window.location.pathname.split('/');
-        let username: string | undefined = undefined;
-        if (splitPath.length === 2) {
-          username = splitPath[1];
-        } else if (splitPath.length === 3) {
-          username = splitPath[2];
+        const username = window.location.pathname.split('/')[1];
+        if (username.length === 0) {
+          throw new Error('no username provided');
         }
         if (currentUser && username === currentUser.username) {
           setUser((currentUser as unknown) as PublicUserFieldsFragment);
@@ -220,7 +217,7 @@ const UserPage: FunctionComponent = () => {
                         type="button"
                         onClick={(evt) => {
                           evt.preventDefault();
-                          router.push('/profile');
+                          router.push('/account');
                         }}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >

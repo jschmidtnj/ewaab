@@ -1,0 +1,38 @@
+# should be the same as the post search fields
+# otherwise this won't work
+fragment postFields on Post {
+  id
+  title
+  content
+  publisher
+  created
+  updated
+  link
+  type
+  publisherData {
+    name
+    username
+    avatar
+    description
+  }
+  mediaData {
+    id
+    type
+    name
+  }
+  userReactions(page:0, perpage:1) {
+    id
+    type
+  }
+  reactions(page:0, perpage:3) {
+    type
+  }
+  reactionCount
+  commentCount
+}
+
+query post($id: String!) {
+  post(id: $id) {
+    ...postFields
+  }
+}

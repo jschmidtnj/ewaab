@@ -17,6 +17,7 @@ import { Formik, FormikHandlers, FormikHelpers, FormikState } from 'formik';
 import {
   defaultPerPage,
   perPageOptions,
+  searchHelpLink,
   SelectNumberObject,
   SelectStringObject,
 } from 'utils/variables';
@@ -29,6 +30,7 @@ import Avatar from 'components/Avatar';
 import PrivateRoute from 'components/PrivateRoute';
 import sleep from 'shared/sleep';
 import { capitalizeFirstLetter } from 'utils/misc';
+import { AiFillQuestionCircle, AiOutlineSearch } from 'react-icons/ai';
 
 const avatarWidth = 40;
 
@@ -145,8 +147,8 @@ const UsersPage: FunctionComponent = () => {
 
   const formRef = useRef<
     FormikHelpers<UsersQueryVariables> &
-    FormikState<UsersQueryVariables> &
-    FormikHandlers
+      FormikState<UsersQueryVariables> &
+      FormikHandlers
   >();
 
   useEffect(() => {
@@ -216,12 +218,7 @@ const UsersPage: FunctionComponent = () => {
                     <div>
                       <div className="mt-1 flex rounded-md shadow-sm">
                         <span className="h-full absolute inset-y-0 left-0 pl-2">
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="mt-4 h-4 w-4 fill-current text-gray-500"
-                          >
-                            <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z"></path>
-                          </svg>
+                          <AiOutlineSearch className="mt-4 h-4 w-4 fill-current text-gray-500" />
                         </span>
                         <input
                           onChange={handleChange}
@@ -229,12 +226,22 @@ const UsersPage: FunctionComponent = () => {
                           value={values.query}
                           disabled={isSubmitting}
                           type="text"
+                          tabIndex={1}
                           autoComplete="off"
                           name="query"
                           id="query"
                           placeholder="Search"
                           className="shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none sm:rounded-l"
                         />
+                        <span className="h-full absolute inset-y-0 right-0 pr-1">
+                          <a
+                            href={searchHelpLink}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <AiFillQuestionCircle className="mt-2 h-4 w-4 fill-current text-gray-400" />
+                          </a>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -250,11 +257,16 @@ const UsersPage: FunctionComponent = () => {
                           isClearable={false}
                           options={userTypeOptions}
                           cacheOptions={true}
-                          defaultValue={!initialValues.types ? [] : (initialValues.types as UserType[]).map(
-                            (currType) => (
-                              userTypeOptions.find(elem => elem.value === currType) as SelectUserTypeObject
-                            )
-                          )}
+                          defaultValue={
+                            !initialValues.types
+                              ? []
+                              : (initialValues.types as UserType[]).map(
+                                  (currType) =>
+                                    userTypeOptions.find(
+                                      (elem) => elem.value === currType
+                                    ) as SelectUserTypeObject
+                                )
+                          }
                           placeholder="User Type"
                           onChange={(
                             selectedOptions: ValueType<
@@ -286,7 +298,7 @@ const UsersPage: FunctionComponent = () => {
                                 touched.types && errors.types
                                   ? 'red'
                                   : styles.borderColor,
-                              borderRadius: 0
+                              borderRadius: 0,
                             }),
                           }}
                           invalid={!!(touched.types && errors.types)}
@@ -294,8 +306,9 @@ const UsersPage: FunctionComponent = () => {
                         />
                       </div>
                       <p
-                        className={`${touched.types && errors.types ? '' : 'hidden'
-                          } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                        className={`${
+                          touched.types && errors.types ? '' : 'hidden'
+                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                       >
                         {errors.types}
                       </p>
@@ -352,7 +365,7 @@ const UsersPage: FunctionComponent = () => {
                                 touched.majors && errors.majors
                                   ? 'red'
                                   : styles.borderColor,
-                              borderRadius: 0
+                              borderRadius: 0,
                             }),
                           }}
                           invalid={!!(touched.majors && errors.majors)}
@@ -360,8 +373,9 @@ const UsersPage: FunctionComponent = () => {
                         />
                       </div>
                       <p
-                        className={`${touched.majors && errors.majors ? '' : 'hidden'
-                          } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                        className={`${
+                          touched.majors && errors.majors ? '' : 'hidden'
+                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                       >
                         {errors.majors}
                       </p>
@@ -410,8 +424,9 @@ const UsersPage: FunctionComponent = () => {
                         />
                       </div>
                       <p
-                        className={`${touched.perpage && errors.perpage ? '' : 'hidden'
-                          } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                        className={`${
+                          touched.perpage && errors.perpage ? '' : 'hidden'
+                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                       >
                         {errors.perpage}
                       </p>
@@ -426,10 +441,10 @@ const UsersPage: FunctionComponent = () => {
             )}
           </Formik>
           {!users ||
-            users.loading ||
-            !users.data ||
-            !formRef?.current ||
-            users.data.users.results.length === 0 ? (
+          users.loading ||
+          !users.data ||
+          !formRef?.current ||
+          users.data.users.results.length === 0 ? (
             <p className="text-md pt-4 ml-2">No users found</p>
           ) : (
             <div className="flex flex-col mt-4">
@@ -532,8 +547,8 @@ const UsersPage: FunctionComponent = () => {
                             }}
                             disabled={
                               formRef.current.values.page *
-                              formRef.current.values.perpage +
-                              users.data.users.results.length ===
+                                formRef.current.values.perpage +
+                                users.data.users.results.length ===
                               users.data.users.count
                             }
                           >

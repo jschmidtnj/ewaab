@@ -1,9 +1,9 @@
-import { Resolver, Query, Ctx, ArgsType, Field, Int, Args } from 'type-graphql';
+import { Resolver, Query, Ctx, ArgsType, Field, Args, Float } from 'type-graphql';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import { GraphQLContext } from '../utils/context';
 import { verifyLoggedIn } from '../auth/checkAuth';
-import { IsOptional, IsPositive, Matches, ValidateIf } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, Matches, ValidateIf } from 'class-validator';
 import { PostCount, PostSortOption, PostType, BaseSearchPost, SearchPostsResult } from '../schema/posts/post.entity';
 import esb from 'elastic-builder';
 import { uuidRegex } from '../shared/variables';
@@ -21,9 +21,10 @@ class PostsArgs extends PaginationArgs {
   @IsOptional()
   type?: PostType;
 
-  @Field(_type => Int, { description: 'created after this date', nullable: true })
+  @Field(_type => Float, { description: 'created after this date', nullable: true })
   @IsOptional()
   @ValidateIf((_obj, val?: number) => val !== undefined)
+  @IsInt({ message: 'unix timestamp must be an int' })
   @IsPositive({ message: 'utc timestamp must be greater than 0' })
   created?: number;
 
@@ -67,7 +68,7 @@ export const getPosts = async (args: PostsArgs, ctx?: GraphQLContext): Promise<S
 
   if (args.query) {
     args.query = args.query.toLowerCase();
-    mustParams.push(esb.simpleQueryStringQuery(args.query).fields(['title', 'content']));
+    mustParams.push(esb.simpleQueryStringQuery(args.query).fields(['title.text', 'content']));
   }
 
   if (args.publisher !== undefined) {

@@ -175,12 +175,16 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
           </Link>
         </div>
         <div className="mx-4 mt-4">
-          <h2
-            className="text-lg leading-5 font-semibold text-gray-900"
-            id="modal-headline"
-          >
-            {args.data.title}
-          </h2>
+          <Link href={`/post/${args.data.id}`}>
+            <a>
+              <h2
+                className="text-lg leading-5 font-semibold text-gray-900"
+                id="modal-headline"
+              >
+                {args.data.title}
+              </h2>
+            </a>
+          </Link>
           <div className="mt-4">
             <Markdown content={args.data.content} />
           </div>

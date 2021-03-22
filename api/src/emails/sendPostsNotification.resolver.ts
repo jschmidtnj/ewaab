@@ -1,5 +1,5 @@
-import { Resolver, ArgsType, Field, Args, Mutation, Ctx, Int } from 'type-graphql';
-import { IsOptional, IsPositive, Matches, ValidateIf } from 'class-validator';
+import { Resolver, ArgsType, Field, Args, Mutation, Ctx, Float } from 'type-graphql';
+import { IsInt, IsOptional, IsPositive, Matches, ValidateIf } from 'class-validator';
 import { configData, getAPIURL } from '../utils/config';
 import { emailTemplateFiles, PostEmailData } from './compileEmailTemplates';
 import { sendEmailUtil } from './sendEmail.resolver';
@@ -30,9 +30,10 @@ class SendPostNotificationArgs {
   })
   id?: string;
 
-  @Field(_type => Int, { description: 'created after this date', nullable: true })
+  @Field(_type => Float, { description: 'created after this date', nullable: true })
   @IsOptional()
   @ValidateIf((_obj, val?: number) => val !== undefined)
+  @IsInt({ message: 'unix timestamp must be an int' })
   @IsPositive({ message: 'utc timestamp must be greater than 0' })
   created?: number;
 }
@@ -71,6 +72,8 @@ export const sendNotification = async (id: string, created?: number): Promise<st
     const publisherData = await getPublisherData(post.publisher);
     const mediaData = post.media ? await getMediaData(post.media) : undefined;
     return {
+      id: post.id as string,
+      title: post.title,
       avatarURL: getAvatarURL(publisherData ? publisherData.avatar : null,
         publisherData?.avatar ? await generateJWTMediaAccess({
           id: userData.id,
@@ -112,7 +115,7 @@ export const sendNotification = async (id: string, created?: number): Promise<st
     posts: postEmailData
   });
   const now = new Date();
-  const subject = `${emailTemplateData.subject} ${format(now, "MMM do, 'yy")}`;
+  const subject = `${emailTemplateData.subject} ${format(now, "MMM do, ''yy")}`;
   await sendEmailUtil({
     content: emailData,
     email: userData.email,

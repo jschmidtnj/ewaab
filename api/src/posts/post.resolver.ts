@@ -4,6 +4,8 @@ import { GraphQLContext } from '../utils/context';
 import { getRepository } from 'typeorm';
 import Post from '../schema/posts/post.entity';
 import { connectionName } from '../db/connect';
+import { ApolloError } from 'apollo-server-errors';
+import statusCodes from 'http-status-codes';
 
 @ArgsType()
 export class PostArgs {
@@ -21,14 +23,14 @@ class PostResolver {
     const PostModel = getRepository(Post, connectionName);
     const post = await PostModel.findOne(args.id);
     if (!post) {
-      throw new Error(`cannot find post with id ${args.id}`);
+      throw new ApolloError(`cannot find post with id ${args.id}`, `${statusCodes.NOT_FOUND}`);
     }
     if (!await checkPostAccess({
       ctx,
       accessType: AuthAccessType.view,
       ...post
     })) {
-      throw new Error(`user of type ${ctx.auth!.type} not authorized to view post ${args.id}`);
+      throw new ApolloError(`user of type ${ctx.auth!.type} not authorized to view post ${args.id}`, `${statusCodes.FORBIDDEN}`);
     }
     return post;
   }

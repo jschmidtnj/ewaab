@@ -1,5 +1,8 @@
 import { UserType, PostType } from 'lib/generated/datamodel';
 
+export const searchHelpLink =
+  'https://github.com/jschmidtnj/ewaab/blob/main/docs/search_help.md';
+
 export interface SelectNumberObject {
   label: number;
   value: number;

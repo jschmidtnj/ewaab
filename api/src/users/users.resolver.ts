@@ -66,11 +66,11 @@ class UsersResolver {
 
     if (args.query) {
       args.query = args.query.toLowerCase();
-      mustShouldParams.push(esb.simpleQueryStringQuery(args.query).fields(['name', 'locationName']));
+      mustShouldParams.push(esb.simpleQueryStringQuery(args.query).fields(['name.text', 'description', 'locationName.text']));
       if (isEmail(args.query)) {
-        mustShouldParams.push(esb.matchQuery('email', args.query));
+        mustShouldParams.push(esb.matchQuery('email.text', args.query));
       }
-      mustShouldParams.push(esb.matchQuery('username', args.query));
+      mustShouldParams.push(esb.matchQuery('username.text', args.query));
     }
     const filterTypeParams: esb.Query[] = [];
     for (const type of args.types) {

@@ -21,10 +21,15 @@ import {
   postWriteMap,
   SelectNumberObject,
   elasticWaitTime,
+  searchHelpLink,
 } from 'utils/variables';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
-import { AiOutlinePlus, AiOutlineSearch } from 'react-icons/ai';
+import {
+  AiFillQuestionCircle,
+  AiOutlinePlus,
+  AiOutlineSearch,
+} from 'react-icons/ai';
 import WritePostModal from 'components/modals/WritePostModal';
 import PostView from 'components/PostView';
 import DeletePostModal from 'components/modals/DeletePostModal';
@@ -184,6 +189,7 @@ const SearchPage: FunctionComponent = () => {
                           onBlur={handleBlur}
                           value={values.query}
                           disabled={isSubmitting}
+                          tabIndex={1}
                           type="text"
                           name="query"
                           id="query"
@@ -191,6 +197,15 @@ const SearchPage: FunctionComponent = () => {
                           autoComplete="off"
                           className="lg:w-64 h-12 shadow-sm pl-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full border-gray-300 rounded-none sm:rounded-l"
                         />
+                        <span className="h-full absolute inset-y-0 right-0 pr-1">
+                          <a
+                            href={searchHelpLink}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <AiFillQuestionCircle className="mt-2 h-4 w-4 fill-current text-gray-400" />
+                          </a>
+                        </span>
                       </div>
                     </div>
                   </div>
