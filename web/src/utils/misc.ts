@@ -1,5 +1,4 @@
 import { ApolloError } from '@apollo/react-hooks';
-import type { FocusEvent, KeyboardEvent } from 'react';
 
 export const locales: string[] = ['en'];
 
@@ -23,26 +22,4 @@ export const getErrorCode = (err: ApolloError): number | null => {
     }
   }
   return null;
-};
-
-export const deviceDetect = async (): Promise<
-  typeof import('react-device-detect')
-> => {
-  return await import('react-device-detect');
-};
-
-export const handleTabInputElemMobile = (
-  evt: FocusEvent<HTMLInputElement>,
-  callback: () => void
-): void => {
-  // from https://stackoverflow.com/a/11160055
-  const element = evt.currentTarget;
-  element.setAttribute('readonly', 'readonly');
-  element.setAttribute('disabled', 'true');
-  // wait until the attributes are updated
-  setTimeout(() => {
-    element.blur(); // close keyboard
-    element.removeAttribute('readonly');
-    element.removeAttribute('disabled');
-  }, 100);
 };

@@ -29,11 +29,7 @@ import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
 import Avatar from 'components/Avatar';
 import PrivateRoute from 'components/PrivateRoute';
 import sleep from 'shared/sleep';
-import {
-  capitalizeFirstLetter,
-  deviceDetect,
-  handleTabInputElemMobile,
-} from 'utils/misc';
+import { capitalizeFirstLetter } from 'utils/misc';
 import { AiFillQuestionCircle, AiOutlineSearch } from 'react-icons/ai';
 
 const avatarWidth = 40;
@@ -173,13 +169,6 @@ const UsersPage: FunctionComponent = () => {
     })();
   }, []);
 
-  const [isDesktop, setIsDesktop] = useState<boolean>(false);
-  useEffect(() => {
-    (async () => {
-      setIsDesktop((await deviceDetect()).isDesktop);
-    })();
-  }, []);
-
   return (
     <PrivateRoute>
       <Layout>
@@ -237,12 +226,7 @@ const UsersPage: FunctionComponent = () => {
                           value={values.query}
                           disabled={isSubmitting}
                           type="text"
-                          onBlurCapture={
-                            isDesktop
-                              ? undefined
-                              : (evt) =>
-                                  handleTabInputElemMobile(evt, handleSubmit)
-                          }
+                          tabIndex={4}
                           autoComplete="off"
                           name="query"
                           id="query"
@@ -270,6 +254,7 @@ const UsersPage: FunctionComponent = () => {
                           id="types"
                           name="types"
                           isMulti={true}
+                          tabIndex="1"
                           isClearable={false}
                           options={userTypeOptions}
                           cacheOptions={true}
@@ -335,6 +320,7 @@ const UsersPage: FunctionComponent = () => {
                         <Select
                           id="majors"
                           name="majors"
+                          tabIndex="2"
                           isMulti={true}
                           options={showMajorOptions ? majorsOptions : []}
                           isClearable={false}
@@ -404,6 +390,7 @@ const UsersPage: FunctionComponent = () => {
                         <Select
                           id="perpage"
                           name="perpage"
+                          tabIndex="3"
                           isMulti={false}
                           options={perPageOptions}
                           cacheOptions={true}

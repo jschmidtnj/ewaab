@@ -38,7 +38,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 import isDebug from 'utils/mode';
 import { updateSinglePost } from 'components/Feed';
-import { deviceDetect, handleTabInputElemMobile } from 'utils/misc';
 
 const SearchPage: FunctionComponent = () => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
@@ -131,13 +130,6 @@ const SearchPage: FunctionComponent = () => {
     })();
   }, []);
 
-  const [isDesktop, setIsDesktop] = useState<boolean>(false);
-  useEffect(() => {
-    (async () => {
-      setIsDesktop((await deviceDetect()).isDesktop);
-    })();
-  }, []);
-
   const [onlyUser, setOnlyUser] = useState<boolean>(false);
 
   return (
@@ -198,12 +190,6 @@ const SearchPage: FunctionComponent = () => {
                           value={values.query}
                           disabled={isSubmitting}
                           tabIndex={2}
-                          onBlurCapture={
-                            isDesktop
-                              ? undefined
-                              : (evt) =>
-                                  handleTabInputElemMobile(evt, handleSubmit)
-                          }
                           type="text"
                           name="query"
                           id="query"
