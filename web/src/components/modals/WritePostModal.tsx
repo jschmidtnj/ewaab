@@ -115,9 +115,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
     fileElem.setAttribute('type', 'file');
     fileElem.setAttribute('accept', '*');
     fileElem.onchange = (_change_evt) => {
-      console.log('found file');
       if (imageElem && imageElem.files.length > 0) {
-        console.log('delete image');
         setPreviewImage(undefined);
         imageElem.value = '';
       }
@@ -315,7 +313,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                           args.onSubmit();
                           args.toggleModal();
                         } catch (err) {
-                          console.log(JSON.stringify(err, null, 2));
+                          // console.log(JSON.stringify(err, null, 2));
                           toast(err.message, {
                             type: 'error',
                           });
@@ -569,7 +567,6 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                   <button
                     onClick={(evt) => {
                       evt.preventDefault();
-                      console.log(formRef.current.errors);
                       formRef.current.handleSubmit();
                     }}
                     disabled={

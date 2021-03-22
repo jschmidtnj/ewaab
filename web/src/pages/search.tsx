@@ -189,7 +189,12 @@ const SearchPage: FunctionComponent = () => {
                           onBlur={handleBlur}
                           value={values.query}
                           disabled={isSubmitting}
-                          tabIndex={1}
+                          onKeyDown={(evt) => {
+                            if (evt.key === 'Tab') {
+                              evt.preventDefault();
+                              handleSubmit();
+                            }
+                          }}
                           type="text"
                           name="query"
                           id="query"

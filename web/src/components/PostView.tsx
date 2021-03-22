@@ -194,7 +194,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
         <>
           <hr className="my-2" />
           {!args.data.link ? null : (
-            <div className="mt-2 p-2">
+            <div className="mt-2 sm:p-4">
               <a href={args.data.link} target="_blank" rel="noreferrer">
                 <BsLink45Deg className="inline-block mr-1 text-md" />
                 <span className="text-sm">{args.data.link}</span>

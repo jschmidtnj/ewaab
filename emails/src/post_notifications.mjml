@@ -340,17 +340,17 @@
           <mj-column width="4%" padding="0">
             <mj-spacer height="2px" />
           </mj-column>
-          <mj-column width="5%" padding="0">
-            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/icons/link.png" alt="file" width="25px"></mj-image>
+          <mj-column width="5%" padding="0" vertical-align="middle">
+            <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/icons/link.png" alt="file" target="_blank" rel="noreferrer" href="{{{this.link}}}" width="25px"></mj-image>
           </mj-column>
-          <mj-column width="30%" padding="0">
-            <mj-text align="left" padding="0">
+          <mj-column width="50%" padding="0" vertical-align="middle">
+            <mj-text align="left" padding="0" padding-left="5px">
               <p class="text-link">
                 <a target="_blank" rel="noreferrer" href="{{{this.link}}}" padding="0">{{{this.link}}}</a>
               </p>
             </mj-text>
           </mj-column>
-          <mj-column padding="0" width="61%">
+          <mj-column padding="0" width="41%">
             <mj-spacer />
           </mj-column>
         </mj-group>
@@ -373,17 +373,17 @@
           <mj-column width="4%" padding="0">
             <mj-spacer height="2px" />
           </mj-column>
-          <mj-column width="5%" padding="0">
+          <mj-column width="5%" padding="0" vertical-align="middle">
             <mj-image align="left" padding="0" src="{{{@root.websiteURL}}}/assets/icons/file.png" alt="file" width="25px"></mj-image>
           </mj-column>
-          <mj-column width="30%" padding="0">
-            <mj-text align="left" padding="0">
+          <mj-column width="50%" padding="0" vertical-align="middle">
+            <mj-text align="left" padding="0" padding-left="5px">
               <p class="text-link">
                 <a target="_blank" rel="noreferrer" href="{{{this.media.url}}}" padding="0">{{this.media.name}}</a>
               </p>
             </mj-text>
           </mj-column>
-          <mj-column padding="0" width="61%">
+          <mj-column padding="0" width="41%">
             <mj-spacer />
           </mj-column>
         </mj-group>

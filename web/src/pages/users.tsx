@@ -226,7 +226,12 @@ const UsersPage: FunctionComponent = () => {
                           value={values.query}
                           disabled={isSubmitting}
                           type="text"
-                          tabIndex={1}
+                          onKeyDown={(evt) => {
+                            if (evt.key === 'Tab') {
+                              evt.preventDefault();
+                              handleSubmit();
+                            }
+                          }}
                           autoComplete="off"
                           name="query"
                           id="query"
