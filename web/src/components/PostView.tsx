@@ -51,22 +51,26 @@ const MediaView: FunctionComponent<MediaViewArgs> = (args) => {
 
   if (args.type === MediaType.Image) {
     return (
-      <div className="flex text-center justify-center mt-4">
-        <LazyLoadImage
-          effect={'blur'}
-          placeholderSrc={`${apiURL}/media/${args.id}?blur`}
-          alt={args.name}
-          src={`${apiURL}/media/${args.id}`}
-          width={postMediaWidth}
-        />
+      <div className="sm:p-4 mt-2">
+        <div className="flex text-center justify-center">
+          <LazyLoadImage
+            effect={'blur'}
+            placeholderSrc={`${apiURL}/media/${args.id}?blur`}
+            alt={args.name}
+            src={`${apiURL}/media/${args.id}`}
+            width={postMediaWidth}
+          />
+        </div>
       </div>
     );
   } else if (args.type === MediaType.File) {
     return (
-      <a href={`${apiURL}/media/${args.id}`} target="_blank" rel="noreferrer">
-        <FiFileText className="inline-block mr-1 text-lg" />
-        <span className="text-sm">{args.name}</span>
-      </a>
+      <div className="sm:px-4 px-2 mx-4">
+        <a href={`${apiURL}/media/${args.id}`} target="_blank" rel="noreferrer">
+          <FiFileText className="inline-block mr-1 text-lg" />
+          <span className="text-sm">{args.name}</span>
+        </a>
+      </div>
     );
   } else {
     throw new Error(`unsupported media type ${args.type} provided`);
@@ -112,7 +116,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
 
   return (
     <div className="bg-white rounded-lg text-left overflow-hidden shadow-sm mb-4">
-      <div className="sm:px-4 pt-4 px-2">
+      <div className="sm:px-4 pt-4 px-2 mb-8">
         {userType !== UserType.Admin &&
         args.data.publisher !== userID ? null : (
           <div className="flex justify-end text-2xl text-gray-800">
@@ -192,9 +196,9 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
       </div>
       {!args.data.link && !args.data.mediaData ? null : (
         <>
-          <hr className="my-2" />
+          <hr className="mt-2 mb-4" />
           {!args.data.link ? null : (
-            <div className="mt-2 sm:p-4">
+            <div className="mt-2 sm:px-4 px-2 mx-4">
               <a href={args.data.link} target="_blank" rel="noreferrer">
                 <BsLink45Deg className="inline-block mr-1 text-md" />
                 <span className="text-sm">{args.data.link}</span>
@@ -202,17 +206,15 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
             </div>
           )}
           {!args.data.mediaData ? null : (
-            <div className="mt-2 sm:p-4">
-              <MediaView
-                id={args.data.mediaData.id}
-                name={args.data.mediaData.name}
-                type={args.data.mediaData.type}
-              />
-            </div>
+            <MediaView
+              id={args.data.mediaData.id}
+              name={args.data.mediaData.name}
+              type={args.data.mediaData.type}
+            />
           )}
         </>
       )}
-      <div className="pt-2 pb-2 sm:px-4 px-2">
+      <div className="pb-2 sm:px-4 px-2">
         <div className="mx-4 mt-1">
           <div className="flex items-center justify-start text-sm mb-1 mt-2">
             {args.data.reactionCount === 0 ? null : (
@@ -244,9 +246,9 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
               </div>
             )}
           </div>
-          <hr className="mb-2" />
+          <hr className="mb-4" />
 
-          <div className="mt-2 space-x-4">
+          <div className="space-x-4">
             <EmojiPicker
               isVisible={emojiPickerVisible}
               toggleView={toggleEmojiPicker}

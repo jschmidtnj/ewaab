@@ -1,4 +1,5 @@
 import { ApolloError } from '@apollo/react-hooks';
+import { KeyboardEvent } from 'react';
 
 export const locales: string[] = ['en'];
 
@@ -22,4 +23,25 @@ export const getErrorCode = (err: ApolloError): number | null => {
     }
   }
   return null;
+};
+
+export const handleTabInputElemMobile = (
+  evt: KeyboardEvent<HTMLInputElement>,
+  callback: () => void
+): void => {
+  // from https://stackoverflow.com/a/11160055
+
+  if (evt.key === 'Tab') {
+    evt.preventDefault();
+    const element = evt.currentTarget;
+    element.setAttribute('readonly', 'readonly');
+    element.setAttribute('disabled', 'true');
+    // wait until the attributes are updated
+    setTimeout(() => {
+      element.blur(); // close keyboard
+      element.removeAttribute('readonly');
+      element.removeAttribute('disabled');
+      callback();
+    }, 100);
+  }
 };

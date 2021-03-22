@@ -27,7 +27,7 @@ import { userIndexName } from '../elastic/settings';
 import majors from '../shared/majors';
 import universities from '../shared/universities';
 import { connectionName } from '../db/connect';
-import { supportedImageMimes } from '../shared/variables'
+import { supportedImageMimes } from '../shared/variables';
 
 @ArgsType()
 class UpdateArgs {

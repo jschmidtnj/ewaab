@@ -29,8 +29,9 @@ import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
 import Avatar from 'components/Avatar';
 import PrivateRoute from 'components/PrivateRoute';
 import sleep from 'shared/sleep';
-import { capitalizeFirstLetter } from 'utils/misc';
+import { capitalizeFirstLetter, handleTabInputElemMobile } from 'utils/misc';
 import { AiFillQuestionCircle, AiOutlineSearch } from 'react-icons/ai';
+import { isDesktop } from 'react-device-detect';
 
 const avatarWidth = 40;
 
@@ -226,12 +227,12 @@ const UsersPage: FunctionComponent = () => {
                           value={values.query}
                           disabled={isSubmitting}
                           type="text"
-                          onKeyDown={(evt) => {
-                            if (evt.key === 'Tab') {
-                              evt.preventDefault();
-                              handleSubmit();
-                            }
-                          }}
+                          onKeyDown={
+                            isDesktop
+                              ? undefined
+                              : (evt) =>
+                                  handleTabInputElemMobile(evt, handleSubmit)
+                          }
                           autoComplete="off"
                           name="query"
                           id="query"
