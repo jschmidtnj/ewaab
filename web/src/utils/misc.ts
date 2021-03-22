@@ -25,6 +25,10 @@ export const getErrorCode = (err: ApolloError): number | null => {
   return null;
 };
 
+export const deviceDetect = async (): Promise<typeof import("react-device-detect")> => {
+  return (await import ('react-device-detect'));
+};
+
 export const handleTabInputElemMobile = (
   evt: KeyboardEvent<HTMLInputElement>,
   callback: () => void
@@ -42,6 +46,6 @@ export const handleTabInputElemMobile = (
       element.removeAttribute('readonly');
       element.removeAttribute('disabled');
       callback();
-    }, 100);
+    }, 1000);
   }
 };

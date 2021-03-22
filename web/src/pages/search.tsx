@@ -38,8 +38,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 import isDebug from 'utils/mode';
 import { updateSinglePost } from 'components/Feed';
-import { isDesktop } from 'react-device-detect';
-import { handleTabInputElemMobile } from 'utils/misc';
+import { deviceDetect, handleTabInputElemMobile } from 'utils/misc';
 
 const SearchPage: FunctionComponent = () => {
   const [posts, setPosts] = useState<ApolloQueryResult<PostsQuery> | undefined>(
@@ -90,8 +89,8 @@ const SearchPage: FunctionComponent = () => {
 
   const formRef = useRef<
     FormikHelpers<PostsQueryVariables> &
-      FormikState<PostsQueryVariables> &
-      FormikHandlers
+    FormikState<PostsQueryVariables> &
+    FormikHandlers
   >();
 
   const [writePostModalIsOpen, setWritePostIsOpen] = useState<boolean>(false);
@@ -129,6 +128,13 @@ const SearchPage: FunctionComponent = () => {
           type: 'error',
         });
       }
+    })();
+  }, []);
+
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  useEffect(() => {
+    (async () => {
+      setIsDesktop((await deviceDetect()).isDesktop);
     })();
   }, []);
 
@@ -195,7 +201,7 @@ const SearchPage: FunctionComponent = () => {
                             isDesktop
                               ? undefined
                               : (evt) =>
-                                  handleTabInputElemMobile(evt, handleSubmit)
+                                handleTabInputElemMobile(evt, handleSubmit)
                           }
                           type="text"
                           name="query"
@@ -260,9 +266,8 @@ const SearchPage: FunctionComponent = () => {
                         />
                       </div>
                       <p
-                        className={`${
-                          touched.perpage && errors.perpage ? '' : 'hidden'
-                        } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                        className={`${touched.perpage && errors.perpage ? '' : 'hidden'
+                          } text-red-700 pl-3 pt-1 pb-2 text-sm`}
                       >
                         {errors.perpage}
                       </p>
@@ -320,9 +325,9 @@ const SearchPage: FunctionComponent = () => {
               <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-6">
                   {!posts ||
-                  posts.loading ||
-                  !posts.data ||
-                  !formRef?.current ? null : (
+                    posts.loading ||
+                    !posts.data ||
+                    !formRef?.current ? null : (
                     <div className="lg:ml-12 lg:w-64 col-start-1 col-span-2 mb-4 rounded-lg">
                       <ul className="flex flex-col bg-gray-50 border-gray-300 rounded-md shadow-md">
                         {posts.data.posts.postCounts.map((countData, i) => (
@@ -357,7 +362,7 @@ const SearchPage: FunctionComponent = () => {
                               <span className="float-right inline-block pr-2">
                                 <div className="flex items-center justify-center rounded-full h-0.5 w-0.5 bg-purple-500 text-white p-3 text-sm">
                                   {!formRef.current.values.type ||
-                                  countData.type === formRef.current.values.type
+                                    countData.type === formRef.current.values.type
                                     ? countData.count
                                     : '-'}
                                 </div>
@@ -460,7 +465,7 @@ const SearchPage: FunctionComponent = () => {
                                 Showing{' '}
                                 {posts.data.posts.results.length +
                                   formRef.current.values.page *
-                                    formRef.current.values.perpage}{' '}
+                                  formRef.current.values.perpage}{' '}
                                 / {posts.data.posts.count}
                               </span>
                               <div
@@ -494,9 +499,9 @@ const SearchPage: FunctionComponent = () => {
                                   disabled={
                                     formRef.current &&
                                     formRef.current.values.page *
-                                      formRef.current.values.perpage +
-                                      posts.data.posts.results.length ===
-                                      posts.data.posts.count
+                                    formRef.current.values.perpage +
+                                    posts.data.posts.results.length ===
+                                    posts.data.posts.count
                                   }
                                 >
                                   Next

@@ -29,9 +29,8 @@ import { AiFillCaretDown, AiFillCaretUp } from 'react-icons/ai';
 import Avatar from 'components/Avatar';
 import PrivateRoute from 'components/PrivateRoute';
 import sleep from 'shared/sleep';
-import { capitalizeFirstLetter, handleTabInputElemMobile } from 'utils/misc';
+import { capitalizeFirstLetter, deviceDetect, handleTabInputElemMobile } from 'utils/misc';
 import { AiFillQuestionCircle, AiOutlineSearch } from 'react-icons/ai';
-import { isDesktop } from 'react-device-detect';
 
 const avatarWidth = 40;
 
@@ -167,6 +166,13 @@ const UsersPage: FunctionComponent = () => {
           type: 'error',
         });
       }
+    })();
+  }, []);
+
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  useEffect(() => {
+    (async () => {
+      setIsDesktop((await deviceDetect()).isDesktop);
     })();
   }, []);
 
