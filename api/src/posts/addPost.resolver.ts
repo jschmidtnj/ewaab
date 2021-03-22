@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { elasticClient } from '../elastic/init';
 import { postIndexName } from '../elastic/settings';
 import Post, { PostType, BaseSearchPost } from '../schema/posts/post.entity';
-import { postMediaWidth, strMinLen } from '../shared/variables';
+import { postMediaWidth, strMinLen, supportedImageMimes } from '../shared/variables';
 import { AuthAccessType, checkPostAccess } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import User from '../schema/users/user.entity';
@@ -14,7 +14,6 @@ import { blurredWidth, maxFileUploadSize } from '../utils/variables';
 import Media, { MediaParentType, MediaType } from '../schema/media/media.entity';
 import sharp from 'sharp';
 import { s3Client, fileBucket, getMediaKey } from '../utils/aws';
-import { imageMime } from '../utils/misc';
 import { ApolloError } from 'apollo-server-express';
 import statusCodes from 'http-status-codes';
 import { connectionName } from '../db/connect';
@@ -69,7 +68,7 @@ export const handlePostMedia = (postID: string, media?: Promise<FileUpload>): Pr
             const mediaID = uuidv4();
             let mediaType: MediaType;
   
-            if (mediaFile.mimetype.startsWith(imageMime)) {
+            if (supportedImageMimes.includes(mediaFile.mimetype)) {
               mediaType = MediaType.image;
   
               const blurred = await sharp(buffer).blur().resize(blurredWidth).toBuffer();

@@ -18,3 +18,5 @@ export const baseTwitter = 'https://twitter.com';
 export const baseGitHub = 'https://github.com';
 
 export const ewaabFounded = 2010;
+
+export const supportedImageMimes: string[] = ['image/jpeg', 'image/png'];

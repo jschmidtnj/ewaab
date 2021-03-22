@@ -23,6 +23,7 @@ import {
   validUsername,
   baseFacebook,
   baseTwitter,
+  supportedImageMimes,
 } from 'shared/variables';
 import { client } from 'utils/apollo';
 import { useDispatch, useSelector } from 'react-redux';
@@ -125,7 +126,7 @@ const AccountPage: FunctionComponent = () => {
   useEffect(() => {
     const avatarInputElement = document.createElement('input');
     avatarInputElement.setAttribute('type', 'file');
-    avatarInputElement.setAttribute('accept', 'image/jpeg,image/png');
+    avatarInputElement.setAttribute('accept', supportedImageMimes.join(','));
     avatarInputElement.onchange = (_change_evt) => {
       if (avatarInputElement.files.length === 0) {
         setPreviewImage('');

@@ -20,13 +20,14 @@ import { blurredWidth, maxFileUploadSize } from '../utils/variables';
 import { fileBucket, getMediaKey, s3Client } from '../utils/aws';
 import Media, { MediaParentType, MediaType } from '../schema/media/media.entity';
 import sharp from 'sharp';
-import { checkTextFile, imageMime } from '../utils/misc';
+import { checkTextFile } from '../utils/misc';
 import { deleteMedia } from './media.resolver';
 import { elasticClient } from '../elastic/init';
 import { userIndexName } from '../elastic/settings';
 import majors from '../shared/majors';
 import universities from '../shared/universities';
 import { connectionName } from '../db/connect';
+import { supportedImageMimes } from '../shared/variables'
 
 @ArgsType()
 class UpdateArgs {
@@ -384,7 +385,7 @@ class UpdateAccountResolver {
         if (args.avatar) {
           numReading++;
           const avatarFile = await args.avatar;
-          if (!avatarFile.mimetype.startsWith(imageMime)) {
+          if (!supportedImageMimes.includes(avatarFile.mimetype)) {
             throw new Error('invalid image provided for avatar');
           }
           const avatarReadStream = avatarFile.createReadStream();

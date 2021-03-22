@@ -10,9 +10,7 @@ export const streamToString = (stream: internal.Readable): Promise<string> => {
   });
 };
 
-export const imageMime = 'image/';
-
-const mediaMimes: string[] = [imageMime, 'video/', 'audio/'];
+const mediaMimes: string[] = ['image/', 'video/', 'audio/'];
 
 export const checkMedia = (mime: string): boolean => {
   return mediaMimes.some(start => mime.startsWith(start));
