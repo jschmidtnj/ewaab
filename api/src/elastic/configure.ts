@@ -37,7 +37,8 @@ const initializeMapping = async (indexName: string, indexSettings: Record<string
     });
     logger.info(`created ${indexName} index: ${createIndexRes.statusCode === statusCodes.OK}`);
   } catch (err) {
-    logger.error(err.meta.body.error);
+    logger.error(err);
+    logger.error((err as Error).message);
     throw err;
   }
   await sleep(1 * 1e3);
