@@ -1,5 +1,5 @@
 import { Resolver, ArgsType, Field, Args, Mutation, Ctx, Int } from 'type-graphql';
-import { IsEmail, Max, Min } from 'class-validator';
+import { IsEmail, IsOptional, Max, Min, ValidateIf } from 'class-validator';
 import { configData } from '../utils/config';
 import { emailTemplateFiles } from './compileEmailTemplates';
 import { getSecret, VerifyType, getJWTIssuer, verifyJWTExpiration, signPromise } from '../utils/jwt';
@@ -26,14 +26,16 @@ class InviteUserArgs {
   @Field(_type => UserType, { description: 'user type', nullable: true, defaultValue: UserType.user })
   type: UserType;
 
-  @Field(_type => Int, { description: 'alumni year' })
+  @Field(_type => Int, { description: 'alumni year', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: number) => val !== undefined)
   @Min(ewaabFounded, {
     message: 'invalid alumni year provided'
   })
   @Max(new Date().getFullYear() + 3, {
     message: 'year cannot be that far in the future'
   })
-  alumniYear: number;
+  alumniYear?: number;
 
   @Field({ description: 'execute as pseudo-admin when not in production', nullable: true })
   executeAdmin?: boolean;
@@ -44,11 +46,11 @@ export interface InviteUserTokenData {
   name: string;
   type: VerifyType.invite;
   userType: UserType;
-  alumniYear: number;
+  alumniYear?: number;
 }
 
 export const generateJWTInviteUser = async (email: string, name: string,
-  type: UserType, alumniYear: number): Promise<string> => {
+  type: UserType, alumniYear?: number): Promise<string> => {
   const secret = getSecret(loginType.LOCAL);
   const jwtIssuer = getJWTIssuer();
   const authData: InviteUserTokenData = {
@@ -66,12 +68,17 @@ export const generateJWTInviteUser = async (email: string, name: string,
   return token;
 };
 
+const alumniOptionalUserTypes: UserType[] = [UserType.visitor];
+
 @Resolver()
 class InviteUserResolver {
   @Mutation(_returns => String)
   async inviteUser(@Args() args: InviteUserArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
     if (!verifyAdmin(ctx, args.executeAdmin)) {
       throw new Error('user must be an admin to invite new users');
+    }
+    if (!args.alumniYear && !alumniOptionalUserTypes.includes(args.type)) {
+      throw new Error(`user type ${args.type} requires an alumni year`);
     }
     if (await accountExistsEmail(args.email)) {
       throw new Error('user with email already registered');

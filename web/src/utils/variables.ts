@@ -9,7 +9,7 @@ export interface SelectNumberObject {
 }
 
 export const defaultLoggedInPage = '/community';
-export const defaultLoggedInPageVisitor = '/users';
+export const defaultLoggedInPageVisitor = '/profiles';
 
 export const defaultPerPage = 10;
 
@@ -31,20 +31,27 @@ export interface SelectStringObject {
 
 export const postTypeLabelMap: Record<PostType, string> = {
   [PostType.Community]: 'Community',
-  [PostType.EncourageHer]: 'Encourage Her',
+  [PostType.Bridge]: 'Bridge',
   [PostType.MentorNews]: 'Mentor News',
-  [PostType.EhParticipantNews]: 'EH Participant News',
+  [PostType.Jobs]: 'Jobs',
 };
 
+const allPostTypesOrder: PostType[] = [
+  PostType.Community,
+  PostType.Bridge,
+  PostType.MentorNews,
+  PostType.Jobs,
+];
+
 export const postViewMap: Record<UserType, PostType[]> = {
-  [UserType.Admin]: Object.values(PostType),
-  [UserType.User]: Object.values(PostType),
+  [UserType.Admin]: allPostTypesOrder,
+  [UserType.User]: allPostTypesOrder,
   [UserType.Mentor]: [PostType.MentorNews, PostType.Community],
   [UserType.Visitor]: [],
 };
 
 export const postWriteMap: Record<UserType, PostType[]> = {
-  [UserType.Admin]: Object.values(PostType),
+  [UserType.Admin]: allPostTypesOrder,
   [UserType.User]: [PostType.Community],
   [UserType.Mentor]: [PostType.MentorNews],
   [UserType.Visitor]: [],
@@ -60,17 +67,17 @@ export const linkMap: Record<PostType, LinkData> = {
     name: 'community',
     href: '/community',
   },
-  [PostType.EhParticipantNews]: {
-    name: 'participant news',
-    href: '/participant-news',
-  },
-  [PostType.EncourageHer]: {
-    name: 'encourage her',
-    href: '/encourage-her',
+  [PostType.Bridge]: {
+    name: 'bridge',
+    href: '/bridge',
   },
   [PostType.MentorNews]: {
     name: 'mentor news',
     href: '/mentor-news',
+  },
+  [PostType.Jobs]: {
+    name: 'jobs',
+    href: '/jobs',
   },
 };
 
@@ -78,9 +85,9 @@ export const accountLink: LinkData = {
   name: 'account',
   href: '/account',
 };
-export const usersLink: LinkData = {
-  name: 'students',
-  href: '/users',
+export const profilesLink: LinkData = {
+  name: 'user profiles',
+  href: '/profiles',
 };
 export const loginLink: LinkData = {
   name: 'login',
@@ -97,8 +104,10 @@ export const feedPaths: string[] = Object.values(linkMap).map(
 
 export const allDefinedPaths: string[] = [
   ...feedPaths,
-  ...[accountLink, usersLink, loginLink, searchLink].map((elem) => elem.href),
+  ...[accountLink, profilesLink, loginLink, searchLink].map(
+    (elem) => elem.href
+  ),
 ];
 
-export const allowedVisitorPaths: LinkData[] = [usersLink];
-export const dynamicAllowedVisitorPaths: string[] = ['/[user]'];
+export const allowedVisitorPaths: LinkData[] = [profilesLink];
+export const dynamicAllowedVisitorPaths: string[] = ['/[profile]'];

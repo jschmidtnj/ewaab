@@ -3,7 +3,7 @@ import { Resolver, ArgsType, Field, Args, Mutation } from 'type-graphql';
 import { IsEmail, MinLength, Matches } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, validUsername, strMinLen } from '../shared/variables';
 import { accountExistsEmail, accountExistsUsername } from './shared';
-import User, { BaseSearchUser } from '../schema/users/user.entity';
+import User, { BaseSearchUser, EmailNotificationFrequency } from '../schema/users/user.entity';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
@@ -159,7 +159,7 @@ class RegisterResolver {
       facebook: '',
       github: '',
       twitter: '',
-      emailNotifications: true,
+      emailNotificationFrequency: EmailNotificationFrequency.weekly,
       lastEmailNotification: new Date().getTime(),
       bio: '',
       mentor: ''

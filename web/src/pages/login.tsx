@@ -50,6 +50,15 @@ const Login: FunctionComponent = () => {
   const router = useRouter();
   const [useCode, setUseCode] = useState<boolean>(false);
 
+  const onLogin = (): void => {
+    const userType = getType();
+    if (userType === UserType.Visitor) {
+      router.replace(redirect !== null ? redirect : defaultLoggedInPageVisitor);
+    } else {
+      router.replace(redirect !== null ? redirect : defaultLoggedInPage);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       let verifyEmail = false;
@@ -96,14 +105,7 @@ const Login: FunctionComponent = () => {
       try {
         const loggedIn = await isLoggedIn();
         if (localToken === undefined && loggedIn) {
-          const userType = getType();
-          if (userType === UserType.Visitor) {
-            router.replace(
-              redirect !== null ? redirect : defaultLoggedInPageVisitor
-            );
-          } else {
-            router.replace(redirect !== null ? redirect : defaultLoggedInPage);
-          }
+          onLogin();
         }
       } catch (err) {
         dispatchAuthThunk(thunkLogout());
@@ -331,9 +333,7 @@ const Login: FunctionComponent = () => {
                     );
                     await initializeApolloClient();
                     await dispatchAuthThunk(thunkGetUser());
-                    router.push(
-                      redirect !== null ? redirect : defaultLoggedInPage
-                    );
+                    onLogin();
                   } catch (err) {
                     const errObj: Error = err;
                     toast(errObj.message, {

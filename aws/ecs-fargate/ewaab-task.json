@@ -28,7 +28,7 @@
       "environment": [
         {
           "name": "ENABLE_INITIALIZATION",
-          "value": "true"
+          "value": "false"
         }
       ],
       "resourceRequirements": null,

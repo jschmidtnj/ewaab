@@ -14,7 +14,7 @@ fragment userFields on User {
   facebook
   github
   twitter
-  emailNotifications
+  emailNotificationFrequency
   description
   bio
   pronouns

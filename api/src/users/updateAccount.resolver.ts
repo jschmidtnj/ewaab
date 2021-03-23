@@ -5,7 +5,7 @@ import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn, Min, 
 import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen, ewaabFounded, uuidRegex } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
-import User, { BaseSearchUser, UserType } from '../schema/users/user.entity';
+import User, { BaseSearchUser, EmailNotificationFrequency, UserType } from '../schema/users/user.entity';
 import { QueryPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { emailTemplateFiles } from '../emails/compileEmailTemplates';
 import { sendEmailUtil } from '../emails/sendEmail.resolver';
@@ -125,9 +125,9 @@ class UpdateArgs {
   })
   twitter?: string;
 
-  @Field(_type => Boolean, { description: 'email notifications', nullable: true })
+  @Field(_type => EmailNotificationFrequency, { description: 'email notification frequency', nullable: true })
   @IsOptional()
-  emailNotifications?: boolean;
+  emailNotificationFrequency?: EmailNotificationFrequency;
 
   @Field(_type => String, { description: 'description', nullable: true })
   @IsOptional()
@@ -286,8 +286,8 @@ class UpdateAccountResolver {
     if (args.twitter !== undefined) {
       userUpdateData.twitter = args.twitter;
     }
-    if (args.emailNotifications !== undefined) {
-      userUpdateData.emailNotifications = args.emailNotifications;
+    if (args.emailNotificationFrequency !== undefined) {
+      userUpdateData.emailNotificationFrequency = args.emailNotificationFrequency;
     }
     if (args.description !== undefined) {
       userUpdateData.description = args.description;

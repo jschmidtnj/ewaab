@@ -17,6 +17,19 @@ registerEnumType(UserType, {
   description: 'user type',
 });
 
+export enum EmailNotificationFrequency {
+  monthly = 'monthly',
+  biWeekly = 'biWeekly',
+  weekly = 'weekly',
+  daily = 'daily',
+  none = 'none',
+}
+
+registerEnumType(EmailNotificationFrequency, {
+  name: 'EmailNotificationFrequency',
+  description: 'email notification frequency',
+});
+
 @ObjectType({ description: 'user data that you can get from post / comment search', isAbstract: true })
 export class PublisherData extends BaseTimestamp {
   @Field({ description: 'user id' })
@@ -51,7 +64,7 @@ export class BaseSearchUser extends PublisherData {
   @IsDefined()
   email: string;
 
-  @Field({ description: 'user type' })
+  @Field(_type => UserType, { description: 'user type' })
   @Column({ type: 'enum', enum: UserType })
   @IsDefined()
   type: UserType;
@@ -169,10 +182,10 @@ export default class User extends PublicUser {
   @IsDefined()
   lastEmailNotification: number;
 
-  @Field({ description: 'email notifications' })
-  @Column({ type: 'boolean' })
+  @Field(_type => EmailNotificationFrequency, { description: 'email notification frequency' })
+  @Column({ type: 'enum', enum: EmailNotificationFrequency })
   @IsDefined()
-  emailNotifications: boolean;
+  emailNotificationFrequency: EmailNotificationFrequency;
 
   @Field({ description: 'current token version' })
   @Column({ type: 'bigint' })

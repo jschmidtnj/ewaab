@@ -9,8 +9,8 @@ const ParticipantNewsPage: FunctionComponent = () => {
   return (
     <PrivateRoute>
       <Layout>
-        <SEO page="participant news" />
-        <Feed postType={PostType.EhParticipantNews} />
+        <SEO page="jobs" />
+        <Feed postType={PostType.Jobs} />
       </Layout>
     </PrivateRoute>
   );

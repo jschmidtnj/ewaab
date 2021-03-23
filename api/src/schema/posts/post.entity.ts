@@ -9,9 +9,9 @@ import ReactionCount from '../reactions/reactionCount.entity';
 import Reaction from '../reactions/reaction.entity';
 
 export enum PostType {
-  ehParticipantNews = 'ehParticipantNews',
+  jobs = 'jobs',
   mentorNews = 'mentorNews',
-  encourageHer = 'encourageHer',
+  bridge = 'bridge',
   community = 'community',
 }
 
@@ -35,7 +35,7 @@ export class BaseSearchPost extends BaseTimestamp {
   @IsDefined()
   content: string;
 
-  @Field({ description: 'post type' })
+  @Field(_type => PostType, { description: 'post type' })
   @Column({ type: 'enum', enum: PostType })
   @IsDefined()
   type: PostType;

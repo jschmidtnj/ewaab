@@ -34,7 +34,7 @@ interface CommentsViewArgs {
 
 const CommentView: FunctionComponent<CommentsViewArgs> = (args) => {
   const userType = useSelector<RootState, UserType | undefined>(
-    (state) => state.authReducer.user?.type as UserType | undefined
+    (state) => state.authReducer.user?.type
   );
   const userID = useSelector<RootState, string | undefined>(
     (state) => state.authReducer.user?.id

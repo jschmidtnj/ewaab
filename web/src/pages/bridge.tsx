@@ -5,15 +5,15 @@ import Layout from 'layouts/main';
 import { PostType } from 'lib/generated/datamodel';
 import { FunctionComponent } from 'react';
 
-const EncourageHerPage: FunctionComponent = () => {
+const BridgePage: FunctionComponent = () => {
   return (
     <PrivateRoute>
       <Layout>
-        <SEO page="encourage her" />
-        <Feed postType={PostType.EncourageHer} />
+        <SEO page="bridge" />
+        <Feed postType={PostType.Bridge} />
       </Layout>
     </PrivateRoute>
   );
 };
 
-export default EncourageHerPage;
+export default BridgePage;

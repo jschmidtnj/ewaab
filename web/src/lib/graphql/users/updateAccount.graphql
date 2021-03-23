@@ -1,11 +1,12 @@
 mutation updateAccount($email: String, $name: String, $avatar: Upload, $resume: Upload,
                         $jobTitle: String, $location: String, $locationName: String, $url: String,
-                        $facebook: String, $github: String, $twitter: String, $emailNotifications: Boolean,
+                        $facebook: String, $github: String, $twitter: String,
+                        $emailNotificationFrequency: EmailNotificationFrequency,
                         $description: String, $major: String, $university: String, $mentor: String,
                         $pronouns: String, $bio: String, $password: String) {
   updateAccount(email: $email, name: $name, avatar: $avatar, resume: $resume,
                 jobTitle: $jobTitle, location: $location, locationName: $locationName, url: $url,
-                facebook: $facebook, github: $github, twitter: $twitter, emailNotifications: $emailNotifications,
+                facebook: $facebook, github: $github, twitter: $twitter, emailNotificationFrequency: $emailNotificationFrequency,
                 description: $description, major: $major, university: $university, mentor: $mentor,
                 pronouns: $pronouns, bio: $bio, password: $password)
 }

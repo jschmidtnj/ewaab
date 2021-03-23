@@ -148,7 +148,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
           formRef.current.setValues({
             title: updateDataRes.data.post.title,
             content: updateDataRes.data.post.content,
-            type: updateDataRes.data.post.type as PostType,
+            type: updateDataRes.data.post.type,
             link: updateDataRes.data.post.link
               ? updateDataRes.data.post.link
               : '',

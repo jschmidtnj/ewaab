@@ -47,7 +47,7 @@ const SearchPage: FunctionComponent = () => {
     (state) => state.authReducer.user?.id
   );
   const userType = useSelector<RootState, UserType | undefined>(
-    (state) => state.authReducer.user?.type as UserType | undefined
+    (state) => state.authReducer.user?.type
   );
 
   const [defaultQuery, setDefaultQuery] = useState<string>('');

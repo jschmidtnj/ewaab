@@ -24,7 +24,7 @@ import {
   postViewMap,
   accountLink,
   searchLink,
-  usersLink,
+  profilesLink,
 } from 'utils/variables';
 import VisibilitySensor from 'react-visibility-sensor';
 import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
@@ -75,7 +75,7 @@ const Header: FunctionComponent = () => {
         const feedPaths = postViewMap[userType].map(
           (postType) => linkMap[postType]
         );
-        setPaths([...feedPaths, usersLink, searchLink]);
+        setPaths([...feedPaths, profilesLink, searchLink]);
         const username = getUsername();
         setUserPaths([
           {

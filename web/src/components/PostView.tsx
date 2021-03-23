@@ -91,7 +91,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
     (state) => state.authReducer.user?.id
   );
   const userType = useSelector<RootState, UserType | undefined>(
-    (state) => state.authReducer.user?.type as UserType | undefined
+    (state) => state.authReducer.user?.type
   );
 
   const [emojiPickerVisible, setEmojiPickerVisible] = useState<boolean>(false);

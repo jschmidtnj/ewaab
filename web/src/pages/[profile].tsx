@@ -61,9 +61,6 @@ const UserPage: FunctionComponent = () => {
           return;
         }
         const username = window.location.pathname.split('/')[1];
-        if (username.length === 0) {
-          throw new Error('no username provided');
-        }
         if (currentUser && username === currentUser.username) {
           setUser((currentUser as unknown) as PublicUserFieldsFragment);
         } else {
@@ -95,7 +92,7 @@ const UserPage: FunctionComponent = () => {
   return (
     <PrivateRoute>
       <Layout>
-        <SEO page={user ? user.username : 'user'} />
+        <SEO page={user ? user.username : 'profile'} />
         <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
           {!user ? (
             <p className="text-sm">loading...</p>

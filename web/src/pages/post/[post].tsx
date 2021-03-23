@@ -12,7 +12,6 @@ import {
   PostQuery,
   PostQueryVariables,
   PostSearchFieldsFragment,
-  PostType,
 } from 'lib/generated/datamodel';
 import { useRouter } from 'next/dist/client/router';
 import React, { FunctionComponent, useEffect, useState } from 'react';
@@ -93,21 +92,10 @@ const PostPage: FunctionComponent = () => {
 
   useEffect(() => {
     (async () => {
-      let postID: string;
-      try {
-        if (!(await isLoggedIn())) {
-          return;
-        }
-        postID = window.location.pathname.split('/')[2];
-        if (postID.length === 0) {
-          throw new Error('no post id provided');
-        }
-      } catch (err) {
-        toast((err as Error).message, {
-          type: 'error',
-        });
+      if (!(await isLoggedIn())) {
         return;
       }
+      const postID = window.location.pathname.split('/')[2];
       await runQuery(postID, false, true);
     })();
   }, []);
@@ -125,7 +113,7 @@ const PostPage: FunctionComponent = () => {
                 {!writePostModalIsOpen ? null : (
                   <WritePostModal
                     toggleModal={toggleWritePost}
-                    postType={post.type as PostType}
+                    postType={post.type}
                     onSubmit={async () => {
                       // wait for elasticsearch to update
                       await sleep(elasticWaitTime);
@@ -139,7 +127,7 @@ const PostPage: FunctionComponent = () => {
                     toggleModal={toggleDeletePostModal}
                     onSubmit={async () => {
                       await sleep(elasticWaitTime);
-                      router.push(linkMap[post.type as PostType].href);
+                      router.push(linkMap[post.type].href);
                     }}
                     variables={deletePostVariables}
                   />

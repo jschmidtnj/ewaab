@@ -12,6 +12,7 @@ import {
   DeleteAccountMutation,
   DeleteAccountMutationVariables,
   UserType,
+  EmailNotificationFrequency,
 } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
 import {
@@ -62,6 +63,34 @@ const majorOptions = majors.map(
     value: major,
   })
 );
+
+interface SelectEmailNotificationFrequencyObject {
+  label: string;
+  value: EmailNotificationFrequency;
+}
+
+const emailNotificationFrequencyOptions: SelectEmailNotificationFrequencyObject[] = [
+  {
+    label: 'Daily',
+    value: EmailNotificationFrequency.Daily,
+  },
+  {
+    label: 'Weekly',
+    value: EmailNotificationFrequency.Weekly,
+  },
+  {
+    label: 'Biweekly',
+    value: EmailNotificationFrequency.BiWeekly,
+  },
+  {
+    label: 'Monthly',
+    value: EmailNotificationFrequency.Monthly,
+  },
+  {
+    label: 'None',
+    value: EmailNotificationFrequency.None,
+  },
+];
 
 const LocationSelect = dynamic(() => import('components/LocationSelect'), {
   ssr: false,
@@ -204,7 +233,7 @@ const AccountPage: FunctionComponent = () => {
                     facebook: user.facebook,
                     github: user.github,
                     twitter: user.twitter,
-                    emailNotifications: user.emailNotifications,
+                    emailNotificationFrequency: user.emailNotificationFrequency,
                     description: user.description,
                     bio: user.bio,
                     major: user.major,
@@ -228,7 +257,7 @@ const AccountPage: FunctionComponent = () => {
                     twitter: yup
                       .string()
                       .matches(validUsername, 'invalid twitter account'),
-                    emailNotifications: yup.boolean(),
+                    emailNotificationFrequency: yup.string(),
                     description: yup.string(),
                     bio: yup.string(),
                     password: yup
@@ -304,10 +333,11 @@ const AccountPage: FunctionComponent = () => {
                         foundUpdate = true;
                       }
                       if (
-                        formData.emailNotifications !== user.emailNotifications
+                        formData.emailNotificationFrequency !==
+                        user.emailNotificationFrequency
                       ) {
-                        updates.emailNotifications =
-                          formData.emailNotifications;
+                        updates.emailNotificationFrequency =
+                          formData.emailNotificationFrequency;
                         foundUpdate = true;
                       }
                       if (formData.description !== user.description) {
@@ -828,40 +858,78 @@ const AccountPage: FunctionComponent = () => {
                             </p>
                           </div>
 
-                          <div
-                            className="flex flex-row items-center justify-start"
-                            onClick={(evt) => {
-                              evt.preventDefault();
-                              setFieldValue(
-                                'emailNotifications',
-                                !values.emailNotifications
-                              );
-                            }}
-                          >
-                            <label
-                              htmlFor="emailNotifications"
-                              className="block text-sm font-medium text-gray-700"
-                            >
-                              Email Notifications
-                            </label>
-                            <div
-                              id="emailNotifications"
-                              className={
-                                'ml-2 w-10 h-6 bg-gray-300 rounded-full p-1 duration-300 ease-in-out' +
-                                (values.emailNotifications
-                                  ? ' bg-green-400'
-                                  : '')
-                              }
-                            >
-                              <div
+                          <div>
+                            <div className="mt-1 rounded-md shadow-sm -space-y-px">
+                              <label
+                                htmlFor="emailNotificationFrequency"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                              >
+                                Email Notification Frequency
+                              </label>
+                              <Select
+                                id="emailNotificationFrequency"
+                                name="emailNotificationFrequency"
+                                isMulti={false}
+                                options={emailNotificationFrequencyOptions}
+                                cacheOptions={true}
+                                defaultValue={emailNotificationFrequencyOptions.find(
+                                  (elem) =>
+                                    elem.value ===
+                                    user.emailNotificationFrequency
+                                )}
+                                onChange={(
+                                  selectedOption: ValueType<
+                                    SelectEmailNotificationFrequencyObject,
+                                    false
+                                  >
+                                ) => {
+                                  setFieldValue(
+                                    'emailNotificationFrequency',
+                                    selectedOption.value
+                                  );
+                                }}
+                                onBlur={(evt) => {
+                                  handleBlur(evt);
+                                  setFieldTouched(
+                                    'emailNotificationFrequency',
+                                    true
+                                  );
+                                }}
                                 className={
-                                  'bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out' +
-                                  (values.emailNotifications
-                                    ? ' translate-x-4'
-                                    : '')
+                                  (touched.emailNotificationFrequency &&
+                                  errors.emailNotificationFrequency
+                                    ? 'is-invalid'
+                                    : '') + ' select-dropdown'
                                 }
-                              ></div>
+                                styles={{
+                                  control: (styles) => ({
+                                    ...styles,
+                                    borderColor:
+                                      touched.emailNotificationFrequency &&
+                                      errors.emailNotificationFrequency
+                                        ? 'red'
+                                        : styles.borderColor,
+                                  }),
+                                }}
+                                invalid={
+                                  !!(
+                                    touched.emailNotificationFrequency &&
+                                    errors.emailNotificationFrequency
+                                  )
+                                }
+                                disabled={isSubmitting}
+                              />
                             </div>
+                            <p
+                              className={`${
+                                touched.emailNotificationFrequency &&
+                                errors.emailNotificationFrequency
+                                  ? ''
+                                  : 'hidden'
+                              } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                            >
+                              {errors.emailNotificationFrequency}
+                            </p>
                           </div>
 
                           <div>
