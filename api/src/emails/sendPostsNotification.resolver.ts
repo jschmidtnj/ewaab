@@ -63,7 +63,7 @@ export const sendNotification = async (id: string, created?: number): Promise<st
   });
 
   if (postData.count === 0) {
-    throw new Error('no posts found in given timeframe');
+    return 'no posts found in given timeframe';
   }
 
   const markdownConverter = new Converter();

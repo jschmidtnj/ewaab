@@ -32,6 +32,12 @@ const initialize = async (): Promise<void> => {
   logger.info('email templates compiled');
 };
 
+/**
+ * get Mondays in month
+ * 
+ * @param {Date} now today
+ * @returns {number[]} Monday dates in month
+ */
 const getMonthMondays = (now: Date): number[] => {
   const mondays: number[] = [];
   const current = new Date(now.getTime());
