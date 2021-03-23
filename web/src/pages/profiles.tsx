@@ -173,7 +173,7 @@ const UsersPage: FunctionComponent = () => {
     <PrivateRoute>
       <Layout>
         <SEO page="profiles" />
-        <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12">
+        <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-12 pb-36">
           <Formik
             innerRef={(formRef as unknown) as (instance: any) => void}
             initialValues={initialValues}
