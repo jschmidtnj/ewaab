@@ -5,7 +5,7 @@
 
 ```graphql
 mutation inviteUser {
-  inviteUser(name:"Kaitlin", email:"<email>", type:admin, alumniYear:2020, executeAdmin:true)
+  inviteUser(name: "Kaitlin", email: "<email>", type: admin, alumniYear: 2020, executeAdmin: true)
 }
 ```
 
@@ -18,3 +18,15 @@ mutation inviteUser {
 ```
 
 You can get the token from going to https://network.ewaab.org/account?dev.
+
+## user authorization codes
+
+Sometimes you may want to invite users for an organization / company, and you want to restrict that access for when they give you funding (or for any reason). To handle this, you can create an account using code login. Here's the mutation:
+
+```graphql
+mutation inviteUser {
+  addUserCode(name: "external-company", executeAdmin: true)
+}
+```
+
+Again, executeAdmin is optional, and will be disabled in production. You can also remove user codes with the `deleteUserCode` mutation.
