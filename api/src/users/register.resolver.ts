@@ -159,6 +159,7 @@ class RegisterResolver {
       facebook: '',
       github: '',
       twitter: '',
+      linkedIn: '',
       emailNotificationFrequency: EmailNotificationFrequency.weekly,
       lastEmailNotification: new Date().getTime(),
       bio: '',

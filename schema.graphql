@@ -408,6 +408,9 @@ type Mutation {
     """job title"""
     jobTitle: String
 
+    """linked-in username"""
+    linkedIn: String
+
     """location"""
     location: String
 
@@ -652,6 +655,9 @@ type PublicUser {
 
   """job title"""
   jobTitle: String!
+
+  """linked-in profile"""
+  linkedIn: String!
 
   """location latitude longitude"""
   location: String
@@ -1181,6 +1187,9 @@ type User {
 
   """date of last email notification"""
   lastEmailNotification: Float!
+
+  """linked-in profile"""
+  linkedIn: String!
 
   """location latitude longitude"""
   location: String

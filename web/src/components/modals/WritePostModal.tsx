@@ -197,7 +197,11 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                     </h3>
                     <hr className="mb-2" />
                     <div className="ml-6 flex items-center text-left">
-                      <Avatar avatar={user?.avatar} avatarWidth={40} />
+                      <Avatar
+                        avatar={user?.avatar}
+                        className="w-10 h-10"
+                        avatarWidth={40}
+                      />
                       <p className="inline-block ml-2 font-bold">{user.name}</p>
                     </div>
                   </div>

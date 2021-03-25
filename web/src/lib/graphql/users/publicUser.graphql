@@ -11,6 +11,7 @@ fragment publicUserFields on PublicUser {
   facebook
   twitter
   github
+  linkedIn
   description
   bio
   pronouns

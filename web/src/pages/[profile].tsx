@@ -24,6 +24,7 @@ import {
   FaGithub,
   FaEnvelope,
   FaSchool,
+  FaLinkedin,
 } from 'react-icons/fa';
 import { FiFileText } from 'react-icons/fi';
 import { IoMdSchool } from 'react-icons/io';
@@ -38,6 +39,7 @@ import Markdown from 'components/markdown/Markdown';
 import { defaultUniversity } from 'shared/universities';
 import PrivateRoute from 'components/PrivateRoute';
 import { isLoggedIn } from 'state/auth/getters';
+import { baseLinkedIn } from '../../../api/src/shared/variables';
 
 const avatarWidth = 40;
 
@@ -101,7 +103,11 @@ const UserPage: FunctionComponent = () => {
               <div className="lg:flex lg:items-center lg:justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center">
-                    <Avatar avatar={user?.avatar} avatarWidth={avatarWidth} />
+                    <Avatar
+                      avatar={user?.avatar}
+                      className="w-10 h-10"
+                      avatarWidth={avatarWidth}
+                    />
                     <h2 className="ml-3 inline-block text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                       {user.name}
                     </h2>
@@ -201,6 +207,17 @@ const UserPage: FunctionComponent = () => {
                           rel="noreferrer"
                         >
                           <FaTwitter />
+                        </a>
+                      </div>
+                    )}
+                    {!user.linkedIn ? null : (
+                      <div className="mt-1 flex items-center text-md text-gray-500">
+                        <a
+                          href={`${baseLinkedIn}/${user.linkedIn}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <FaLinkedin />
                         </a>
                       </div>
                     )}

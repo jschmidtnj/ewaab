@@ -181,6 +181,7 @@ const Header: FunctionComponent = () => {
                     <Avatar
                       avatar={user ? user.avatar : undefined}
                       avatarWidth={avatarWidth}
+                      className="w-12 h-12"
                     />
                   </button>
                 </div>

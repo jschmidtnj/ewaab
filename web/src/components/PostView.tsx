@@ -155,6 +155,7 @@ const PostView: FunctionComponent<PostViewArgs> = (args) => {
               <Avatar
                 avatar={args.data.publisherData?.avatar}
                 avatarWidth={40}
+                className="w-10 h-10"
               />
               <div className="inline-block ml-2">
                 {!args.data.publisherData ? (

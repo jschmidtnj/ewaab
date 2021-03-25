@@ -25,6 +25,7 @@ import {
   baseFacebook,
   baseTwitter,
   supportedImageMimes,
+  baseLinkedIn,
 } from 'shared/variables';
 import { client } from 'utils/apollo';
 import { useDispatch, useSelector } from 'react-redux';
@@ -233,6 +234,7 @@ const AccountPage: FunctionComponent = () => {
                     facebook: user.facebook,
                     github: user.github,
                     twitter: user.twitter,
+                    linkedIn: user.linkedIn,
                     emailNotificationFrequency: user.emailNotificationFrequency,
                     description: user.description,
                     bio: user.bio,
@@ -257,6 +259,9 @@ const AccountPage: FunctionComponent = () => {
                     twitter: yup
                       .string()
                       .matches(validUsername, 'invalid twitter account'),
+                    linkedIn: yup
+                      .string()
+                      .matches(validUsername, 'invalid linked-in account'),
                     emailNotificationFrequency: yup.string(),
                     description: yup.string(),
                     bio: yup.string(),
@@ -330,6 +335,10 @@ const AccountPage: FunctionComponent = () => {
                       }
                       if (formData.twitter !== user.twitter) {
                         updates.twitter = formData.twitter;
+                        foundUpdate = true;
+                      }
+                      if (formData.linkedIn !== user.linkedIn) {
+                        updates.linkedIn = formData.linkedIn;
                         foundUpdate = true;
                       }
                       if (
@@ -859,6 +868,44 @@ const AccountPage: FunctionComponent = () => {
                           </div>
 
                           <div>
+                            <label
+                              htmlFor="linkedIn"
+                              className="block text-sm font-medium text-gray-700"
+                            >
+                              LinkedIn
+                            </label>
+                            <div className="mt-2 flex rounded-md shadow-sm">
+                              <LinkSpan
+                                link={
+                                  values.linkedIn.length === 0 ||
+                                  errors.linkedIn
+                                    ? ''
+                                    : `${baseLinkedIn}/${values.linkedIn}`
+                                }
+                              />
+                              <input
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                value={values.linkedIn}
+                                disabled={isSubmitting}
+                                type="text"
+                                name="linkedIn"
+                                id="linkedIn"
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-none rounded-r-md"
+                              />
+                            </div>
+                            <p
+                              className={`${
+                                touched.linkedIn && errors.linkedIn
+                                  ? ''
+                                  : 'hidden'
+                              } text-red-700 pl-3 pt-1 pb-2 text-sm`}
+                            >
+                              {errors.linkedIn}
+                            </p>
+                          </div>
+
+                          <div>
                             <div className="mt-1 rounded-md shadow-sm -space-y-px">
                               <label
                                 htmlFor="emailNotificationFrequency"
@@ -1034,6 +1081,7 @@ const AccountPage: FunctionComponent = () => {
                                 <Avatar
                                   avatar={user?.avatar}
                                   avatarWidth={40}
+                                  className="w-10 h-10"
                                 />
                               )}
                               <button

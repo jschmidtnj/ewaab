@@ -494,6 +494,7 @@ const UsersPage: FunctionComponent = () => {
                               <Avatar
                                 avatar={user.avatar}
                                 avatarWidth={avatarWidth}
+                                className="w-10 h-10"
                               />
                             </td>
                             <td className="w-0 px-4 py-4 whitespace-nowrap text-sm font-medium">

@@ -100,8 +100,12 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
 
   return (
     <div className="mt-4">
-      <div className="space-x-2 flex items-start justify-center pr-12">
-        <Avatar className="inline-block" avatar={avatar} avatarWidth={45} />
+      <div className="space-x-2 flex items-start justify-center pr-6">
+        <Avatar
+          className="inline-block w-10 h-10"
+          avatar={avatar}
+          avatarWidth={40}
+        />
         <Formik
           key={`post-${args.post}-new-comment`}
           initialValues={{
@@ -214,7 +218,7 @@ const CommentsView: FunctionComponent<CommentsViewArgs> = (args) => {
           )}
         </Formik>
       </div>
-      <div className="space-y-4 mt-4 mb-2">
+      <div className="space-y-4 mt-6 mb-2">
         {loading ? (
           <p className="text-sm sr-only">Loading...</p>
         ) : comments.length === 0 ? (

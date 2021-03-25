@@ -163,6 +163,11 @@ export class PublicUser extends SearchUser {
   @IsDefined()
   github: string;
 
+  @Field({ description: 'linked-in profile' })
+  @Column({ type: 'text' })
+  @IsDefined()
+  linkedIn: string;
+
   @Field({ description: 'longer user bio' })
   @Column({ type: 'text' })
   @IsDefined()

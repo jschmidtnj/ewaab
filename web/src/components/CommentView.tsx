@@ -60,8 +60,8 @@ const CommentView: FunctionComponent<CommentsViewArgs> = (args) => {
   }, []);
 
   return (
-    <div className="flex items-start justify-center">
-      <div className="inline-block">
+    <div className="flex items-start justify-center pr-14">
+      <div className="inline-block pl-1">
         <Link
           href={
             !args.comment.publisherData
@@ -72,7 +72,8 @@ const CommentView: FunctionComponent<CommentsViewArgs> = (args) => {
           <a>
             <Avatar
               avatar={args.comment.publisherData?.avatar}
-              avatarWidth={45}
+              avatarWidth={32}
+              className="w-8 h-8"
             />
           </a>
         </Link>

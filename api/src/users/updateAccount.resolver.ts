@@ -125,6 +125,14 @@ class UpdateArgs {
   })
   twitter?: string;
 
+  @Field(_type => String, { description: 'linked-in username', nullable: true })
+  @IsOptional()
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
+  @Matches(validUsername, {
+    message: 'invalid linked-in username'
+  })
+  linkedIn?: string;
+
   @Field(_type => EmailNotificationFrequency, { description: 'email notification frequency', nullable: true })
   @IsOptional()
   emailNotificationFrequency?: EmailNotificationFrequency;
@@ -285,6 +293,9 @@ class UpdateAccountResolver {
     }
     if (args.twitter !== undefined) {
       userUpdateData.twitter = args.twitter;
+    }
+    if (args.linkedIn !== undefined) {
+      userUpdateData.linkedIn = args.linkedIn;
     }
     if (args.emailNotificationFrequency !== undefined) {
       userUpdateData.emailNotificationFrequency = args.emailNotificationFrequency;
