@@ -66,7 +66,10 @@ export const sendNotification = async (id: string, created?: number): Promise<st
     return 'no posts found in given timeframe';
   }
 
-  const markdownConverter = new Converter();
+  const markdownConverter = new Converter({
+    strikethrough: true,
+    
+  });
 
   const postEmailData: PostEmailData[] = await Promise.all(postData.results.map(async (post): Promise<PostEmailData> => {
     const publisherData = await getPublisherData(post.publisher);
