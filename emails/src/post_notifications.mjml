@@ -19,7 +19,9 @@
       }
 
       .post-avatar {
-      min-width: 45px;
+      object-fit: cover;
+      width: 45px;
+      height: 45px;
       }
       .post-wrapper {
       min-width: 360px;
@@ -282,7 +284,7 @@
           <mj-image align="left" padding-top="18px" padding-left="5px" padding-right="0" src="{{{websiteURL}}}/assets/img/ewaab/logo.png" href="{{{websiteURL}}}" target="_blank" rel="noreferrer" alt="ewaab" width="100px"></mj-image>
         </mj-column>
         <mj-column>
-          <mj-image align="right" src="{{{avatarURL}}}" padding-right="5px" border-radius="1000px" href="{{{websiteURL}}}/{{username}}" target="_blank" rel="noreferrer" alt="avatar" width="40px"></mj-image>
+          <mj-image align="right" css-class="avatar" src="{{{avatarURL}}}" padding-right="5px" border-radius="1000px" href="{{{websiteURL}}}/{{username}}" target="_blank" rel="noreferrer" alt="avatar" width="45px" height="45px"></mj-image>
         </mj-column>
       </mj-group>
     </mj-section>
@@ -293,7 +295,7 @@
       <mj-section background-color="#ffffff" border-radius="10px">
         <mj-group width="100%">
           <mj-column width="20%" padding-left="20px" padding-right="0" padding-top="0">
-            <mj-image align="left" css-class="post-avatar" padding-left="0" padding-right="0" src="{{{this.avatarURL}}}" border-radius="1000px" href="{{{authorURL}}}" target="_blank" rel="noreferrer" alt="avatar" width="45px"></mj-image>
+            <mj-image align="left" css-class="avatar" padding-left="0" padding-right="0" src="{{{this.avatarURL}}}" border-radius="1000px" href="{{{authorURL}}}" target="_blank" rel="noreferrer" alt="avatar" width="45px" height="45px"></mj-image>
           </mj-column>
           <mj-column padding="0">
             <mj-text align="left" padding="0" css-class="card-header">
