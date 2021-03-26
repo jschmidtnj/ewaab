@@ -5,7 +5,7 @@ import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
 import { MinLength } from 'class-validator';
 import { passwordMinLen } from '../shared/variables';
 import { UserType } from '../schema/users/user.entity';
-import { setCookies } from '../utils/cookies';
+import { setMediaCookie, setRefreshCookie } from '../utils/cookies';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { getRepository } from 'typeorm';
 import UserCode from '../schema/users/userCode.entity';
@@ -51,11 +51,12 @@ class LoginResolvers {
       id: codeID,
       type: UserType.visitor
     });
-    setCookies(ctx.res, await generateJWTRefresh({
+    setRefreshCookie(ctx.res, await generateJWTRefresh({
       id: codeID,
       tokenVersion: userData.tokenVersion,
       type: UserType.visitor
-    }), await generateJWTMediaAccess({
+    }));
+    setMediaCookie(ctx.res, await generateJWTMediaAccess({
       id: codeID,
       type: UserType.visitor
     }, mediaJWTExpiration));

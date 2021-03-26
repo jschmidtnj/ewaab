@@ -52,7 +52,6 @@ export const isLoggedIn = async (): Promise<boolean> => {
       return state.authToken !== undefined && state.authToken.length > 0;
     } catch (err) {
       try {
-        await axiosClient.get('/');
         await runLogout();
       } catch (err) {
         // cannot connect to server

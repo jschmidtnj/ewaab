@@ -5,7 +5,7 @@ import { Resolver, ArgsType, Field, Args, Ctx, Mutation, ObjectType } from 'type
 import { MinLength, Matches } from 'class-validator';
 import { passwordMinLen, specialCharacterRegex, numberRegex, capitalLetterRegex, lowercaseLetterRegex } from '../shared/variables';
 import User, { UserType } from '../schema/users/user.entity';
-import { setCookies } from '../utils/cookies';
+import { setMediaCookie, setRefreshCookie } from '../utils/cookies';
 import { verifyRecaptcha } from '../utils/recaptcha';
 import { FindOneOptions, getRepository } from 'typeorm';
 import { connectionName } from '../db/connect';
@@ -82,7 +82,8 @@ class LoginResolvers {
       throw new Error('password is invalid');
     }
     const token = await generateJWTAccess(user);
-    setCookies(ctx.res, await generateJWTRefresh(user), await generateJWTMediaAccess(user, mediaJWTExpiration));
+    setRefreshCookie(ctx.res, await generateJWTRefresh(user));
+    setMediaCookie(ctx.res, await generateJWTMediaAccess(user, mediaJWTExpiration));
     return {
       token,
       type: user.type

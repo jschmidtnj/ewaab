@@ -9,14 +9,16 @@ const mediaCookiePath = '/media';
 
 const sameSite = configData.USE_SECURE ? 'strict' : 'lax';
 
-export const setCookies = (res: Response, refreshToken: string, mediaToken: string): void => {
+export const setRefreshCookie = (res: Response, refreshToken: string): void => {
   res.cookie(refreshCookieName, refreshToken, {
     httpOnly: true,
     path: refreshCookiePath,
     secure: isProduction(),
     sameSite
   });
+};
 
+export const setMediaCookie = (res: Response, mediaToken: string): void => {
   res.cookie(mediaCookieName, mediaToken, {
     httpOnly: true,
     path: mediaCookiePath,

@@ -1,5 +1,5 @@
 import { sign, verify, SignOptions, VerifyOptions, Secret } from 'jsonwebtoken';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import User, { UserType } from '../schema/users/user.entity';
 import { configData } from './config';
 import { loginType } from '../auth/shared';
@@ -7,6 +7,7 @@ import { getRepository } from 'typeorm';
 import UserCode from '../schema/users/userCode.entity';
 import { connectionName } from '../db/connect';
 import { promisify } from 'util';
+import { setMediaCookie } from './cookies';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const signPromise = promisify<string | Buffer | object, Secret, SignOptions | undefined, string>(sign);
@@ -134,7 +135,7 @@ export const generateJWTRefresh = async (authData: RefreshTokenData): Promise<st
   }, secret, signOptions);
 };
 
-export const handleRefreshToken = async (req: Request): Promise<string> => {
+export const handleRefreshToken = async (req: Request, res: Response): Promise<string> => {
   if (!req.cookies) {
     throw new Error('no cookies found');
   }
@@ -181,6 +182,7 @@ export const handleRefreshToken = async (req: Request): Promise<string> => {
   if (tokenVersion !== data.tokenVersion) {
     throw new Error('invalid token version');
   }
+  setMediaCookie(res, await generateJWTMediaAccess(generateArgs, mediaJWTExpiration));
   return await generateJWTAccess(generateArgs);
 };
 
