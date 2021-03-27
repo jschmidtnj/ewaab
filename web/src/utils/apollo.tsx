@@ -18,8 +18,15 @@ import { toast } from 'react-toastify';
 import { getAPIURL } from './axios';
 import { createUploadLink } from 'apollo-upload-client';
 import { getMainDefinition } from '@apollo/client/utilities';
+import { onError } from 'apollo-link-error';
+import * as Sentry from '@sentry/browser';
+import omitDeep from 'omit-deep-lodash';
 
 export let client: ApolloClient<any>;
+
+Sentry.init({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_URL,
+});
 
 export const initializeApolloClient = async (): Promise<void> => {
   const defaultLink = createUploadLink({
@@ -41,8 +48,43 @@ export const initializeApolloClient = async (): Promise<void> => {
     }
   });
 
+  const errorMiddleware = onError(({ graphQLErrors, networkError }) => {
+    if (networkError) {
+      Sentry.captureException(networkError);
+    }
+    for (const graphQLError of graphQLErrors) {
+      Sentry.withScope((scope) => {
+        if (graphQLError.path) {
+          scope.addBreadcrumb({
+            category: 'error-path',
+            message: graphQLError.path.join(' > '),
+            level: Sentry.Severity.Debug,
+          });
+        }
+        if (graphQLError.extensions) {
+          const extensions = omitDeep(
+            graphQLError.extensions,
+            'password',
+            'recaptchaToken',
+            'registrationToken'
+          );
+          scope.addBreadcrumb({
+            category: 'extensions',
+            message: JSON.stringify(extensions),
+            level: Sentry.Severity.Debug,
+          });
+        }
+        const err = new Error(graphQLError.message);
+        if (graphQLError.stack) {
+          err.stack = graphQLError.stack;
+        }
+        Sentry.captureException(err);
+      });
+    }
+  });
+
   // @ts-ignore
-  const httpLink = from([httpMiddleware, defaultLink]);
+  const httpLink = from([httpMiddleware, errorMiddleware, defaultLink]);
   if (!process.env.NEXT_PUBLIC_API_URL) {
     throw new Error('no api url provided');
   }

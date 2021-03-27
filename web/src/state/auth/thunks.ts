@@ -18,6 +18,7 @@ import {
   LoginOutput,
   UserType,
 } from 'lib/generated/datamodel';
+import * as Sentry from '@sentry/browser';
 
 const loginMutation = async (
   args: LoginMutationVariables
@@ -27,6 +28,7 @@ const loginMutation = async (
     variables: args,
   });
   if (apolloRes.data) {
+    Sentry.setUser({ username: args.usernameEmail });
     return apolloRes.data.login;
   } else {
     throw new Error('cannot find apollo data');
@@ -57,6 +59,7 @@ const loginVisitorMutation = async (
     variables: args,
   });
   if (apolloRes.data) {
+    Sentry.setUser({ username: args.code });
     return apolloRes.data.loginVisitor;
   } else {
     throw new Error('cannot find apollo data');
@@ -85,6 +88,7 @@ export const runLogout = async (): Promise<string> => {
     variables: {},
   });
   if (apolloRes.data) {
+    Sentry.configureScope((scope) => scope.setUser(null));
     return apolloRes.data.logout;
   } else {
     throw new Error('cannot find apollo data');

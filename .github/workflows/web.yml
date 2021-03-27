@@ -50,6 +50,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://network.ewaab.org
           NEXT_PUBLIC_MODE: production
           NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID }}
+          NEXT_PUBLIC_SENTRY_URL: ${{ secrets.NEXT_PUBLIC_SENTRY_URL }}
       - name: Docker
         id: docker-build
         uses: whoan/docker-build-with-cache-action@v5
