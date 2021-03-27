@@ -23,6 +23,7 @@ import {
   numberRegex,
   specialCharacterRegex,
   minJWTLen,
+  validUsername,
 } from 'shared/variables';
 import { isSSR } from 'utils/checkSSR';
 import { defaultLoggedInPage } from 'utils/variables';
@@ -104,7 +105,10 @@ const RegisterPage: FunctionComponent = () => {
                   .string()
                   .required('required')
                   .email('invalid email address'),
-                username: yup.string().required('required'),
+                username: yup
+                  .string()
+                  .matches(validUsername, 'username can only contain A-z_-.')
+                  .required('required'),
                 name: yup.string().required('required'),
                 pronouns: yup.string(),
                 password: yup

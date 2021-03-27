@@ -14,7 +14,7 @@ export const signPromise = promisify<string | Buffer | object, Secret, SignOptio
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const verifyPromise = promisify<string, Secret, VerifyOptions | undefined, object | string>(verify);
 
-export const verifyJWTExpiration = '1h';
+export const verifyJWTExpiration = '3d';
 
 export enum VerifyType {
   verify = 'verify',

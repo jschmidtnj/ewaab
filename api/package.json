@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^7.11.0",
+    "@sentry/node": "^6.2.3",
     "apollo-server-express": "^2.19.0",
     "argon2": "^0.27.1",
     "aws-sdk": "^2.819.0",
