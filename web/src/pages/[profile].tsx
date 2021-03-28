@@ -56,6 +56,7 @@ const UserPage: FunctionComponent = () => {
   const router = useRouter();
   const apiURL = getAPIURL();
 
+  // run on init and on route change
   useEffect(() => {
     (async () => {
       try {
@@ -90,7 +91,8 @@ const UserPage: FunctionComponent = () => {
         }
       }
     })();
-  }, []);
+  }, [router.asPath]);
+
   return (
     <PrivateRoute>
       <Layout>

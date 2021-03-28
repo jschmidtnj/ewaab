@@ -98,7 +98,7 @@ const PostPage: FunctionComponent = () => {
       const postID = window.location.pathname.split('/')[2];
       await runQuery(postID, false, true);
     })();
-  }, []);
+  }, [router.asPath]);
 
   return (
     <PrivateRoute>
