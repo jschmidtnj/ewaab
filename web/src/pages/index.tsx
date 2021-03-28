@@ -36,7 +36,7 @@ const Index: FunctionComponent = () => {
         </div>
         <div className="z-20 absolute inset-0 flex justify-center items-center text-white">
           <div className="m-4 grid sm:grid-cols-2">
-            <div className="my-4">
+            <div className="my-4 pt-20">
               <div className="sm:text-5xl text-4xl">
                 <div className="flex justify-left mb-2">
                   <h1>Start Your Career,</h1>

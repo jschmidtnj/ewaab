@@ -74,6 +74,9 @@ const SearchPage: FunctionComponent = () => {
     if (init) {
       await sleep(50);
     }
+    if (document.activeElement.hasAttribute('blur')) {
+      (document.activeElement as HTMLInputElement).blur();
+    }
     setPosts(res);
   };
 

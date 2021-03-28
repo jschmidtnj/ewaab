@@ -346,6 +346,7 @@ const WritePostModal: FunctionComponent<ModalArgs> = (args) => {
                                   id="title"
                                   name="title"
                                   type="text"
+                                  autoFocus
                                   required
                                   className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-white font-semibold rounded-md"
                                   placeholder="Title"
