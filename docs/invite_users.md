@@ -30,3 +30,11 @@ mutation inviteUser {
 ```
 
 Again, executeAdmin is optional, and will be disabled in production. You can also remove user codes with the `deleteUserCode` mutation.
+
+## user types
+
+current user types:
+- `user` - ewaab participant
+- `visitor` - 3rd party hr person
+- `mentor` - ewaab mentor
+- `admin` - admin user
