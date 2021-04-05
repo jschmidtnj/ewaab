@@ -5,7 +5,7 @@
 
 ```graphql
 mutation inviteUser {
-  inviteUser(name: "Kaitlin", email: "<email>", type: admin, alumniYear: 2020, executeAdmin: true)
+  inviteUser(name: "Kaitlin", email: "<email>", useralumniYear: 2020, type: user)
 }
 ```
 
