@@ -45,8 +45,8 @@ const majorsOptions = majors.map(
 
 const userTypeLabels: Record<UserType, string> = {
   [UserType.User]: 'Participant',
-  [UserType.Mentor]: 'Recruiter',
-  [UserType.Visitor]: '',
+  [UserType.Mentor]: 'Mentor',
+  [UserType.Visitor]: 'Recruiter',
   [UserType.Admin]: 'EWAAB Staff',
 };
 

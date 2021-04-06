@@ -319,12 +319,17 @@ const Login: FunctionComponent = () => {
                     if (!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
                       throw new Error('cannot find recaptcha token');
                     }
-                    const recaptchaToken = await window.grecaptcha.execute(
-                      process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-                      {
-                        action: 'login',
-                      }
-                    );
+                    let recaptchaToken: string;
+                    try {
+                      recaptchaToken = await window.grecaptcha.execute(
+                        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+                        {
+                          action: 'login',
+                        }
+                      );
+                    } catch (err) {
+                      throw new Error('recaptcha error');
+                    }
                     await dispatchAuthThunk(
                       thunkLogin({
                         ...formData,
