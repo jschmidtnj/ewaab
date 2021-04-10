@@ -37,6 +37,13 @@ const Admin: FunctionComponent = () => {
     ApolloQueryResult<UserCodesQuery> | undefined
   >(undefined);
 
+  const initialValues: InviteUserMutationVariables = {
+    name: '',
+    email: '',
+    alumniYear: currentYear,
+    type: UserType.User,
+  };
+
   const runUserCodesQuery = async (
     variables: UserCodesQueryVariables
   ): Promise<void> => {
@@ -76,12 +83,7 @@ const Admin: FunctionComponent = () => {
             </div>
             <Formik
               key="inviteUser"
-              initialValues={{
-                name: '',
-                email: '',
-                alumniYear: currentYear,
-                type: UserType.User,
-              }}
+              initialValues={initialValues}
               validationSchema={yup.object({
                 email: yup
                   .string()
@@ -89,7 +91,7 @@ const Admin: FunctionComponent = () => {
                   .email('invalid email address'),
                 name: yup.string().required('required'),
                 alumniYear: yup.number().min(ewaabFounded).max(currentYear),
-                type: yup.object().nullable().required('required'),
+                type: yup.string().required('required'),
               })}
               onSubmit={async (
                 formData,
@@ -232,6 +234,11 @@ const Admin: FunctionComponent = () => {
                           options={userTypeOptions}
                           cacheOptions={true}
                           placeholder="User Type"
+                          defaultValue={
+                            userTypeOptions.find(
+                              (elem) => elem.value === initialValues.type
+                            ) as SelectUserTypeObject
+                          }
                           onChange={(
                             selectedOption: ValueType<
                               SelectUserTypeObject,
