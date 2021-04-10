@@ -65,7 +65,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ewaab
+          service: ewaab-service
           cluster: ewaab
           # wait until service is stable
           wait-for-service-stability: false
