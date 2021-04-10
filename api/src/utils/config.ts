@@ -35,7 +35,7 @@ export const configData: ConfigType = {
   JWT_ISSUER: 'EWAAB',
   API_HOST: 'api.ewaab.org',
   WEBSITE_URL: 'https://network.ewaab.org',
-  DEBUG: false,
+  DEBUG: true,
   PRODUCTION: true,
   USE_SECURE: true,
   JWT_SECRET: '',
