@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'state';
 import { isSSR } from 'utils/checkSSR';
 import {
+  adminPaths,
   allDefinedPaths,
   allowedVisitorPaths,
   dynamicAllowedVisitorPaths,
@@ -36,6 +37,8 @@ const PrivateRoute: FunctionComponent<PrivateRouteArgs> = (args) => {
     const userType = getType();
     if (userType === UserType.Admin) {
       return true;
+    } else if (adminPaths.includes(router.asPath)) {
+      return false;
     }
     if (!allDefinedPaths.includes(router.asPath)) {
       // anyone can see user pages

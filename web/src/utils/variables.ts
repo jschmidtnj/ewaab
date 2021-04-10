@@ -98,6 +98,12 @@ export const searchLink: LinkData = {
   name: 'search',
   href: '/search',
 };
+export const adminLink: LinkData = {
+  name: 'admin',
+  href: '/admin',
+};
+
+export const adminPaths: string[] = [adminLink].map((elem) => elem.href);
 
 export const feedPaths: string[] = Object.values(linkMap).map(
   (elem) => elem.href
@@ -105,7 +111,7 @@ export const feedPaths: string[] = Object.values(linkMap).map(
 
 export const allDefinedPaths: string[] = [
   ...feedPaths,
-  ...[accountLink, profilesLink, loginLink, searchLink].map(
+  ...[accountLink, profilesLink, loginLink, searchLink, adminLink].map(
     (elem) => elem.href
   ),
 ];

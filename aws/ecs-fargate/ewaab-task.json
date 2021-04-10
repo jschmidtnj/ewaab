@@ -54,6 +54,10 @@
           "name": "REDIS_HOST"
         },
         {
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_REDIS_PASSWORD-QVWbbT",
+          "name": "REDIS_PASSWORD"
+        },
+        {
           "valueFrom": "arn:aws:secretsmanager:us-east-1:557176606917:secret:EWAAB_ELASTICSEARCH_URI-cSkbaT",
           "name": "ELASTICSEARCH_URI"
         }
@@ -137,7 +141,7 @@
       "name": "web"
     }
   ],
-  "memory": "2048",
+  "memory": "1024",
   "taskRoleArn": "arn:aws:iam::557176606917:role/ewaab-task-role",
   "family": "ewaab-task",
   "pidMode": null,
@@ -145,7 +149,7 @@
     "FARGATE"
   ],
   "networkMode": "awsvpc",
-  "cpu": "1024",
+  "cpu": "512",
   "inferenceAccelerators": [],
   "proxyConfiguration": null,
   "volumes": [],
