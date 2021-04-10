@@ -24,6 +24,29 @@ export const perPageOptions: SelectNumberObject[] = perPageValues.map(
   })
 );
 
+export const userTypeLabels: Record<UserType, string> = {
+  [UserType.User]: 'Participant',
+  [UserType.Mentor]: 'Mentor',
+  [UserType.Visitor]: 'Recruiter',
+  [UserType.Admin]: 'EWAAB Staff',
+};
+
+export interface SelectUserTypeObject {
+  label: string;
+  value: UserType;
+}
+
+export const userTypeOptions = [
+  UserType.User,
+  UserType.Mentor,
+  UserType.Admin,
+].map(
+  (userType): SelectUserTypeObject => ({
+    label: userTypeLabels[userType],
+    value: userType,
+  })
+);
+
 export interface SelectStringObject {
   label: string;
   value: string;

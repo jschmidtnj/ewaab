@@ -2,6 +2,9 @@ import Layout from 'layouts/main';
 import SEO from 'components/SEO';
 import Link from 'next/link';
 import {
+  DeleteAccount,
+  DeleteAccountMutation,
+  DeleteAccountMutationVariables,
   UserQueryVariables,
   Users,
   UserSortOption,
@@ -16,10 +19,14 @@ import * as yup from 'yup';
 import { Formik, FormikHandlers, FormikHelpers, FormikState } from 'formik';
 import {
   defaultPerPage,
+  elasticWaitTime,
   perPageOptions,
   searchHelpLink,
   SelectNumberObject,
   SelectStringObject,
+  SelectUserTypeObject,
+  userTypeLabels,
+  userTypeOptions,
 } from 'utils/variables';
 import { toast } from 'react-toastify';
 import { client } from 'utils/apollo';
@@ -31,6 +38,13 @@ import PrivateRoute from 'components/PrivateRoute';
 import sleep from 'shared/sleep';
 import { capitalizeFirstLetter } from 'utils/misc';
 import { AiFillQuestionCircle, AiOutlineSearch } from 'react-icons/ai';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from 'state';
+import { BiTrash } from 'react-icons/bi';
+import { thunkLogout } from 'state/auth/thunks';
+import { AuthActionTypes } from 'state/auth/types';
+import { AppThunkDispatch } from 'state/thunk';
+import { isSSR } from 'utils/checkSSR';
 
 const avatarWidth = 40;
 
@@ -43,25 +57,6 @@ const majorsOptions = majors.map(
   })
 );
 
-const userTypeLabels: Record<UserType, string> = {
-  [UserType.User]: 'Participant',
-  [UserType.Mentor]: 'Mentor',
-  [UserType.Visitor]: 'Recruiter',
-  [UserType.Admin]: 'EWAAB Staff',
-};
-
-export interface SelectUserTypeObject {
-  label: string;
-  value: UserType;
-}
-
-const userTypeOptions = [UserType.User, UserType.Mentor, UserType.Admin].map(
-  (userType): SelectUserTypeObject => ({
-    label: userTypeLabels[userType],
-    value: userType,
-  })
-);
-
 interface SortableColumnArgs {
   text: string;
   sortBy?: UserSortOption;
@@ -71,7 +66,7 @@ interface SortableColumnArgs {
   handleSubmit: FormikHandlers['handleSubmit'];
 }
 
-const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
+export const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
   return (
     <th
       scope="col"
@@ -100,6 +95,18 @@ const SortableColumn = (args: SortableColumnArgs): JSX.Element => {
 
 const UsersPage: FunctionComponent = () => {
   const [defaultQuery, setDefaultQuery] = useState<string>('');
+
+  const userType = useSelector<RootState, UserType | undefined>(
+    (state) => state.authReducer.user?.type
+  );
+  const username = useSelector<RootState, string | undefined>(
+    (state) => state.authReducer.user?.username
+  );
+
+  let dispatchAuthThunk: AppThunkDispatch<AuthActionTypes>;
+  if (!isSSR) {
+    dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
+  }
 
   const initialValues: UsersQueryVariables = {
     query: defaultQuery,
@@ -485,6 +492,14 @@ const UsersPage: FunctionComponent = () => {
                           >
                             Type
                           </th>
+                          {userType !== UserType.Admin ? null : (
+                            <th
+                              scope="col"
+                              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                              Delete
+                            </th>
+                          )}
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-gray-200">
@@ -497,21 +512,65 @@ const UsersPage: FunctionComponent = () => {
                                 className="w-10 h-10"
                               />
                             </td>
-                            <td className="w-0 px-4 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="w-0 p-4 whitespace-nowrap text-sm font-medium">
                               <Link href={`/${user.username}`}>
                                 <a className="text-indigo-600 hover:text-indigo-900">
                                   @ {user.username}
                                 </a>
                               </Link>
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="p-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               {user.name}
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="p-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               {capitalizeFirstLetter(user.major)}
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="p-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               {userTypeLabels[user.type]}
+                            </td>
+                            <td className="p-4 whitespace-nowrap">
+                              <button
+                                type="button"
+                                className="text-md hover:text-gray-600"
+                                onClick={async (evt) => {
+                                  evt.preventDefault();
+                                  try {
+                                    const deleteAccountRes = await client.mutate<
+                                      DeleteAccountMutation,
+                                      DeleteAccountMutationVariables
+                                    >({
+                                      mutation: DeleteAccount,
+                                      variables: {
+                                        username: user.username,
+                                      },
+                                    });
+                                    if (deleteAccountRes.errors) {
+                                      throw new Error(
+                                        deleteAccountRes.errors.join(', ')
+                                      );
+                                    }
+                                    toast(
+                                      `deleted user with username ${user.username}`,
+                                      {
+                                        type: 'success',
+                                      }
+                                    );
+                                    if (username === user.username) {
+                                      dispatchAuthThunk(thunkLogout());
+                                    } else {
+                                      await sleep(elasticWaitTime);
+                                      formRef.current.handleSubmit();
+                                    }
+                                  } catch (err) {
+                                    const errObj: Error = err;
+                                    toast(errObj.message, {
+                                      type: 'error',
+                                    });
+                                  }
+                                }}
+                              >
+                                <BiTrash />
+                              </button>
                             </td>
                           </tr>
                         ))}

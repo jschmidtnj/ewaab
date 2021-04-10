@@ -3,13 +3,14 @@ export default interface Messages {
   login: string;
   register: string;
   profile: string;
+  admin: string;
   reset: string;
   'sign out': string;
-  students: string;
+  'user profiles': string;
   search: string;
   account: string;
   community: string;
-  'encourage her': string;
-  'participant news': string;
+  bridge: string;
+  jobs: string;
   'mentor news': string;
 }

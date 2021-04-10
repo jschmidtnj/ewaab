@@ -1,0 +1,10 @@
+query userCodes {
+  userCodes {
+    id
+    name
+  }
+}
+
+mutation deleteUserCode($id: String!) {
+  deleteUserCode(id: $id)
+}

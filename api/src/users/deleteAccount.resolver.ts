@@ -2,7 +2,7 @@
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation } from 'type-graphql';
-import { IsEmail, IsOptional } from 'class-validator';
+import { IsOptional, Matches, ValidateIf } from 'class-validator';
 import User from '../schema/users/user.entity';
 import { FindOneOptions, getRepository } from 'typeorm';
 import { deleteMedia } from './media.resolver';
@@ -12,22 +12,24 @@ import { deleteMessages } from '../messages/deleteMessages.resolver';
 import MessageGroup, { MessageGroupUser } from '../schema/users/messageGroup.entity';
 import { defaultDBCache } from '../utils/variables';
 import { connectionName } from '../db/connect';
+import { validUsername } from '../shared/variables';
 
 @ArgsType()
 class DeleteArgs {
-  @Field(_type => String, { description: 'email', nullable: true })
+  @Field(_type => String, { description: 'username', nullable: true })
   @IsOptional()
-  @IsEmail({}, {
-    message: 'invalid email provided'
+  @ValidateIf((_obj, val?: string) => val !== undefined && val.length > 0)
+  @Matches(validUsername, {
+    message: 'invalid username provided'
   })
-  email?: string;
+  username?: string;
 }
 
 @Resolver()
 class DeleteResolver {
   @Mutation(_returns => String)
-  async deleteAccount(@Args() { email }: DeleteArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
-    const isAdmin = email !== undefined;
+  async deleteAccount(@Args() { username }: DeleteArgs, @Ctx() ctx: GraphQLContext): Promise<string> {
+    const isAdmin = username !== undefined;
     if (!ctx.auth) {
       throw new Error('cannot find auth data');
     }
@@ -49,7 +51,7 @@ class DeleteResolver {
       userFindRes = await UserModel.findOne(ctx.auth.id, findOptions);
     } else {
       userFindRes = await UserModel.findOne({
-        email
+        username
       }, findOptions);
     }
     if (!userFindRes) {

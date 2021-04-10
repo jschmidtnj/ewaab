@@ -238,8 +238,8 @@ type Mutation {
     name: String!
   ): String!
   deleteAccount(
-    """email"""
-    email: String
+    """username"""
+    username: String
   ): String!
   deleteComment(
     """comment id"""

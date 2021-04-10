@@ -1,0 +1,9 @@
+mutation inviteUser($name: String!, $email: String!, $alumniYear: Int!,
+                    $type: UserType!) {
+  inviteUser(name: $name, email: $email, alumniYear: $alumniYear,
+             type: $type)
+}
+
+mutation addUserCode($name: String!) {
+  addUserCode(name: $name)
+}

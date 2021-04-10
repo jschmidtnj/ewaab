@@ -6,14 +6,15 @@ const englishMessages: Messages = {
   register: 'register',
   reset: 'reset',
   profile: 'profile',
+  admin: 'admin',
   'sign out': 'sign out',
-  students: 'students',
   search: 'search',
   account: 'account',
   community: 'community',
-  'encourage her': 'encourage her',
   'mentor news': 'mentor news',
-  'participant news': 'participant news',
+  'user profiles': 'user profiles',
+  bridge: 'bridge',
+  jobs: 'jobs',
 };
 
 export default englishMessages;

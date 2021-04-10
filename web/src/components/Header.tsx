@@ -25,6 +25,7 @@ import {
   accountLink,
   searchLink,
   profilesLink,
+  adminLink,
 } from 'utils/variables';
 import VisibilitySensor from 'react-visibility-sensor';
 import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
@@ -77,13 +78,17 @@ const Header: FunctionComponent = () => {
         );
         setPaths([...feedPaths, profilesLink, searchLink]);
         const username = getUsername();
-        setUserPaths([
+        const userPaths = [
           {
             name: 'profile',
             href: `/${username}`,
           },
           accountLink,
-        ]);
+        ];
+        if (userType === UserType.Admin) {
+          userPaths.push(adminLink);
+        }
+        setUserPaths(userPaths);
       }
     })();
   }, [loggedIn]);
