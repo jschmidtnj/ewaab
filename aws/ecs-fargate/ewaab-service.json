@@ -1,15 +1,15 @@
 {
   "cluster": "ewaab",
-  "serviceName": "ewaab",
+  "serviceName": "ewaab-service",
   "taskDefinition": "ewaab-task:2",
   "loadBalancers": [
     {
-      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-api-target-group/0b11285468a6a89a",
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-api-target-group/ad47ac4e9d217a70",
       "containerName": "api",
       "containerPort": 8080
     },
     {
-      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-web-target-group/5f3b1e4182fd426c",
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:557176606917:targetgroup/ewaab-web-target-group/5673081ac37233b6",
       "containerName": "web",
       "containerPort": 8000
     }
