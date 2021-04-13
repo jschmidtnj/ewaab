@@ -69,15 +69,15 @@ const allPostTypesOrder: PostType[] = [
 // should match api/src/utils/variables.ts
 export const postViewMap: Record<UserType, PostType[]> = {
   [UserType.Admin]: allPostTypesOrder,
-  [UserType.User]: allPostTypesOrder,
-  [UserType.Mentor]: [PostType.Community, PostType.MentorNews],
+  [UserType.User]: [PostType.Community, PostType.Bridge, PostType.Jobs],
+  [UserType.Mentor]: [PostType.Community, PostType.MentorNews, PostType.Jobs],
   [UserType.Visitor]: [PostType.Jobs],
 };
 
 export const postWriteMap: Record<UserType, PostType[]> = {
   [UserType.Admin]: allPostTypesOrder,
   [UserType.User]: [PostType.Community],
-  [UserType.Mentor]: [PostType.Community, PostType.MentorNews],
+  [UserType.Mentor]: [PostType.Community, PostType.MentorNews, PostType.Jobs],
   [UserType.Visitor]: [PostType.Jobs],
 };
 

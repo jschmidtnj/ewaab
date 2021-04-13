@@ -11,14 +11,14 @@ export const messagesTopic = 'messages';
 // should match web/src/utils/variables.ts
 export const postViewMap: Record<UserType, PostType[]> = {
   [UserType.admin]: Object.values(PostType),
-  [UserType.user]: Object.values(PostType),
-  [UserType.mentor]: [PostType.community, PostType.mentorNews],
+  [UserType.user]: [PostType.community, PostType.bridge, PostType.jobs],
+  [UserType.mentor]: [PostType.community, PostType.mentorNews, PostType.jobs],
   [UserType.visitor]: [PostType.jobs],
 };
 
 export const postWriteMap: Record<UserType, PostType[]> = {
   [UserType.admin]: Object.values(PostType),
   [UserType.user]: [PostType.community],
-  [UserType.mentor]: [PostType.community, PostType.mentorNews],
+  [UserType.mentor]: [PostType.community, PostType.mentorNews, PostType.jobs],
   [UserType.visitor]: [PostType.jobs],
 };
