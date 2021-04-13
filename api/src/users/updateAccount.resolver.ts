@@ -2,7 +2,7 @@ import argon2 from 'argon2';
 import { GraphQLContext } from '../utils/context';
 import { Resolver, ArgsType, Field, Args, Ctx, Mutation, Int } from 'type-graphql';
 import { IsEmail, MinLength, Matches, IsOptional, IsUrl, ValidateIf, IsIn, Min, Max } from 'class-validator';
-import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, avatarWidth, validUsername, locationRegex, strMinLen, ewaabFounded, uuidRegex } from '../shared/variables';
+import { passwordMinLen, specialCharacterRegex, numberRegex, lowercaseLetterRegex, capitalLetterRegex, validUsername, locationRegex, strMinLen, ewaabFounded, uuidRegex } from '../shared/variables';
 import { verifyAdmin, verifyLoggedIn } from '../auth/checkAuth';
 import { getRepository } from 'typeorm';
 import User, { BaseSearchUser, EmailNotificationFrequency, UserType } from '../schema/users/user.entity';
@@ -28,6 +28,8 @@ import majors from '../shared/majors';
 import universities from '../shared/universities';
 import { connectionName } from '../db/connect';
 import { supportedImageMimes } from '../shared/variables';
+
+const resizedAvatarWidth = 512;
 
 @ArgsType()
 class UpdateArgs {
@@ -419,7 +421,7 @@ class UpdateAccountResolver {
                 parentType: MediaParentType.user,
                 type: MediaType.image,
               });
-              const original = await sharp(buffer).resize(avatarWidth).toBuffer();
+              const original = await sharp(buffer).resize(resizedAvatarWidth).toBuffer();
   
               // upload original
               await s3Client.upload({

@@ -12,7 +12,6 @@ import { AuthActionTypes } from 'state/auth/types';
 import { AppThunkDispatch } from 'state/thunk';
 import Avatar from 'components/Avatar';
 import { RootState } from 'state';
-import { avatarWidth } from 'shared/variables';
 import { UserFieldsFragment, UserType } from 'lib/generated/datamodel';
 import { toast } from 'react-toastify';
 import { getType, getUsername } from 'state/auth/getters';
@@ -29,6 +28,8 @@ import {
 } from 'utils/variables';
 import VisibilitySensor from 'react-visibility-sensor';
 import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
+
+const avatarWidth = 48;
 
 const Header: FunctionComponent = () => {
   const dispatchAuthThunk = useDispatch<AppThunkDispatch<AuthActionTypes>>();
